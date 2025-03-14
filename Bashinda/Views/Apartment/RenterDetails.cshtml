@@ -1,0 +1,197 @@
+@model Bashinda.ViewModels.RenterProfileDto
+@{
+    ViewData["Title"] = "Renter Details";
+}
+
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12 mb-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Apartment" asp-action="RentersList">Renters</a></li>
+                    <li class="breadcrumb-item active">Renter Details</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Renter Profile</h3>
+                <div>
+                    <a asp-controller="Apartment" asp-action="RentersList" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                    <button class="btn btn-sm btn-primary" onclick="contactRenter('@Model.FullName', '@Model.Email', '@Model.MobileNo')">
+                        <i class="bi bi-chat"></i> Contact
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center mb-4">
+                    @if (!string.IsNullOrEmpty(Model.SelfImagePath))
+                    {
+                        <img src="@Model.SelfImagePath" alt="@Model.FullName" class="img-fluid rounded-circle" style="max-width: 200px; max-height: 200px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <img src="/images/profile-placeholder.jpg" alt="No Profile Photo" class="img-fluid rounded-circle" style="max-width: 200px; max-height: 200px;" />
+                    }
+                    <h4 class="mt-3">@Model.FullName</h4>
+                    <p class="text-muted">@Model.Profession</p>
+                </div>
+                <div class="col-md-9">
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Personal Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong>Father's Name:</strong></p>
+                                <p>@Model.FatherName</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong>Mother's Name:</strong></p>
+                                <p>@Model.MotherName</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong>Date of Birth:</strong></p>
+                                <p>@Model.DateOfBirth.ToString("MMMM d, yyyy")</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong>Gender:</strong></p>
+                                <p>@Model.Gender</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong>Nationality:</strong></p>
+                                <p>@Model.Nationality</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong>Blood Group:</strong></p>
+                                <p><span class="badge bg-danger">@Model.BloodGroup</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Contact Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong>Mobile:</strong></p>
+                                <p><i class="bi bi-telephone"></i> <a href="tel:@Model.MobileNo">@Model.MobileNo</a></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p class="mb-1"><strong>Email:</strong></p>
+                                <p><i class="bi bi-envelope"></i> <a href="mailto:@Model.Email">@Model.Email</a></p>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <p class="mb-1"><strong>Address:</strong></p>
+                                <p>@Model.Division, @Model.District, @Model.Upazila</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Identity Information</h5>
+                        <div class="row">
+                            @if (Model.IsAdult)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <p class="mb-1"><strong>National ID:</strong></p>
+                                    <p>@(string.IsNullOrEmpty(Model.NationalId) ? "Not provided" : Model.NationalId)</p>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.NationalIdImagePath))
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <p class="mb-1"><strong>National ID Image:</strong></p>
+                                        <a href="@Model.NationalIdImagePath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-image"></i> View Image
+                                        </a>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <p class="mb-1"><strong>Birth Registration No:</strong></p>
+                                    <p>@(string.IsNullOrEmpty(Model.BirthRegistrationNo) ? "Not provided" : Model.BirthRegistrationNo)</p>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.BirthRegistrationImagePath))
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <p class="mb-1"><strong>Birth Registration Certificate:</strong></p>
+                                        <a href="@Model.BirthRegistrationImagePath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-image"></i> View Image
+                                        </a>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel">Contact Renter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 id="renterName"></h6>
+                <div class="mt-3">
+                    <div class="d-grid gap-2">
+                        <a id="emailLink" href="#" class="btn btn-primary">
+                            <i class="bi bi-envelope"></i> Send Email
+                        </a>
+                        <a id="callLink" href="#" class="btn btn-success">
+                            <i class="bi bi-telephone"></i> Call
+                        </a>
+                        <a id="smsLink" href="#" class="btn btn-info">
+                            <i class="bi bi-chat-dots"></i> Send SMS
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function contactRenter(name, email, phone) {
+            document.getElementById('renterName').textContent = name;
+            document.getElementById('emailLink').href = 'mailto:' + email;
+            document.getElementById('callLink').href = 'tel:' + phone;
+            document.getElementById('smsLink').href = 'sms:' + phone;
+            
+            var contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
+            contactModal.show();
+        }
+    </script>
+} 

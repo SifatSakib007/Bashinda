@@ -1,0 +1,147 @@
+@model Bashinda.ViewModels.ApartmentDto
+@{
+    ViewData["Title"] = $"Apartment Details - {Model.BuildingName}";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Apartment Details</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2>@Model.BuildingName - @Model.ApartmentNumber</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <img src="@Model.ImagePath" class="img-fluid rounded" alt="@Model.BuildingName" style="max-height: 400px; object-fit: cover; width: 100%;">
+                    }
+                    else
+                    {
+                        <img src="/images/apartment-placeholder.jpg" class="img-fluid rounded" alt="Apartment" style="max-height: 400px; object-fit: cover; width: 100%;">
+                    }
+                </div>
+                <div class="col-md-6">
+                    <h3 class="mb-3">Property Details</h3>
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <th>Building Name</th>
+                            <td>@Model.BuildingName</td>
+                        </tr>
+                        <tr>
+                            <th>Apartment Number</th>
+                            <td>@Model.ApartmentNumber</td>
+                        </tr>
+                        <tr>
+                            <th>Address</th>
+                            <td>@Model.Address</td>
+                        </tr>
+                        <tr>
+                            <th>Number of Rooms</th>
+                            <td>@Model.NumberOfRooms</td>
+                        </tr>
+                        <tr>
+                            <th>Number of Bathrooms</th>
+                            <td>@Model.NumberOfBathrooms</td>
+                        </tr>
+                        <tr>
+                            <th>Square Feet</th>
+                            <td>@Model.SquareFeet</td>
+                        </tr>
+                        <tr>
+                            <th>Monthly Rent</th>
+                            <td>$@Model.MonthlyRent</td>
+                        </tr>
+                        <tr>
+                            <th>Availability</th>
+                            <td>
+                                @if (Model.IsAvailable)
+                                {
+                                    <span class="badge bg-success">Available</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Not Available</span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h3>Description</h3>
+                        <p>@Model.Description</p>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Owner != null)
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h3>Owner Information</h3>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        @if (!string.IsNullOrEmpty(Model.Owner.SelfImagePath))
+                                        {
+                                            <img src="@Model.Owner.SelfImagePath" class="img-fluid rounded-circle" alt="@Model.Owner.FullName" style="width: 100px; height: 100px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <img src="/images/profile-placeholder.jpg" class="img-fluid rounded-circle" alt="Owner" style="width: 100px; height: 100px; object-fit: cover;">
+                                        }
+                                    </div>
+                                    <div class="col-md-10">
+                                        <h5>@Model.Owner.FullName</h5>
+                                        @if (!string.IsNullOrEmpty(Model.Owner.Email))
+                                        {
+                                            <p><i class="bi bi-envelope"></i> <a href="mailto:@Model.Owner.Email">@Model.Owner.Email</a></p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.Owner.MobileNo))
+                                        {
+                                            <p><i class="bi bi-telephone"></i> <a href="tel:@Model.Owner.MobileNo">@Model.Owner.MobileNo</a></p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Back to Apartments</a>
+                        @if (Model.IsAvailable && User.Identity?.IsAuthenticated == true && User.IsInRole("ApartmentRenter"))
+                        {
+                            <!-- Add rental functionality here if needed -->
+                            <button type="button" class="btn btn-primary" onclick="contactOwner()">Contact Owner</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function contactOwner() {
+            // This could be enhanced to show a contact form or modal
+            alert('Please contact the owner directly using the provided contact information.');
+        }
+    </script>
+} 

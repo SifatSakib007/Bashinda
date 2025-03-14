@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Bashinda</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Bashinda.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="d-flex flex-column h-100">
+    @{
+        var hideNavbar = ViewData["HideNavbar"] as bool? ?? false;
+    }
+
+    @if (!hideNavbar)
+    {
+        <partial name="_Navigation" />
+    }
+
+    <div class="main-content">
+        <main role="main" class="flex-grow-1">
+            @RenderBody()
+        </main>
+
+        <footer class="border-top mt-auto py-3">
+            <div class="container">
+                &copy; 2025 - Bashinda - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle functionality
+            const sidebarToggler = document.getElementById('sidebarToggler');
+            const sideNavbar = document.querySelector('.side-navbar');
+
+            if (sidebarToggler) {
+                sidebarToggler.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sideNavbar.classList.toggle('active');
+                });
+            }
+            
+            // Prevent default on anchors with # to avoid navigation issues
+            document.querySelectorAll('a[href="#"]').forEach(function(a) {
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
+            });
+            
+            // Prevent forms with no action from submitting
+            document.querySelectorAll('form:not([action])').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    var hasAction = form.getAttribute('action') !== null && form.getAttribute('action') !== '';
+                    if (!hasAction) {
+                        e.preventDefault();
+                        console.warn('Form submission prevented - no action specified');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

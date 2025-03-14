@@ -1,0 +1,312 @@
+﻿@model Bashinda.ViewModels.RenterProfileViewModel
+@{
+    ViewData["Title"] = "Create Renter Profile";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Complete Your Renter Profile</h2>
+                    <p class="mb-0">Please fill in your personal information to create your profile</p>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Renter" asp-controller="Profile" method="post" enctype="multipart/form-data">
+                        @if (ViewContext.ModelState.ErrorCount > 0)
+                        {
+                            <div asp-validation-summary="All" class="alert alert-danger"></div>
+                        }
+
+                        <!-- Adult Status Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Are you an Adult?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="IsAdult" value="true" id="adultYes" @(Model.IsAdult ? "checked" : "") required />
+                                <label class="form-check-label" for="adultYes">I'm Adult</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="IsAdult" value="false" id="adultNo" @(!Model.IsAdult ? "checked" : "") />
+                                <label class="form-check-label" for="adultNo">I'm Not Adult</label>
+                            </div>
+                            <span asp-validation-for="IsAdult" class="text-danger"></span>
+                        </div>
+
+                        <!-- Conditional Fields for Adults -->
+                        <div id="adultFields" class="conditional-section">
+                            <h5 class="border-bottom pb-2 mb-3">Adult Identification</h5>
+                            <div class="mb-3">
+                                <label asp-for="NationalId" class="form-label">National ID</label>
+                                <input asp-for="NationalId" class="form-control" maxlength="50" />
+                                <span asp-validation-for="NationalId" class="text-danger"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label asp-for="NationalIdImage" class="form-label">Upload NID Image</label>
+                                <input asp-for="NationalIdImage" class="form-control" type="file" accept="image/*" />
+                                <small class="form-text text-muted">Allowed formats: JPG, PNG, JPEG. Max size: 5MB</small>
+                                <span asp-validation-for="NationalIdImage" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Conditional Fields for Minors -->
+                        <div id="minorFields" class="conditional-section">
+                            <h5 class="border-bottom pb-2 mb-3">Minor Identification</h5>
+                            <div class="mb-3">
+                                <label asp-for="BirthRegistrationNo" class="form-label">Birth Registration Number</label>
+                                <input asp-for="BirthRegistrationNo" class="form-control" maxlength="50" />
+                                <span asp-validation-for="BirthRegistrationNo" class="text-danger"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label asp-for="BirthRegistrationImage" class="form-label">Upload Birth Registration Image</label>
+                                <input asp-for="BirthRegistrationImage" class="form-control" type="file" accept="image/*" />
+                                <small class="form-text text-muted">Allowed formats: JPG, PNG, JPEG. Max size: 5MB</small>
+                                <span asp-validation-for="BirthRegistrationImage" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <h5 class="border-bottom pb-2 mb-3">Personal Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FullName" class="form-label">Full Name</label>
+                                    <input asp-for="FullName" class="form-control" required maxlength="100" />
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DateOfBirth" class="form-label">Date of Birth</label>
+                                    <input asp-for="DateOfBirth" class="form-control" type="date" required />
+                                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FatherName" class="form-label">Father's Name</label>
+                                    <input asp-for="FatherName" class="form-control" required maxlength="100" />
+                                    <span asp-validation-for="FatherName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="MotherName" class="form-label">Mother's Name</label>
+                                    <input asp-for="MotherName" class="form-control" required maxlength="100" />
+                                    <span asp-validation-for="MotherName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nationality Radio Buttons -->
+                        <div class="mb-3">
+                            <label class="form-label">Nationality</label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="Nationality" value="Bangladeshi" id="nationalityBangladeshi" @(Model.Nationality == Bashinda.Models.Nationality.Bangladeshi ? "checked" : "") required />
+                                    <label class="form-check-label" for="nationalityBangladeshi">Bangladeshi</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="Nationality" value="Foreigner" id="nationalityForeigner" @(Model.Nationality == Bashinda.Models.Nationality.Foreigner ? "checked" : "") />
+                                    <label class="form-check-label" for="nationalityForeigner">Foreigner</label>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Nationality" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- Dropdown for Blood Group -->
+                                <div class="mb-3">
+                                    <label asp-for="BloodGroup" class="form-label">Blood Group</label>
+                                    <select asp-for="BloodGroup" class="form-select" asp-items="Html.GetEnumSelectList<Bashinda.Models.BloodGroup>()" required>
+                                        <option value="">-- Select Blood Group --</option>
+                                    </select>
+                                    <span asp-validation-for="BloodGroup" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <!-- Dropdown for Profession -->
+                                <div class="mb-3">
+                                    <label asp-for="Profession" class="form-label">Profession</label>
+                                    <select asp-for="Profession" class="form-select" asp-items="Html.GetEnumSelectList<Bashinda.Models.Profession>()" required>
+                                        <option value="">-- Select Profession --</option>
+                                    </select>
+                                    <span asp-validation-for="Profession" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gender Radio Buttons -->
+                        <div class="mb-4">
+                            <label class="form-label">Gender</label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="Gender" value="Male" id="genderMale" @(Model.Gender == Bashinda.Models.Gender.Male ? "checked" : "") required />
+                                    <label class="form-check-label" for="genderMale">Male</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="Gender" value="Female" id="genderFemale" @(Model.Gender == Bashinda.Models.Gender.Female ? "checked" : "") />
+                                    <label class="form-check-label" for="genderFemale">Female</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="Gender" value="Other" id="genderOther" @(Model.Gender == Bashinda.Models.Gender.Other ? "checked" : "") />
+                                    <label class="form-check-label" for="genderOther">Other</label>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <h5 class="border-bottom pb-2 mb-3">Contact Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="MobileNo" class="form-label">Mobile Number</label>
+                                    <input asp-for="MobileNo" class="form-control" required maxlength="20" />
+                                    <span asp-validation-for="MobileNo" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label">Email Address</label>
+                                    <input asp-for="Email" class="form-control" required maxlength="100" type="email" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Self Image Upload -->
+                        <div class="mb-4">
+                            <label asp-for="SelfImage" class="form-label">Upload Profile Picture</label>
+                            <input asp-for="SelfImage" class="form-control" type="file" accept="image/*" />
+                            <small class="form-text text-muted">Upload a clear front-facing photo. Allowed formats: JPG, PNG, JPEG. Max size: 5MB</small>
+                            <span asp-validation-for="SelfImage" class="text-danger"></span>
+                        </div>
+
+                        <!-- Permanent Resident Information -->
+                        <h5 class="border-bottom pb-2 mb-3">Permanent Resident Information</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Division" class="form-label">Division</label>
+                                    <input asp-for="Division" class="form-control" required maxlength="50" />
+                                    <span asp-validation-for="Division" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="District" class="form-label">District</label>
+                                    <input asp-for="District" class="form-control" required maxlength="50" />
+                                    <span asp-validation-for="District" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Upazila" class="form-label">Upazila</label>
+                                    <input asp-for="Upazila" class="form-control" required maxlength="50" />
+                                    <span asp-validation-for="Upazila" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Create Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function toggleFields() {
+            var isAdult = $('input[name="IsAdult"]:checked').val();
+            if (isAdult === "true") {
+                $('#adultFields').show();
+                $('#minorFields').hide();
+                // Clear minor fields when switching to adult
+                $('#minorFields input').val('');
+                $('#minorFields input').removeClass('input-validation-error');
+                $('#minorFields .field-validation-error').text('');
+            } else if (isAdult === "false") {
+                $('#adultFields').hide();
+                $('#minorFields').show();
+                // Clear adult fields when switching to minor
+                $('#adultFields input').val('');
+                $('#adultFields input').removeClass('input-validation-error');
+                $('#adultFields .field-validation-error').text('');
+            } else {
+                // If none is selected, hide both
+                $('#adultFields').hide();
+                $('#minorFields').hide();
+            }
+        }
+        
+        $(document).ready(function() {
+            // Set initial state
+            toggleFields();
+            
+            // Handle radio button changes
+            $('input[name="IsAdult"]').change(function() {
+                toggleFields();
+            });
+            
+            // Handle form submission
+            $('form').on('submit', function(e) {
+                // Make sure the appropriate fields are validated based on IsAdult selection
+                var isAdult = $('input[name="IsAdult"]:checked').val();
+                if (isAdult === "true") {
+                    // For adults, clear birth registration fields
+                    $('#minorFields input').val('');
+                    // Remove any validation errors for these fields
+                    $('#minorFields .field-validation-error').text('');
+                } else if (isAdult === "false") {
+                    // For minors, clear NID fields
+                    $('#adultFields input').val('');
+                    // Remove any validation errors for these fields
+                    $('#adultFields .field-validation-error').text('');
+                }
+            });
+
+            // File size validation
+            $('input[type="file"]').on('change', function() {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (this.files[0] && this.files[0].size > maxSize) {
+                    alert('File size exceeds the maximum limit of 5MB');
+                    this.value = '';
+                }
+
+                // Check file extension
+                const validExtensions = ['jpg', 'jpeg', 'png'];
+                if (this.files[0]) {
+                    const fileName = this.files[0].name;
+                    const fileExt = fileName.split('.').pop().toLowerCase();
+                    if (!validExtensions.includes(fileExt)) {
+                        alert('Invalid file type. Please select a JPG, JPEG, or PNG file.');
+                        this.value = '';
+                    }
+                }
+            });
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}
+
+@section Styles {
+    <style>
+        .conditional-section {
+            display: none;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4361ee;
+        }
+    </style>
+}

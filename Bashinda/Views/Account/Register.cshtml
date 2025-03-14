@@ -1,0 +1,200 @@
+﻿<!-- Updated Register View -->
+@model Bashinda.ViewModels.RegisterUserDto
+@{
+    ViewData["Title"] = "Register";
+    ViewData["HideNavbar"] = true;
+}
+
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Create Account</h2>
+                    <p class="text-muted">Join our community today</p>
+                </div>
+
+                <form asp-controller="Account" asp-action="Register" method="post">
+                    @if (ViewContext.ModelState.ErrorCount > 0)
+                    {
+                        <div asp-validation-summary="All" class="alert alert-danger"></div>
+                    }
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="input-icon mb-3">
+                                <i class="bi bi-person"></i>
+                                <input asp-for="UserName" class="form-control" placeholder="Username" />
+                            </div>
+                            <span asp-validation-for="UserName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="input-icon mb-3">
+                                <i class="bi bi-envelope"></i>
+                                <input asp-for="Email" class="form-control" placeholder="Email Address" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <div class="input-icon mb-3">
+                                <i class="bi bi-phone"></i>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-icon mb-3">
+                                <i class="bi bi-lock"></i>
+                                <input asp-for="Password" class="form-control" type="password" placeholder="Password" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-icon mb-3">
+                                <i class="bi bi-lock"></i>
+                                <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Confirm Password" />
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Role</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="role-card @(Model?.Role == "ApartmentOwner" ? "active" : "")" data-role="ApartmentOwner">
+                                    <input asp-for="Role" type="radio" value="ApartmentOwner" id="roleOwner" class="role-input" />
+                                    <label for="roleOwner" class="d-block">
+                                        <h5 class="mb-1">🏠 Apartment Owner</h5>
+                                        <p class="text-muted small mb-0">I own properties</p>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="role-card @(Model?.Role == "ApartmentRenter" ? "active" : "")" data-role="ApartmentRenter">
+                                    <input asp-for="Role" type="radio" value="ApartmentRenter" id="roleRenter" class="role-input" />
+                                    <label for="roleRenter" class="d-block">
+                                        <h5 class="mb-1">🔑 Apartment Renter</h5>
+                                        <p class="text-muted small mb-0">I'm looking to rent</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <span asp-validation-for="Role" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">Get Started</button>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Already have an account? <a asp-controller="Account" asp-action="Login" class="text-primary fw-bold">Sign In</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial check of role inputs
+            checkSelectedRole();
+            
+            // Add active class to selected role card
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    // Clear all active classes
+                    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked card
+                    this.classList.add('active');
+                    
+                    // Find the radio button within this card and check it
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                    }
+                });
+            });
+            
+            // Check radio buttons directly as well
+            document.querySelectorAll('.role-input').forEach(input => {
+                input.addEventListener('change', checkSelectedRole);
+            });
+            
+            function checkSelectedRole() {
+                document.querySelectorAll('.role-input').forEach(input => {
+                    const card = input.closest('.role-card');
+                    if (input.checked && card) {
+                        card.classList.add('active');
+                    } else if (card) {
+                        card.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    .auth-card {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .input-icon {
+        position: relative;
+    }
+
+    .input-icon i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .input-icon input {
+        padding-left: 3rem;
+    }
+    
+    .role-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .role-card:hover {
+        border-color: #a0c4ff;
+        background-color: #f0f7ff;
+    }
+    
+    .role-card.active {
+        border-color: #0d6efd;
+        background-color: #e6f0ff;
+    }
+    
+    .role-input {
+        position: absolute;
+        opacity: 0;
+    }
+</style>

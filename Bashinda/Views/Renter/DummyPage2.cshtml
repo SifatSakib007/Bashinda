@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Dummy Page 2";
+}
+
+<h2>Dummy Page 2</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@ViewBag.WelcomeMessage</h5>
+        <p class="card-text">
+            This is another exclusive section that requires admin approval.
+            As an approved renter, you have access to all premium features.
+        </p>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-calendar me-2"></i> Upcoming Events
+                    </div>
+                    <div class="card-body">
+                        <p>View and register for upcoming community events.</p>
+                        <button class="btn btn-outline-primary btn-sm">View Events</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-white">
+                        <i class="fas fa-tools me-2"></i> Maintenance
+                    </div>
+                    <div class="card-body">
+                        <p>Submit and track maintenance requests for your apartment.</p>
+                        <button class="btn btn-outline-success btn-sm">Request Service</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,176 @@
+@model Bashinda.ViewModels.RenterProfileDto
+@{
+    ViewData["Title"] = "Renter Profile Details";
+}
+
+<div class="container-fluid my-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Renter Profile Details</h4>
+                        <a asp-action="PendingApprovals" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            @if (!string.IsNullOrEmpty(Model.SelfImagePath))
+                            {
+                                <img src="@Model.SelfImagePath" alt="@Model.FullName" class="img-thumbnail" style="max-height: 300px; max-width: 100%;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light p-5 rounded">
+                                    <i class="fas fa-user fa-5x text-secondary"></i>
+                                    <p class="mt-3 text-muted">No image available</p>
+                                </div>
+                            }
+                            
+                            <div class="mt-3">
+                                <h5>@Model.FullName</h5>
+                                <p class="mb-1">
+                                    <i class="fas fa-envelope me-2 text-primary"></i> @Model.Email
+                                </p>
+                                <p class="mb-1">
+                                    <i class="fas fa-phone me-2 text-primary"></i> @Model.MobileNo
+                                </p>
+                                <div class="mt-3">
+                                    <form asp-action="ApproveProfile" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-check me-1"></i> Approve
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#declineModal">
+                                        <i class="fas fa-times me-1"></i> Decline
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-id-card me-2 text-primary"></i> Identity Information</h5>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Is Adult:</strong> @(Model.IsAdult ? "Yes" : "No")
+                                </div>
+                                
+                                @if (Model.IsAdult)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <strong>National ID:</strong> @Model.NationalId
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(Model.NationalIdImagePath))
+                                    {
+                                        <div class="col-12 mb-3">
+                                            <strong>National ID Image:</strong>
+                                            <img src="@Model.NationalIdImagePath" alt="National ID" class="img-fluid mt-2 border p-1" style="max-height: 200px;" />
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <strong>Birth Registration No:</strong> @Model.BirthRegistrationNo
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(Model.BirthRegistrationImagePath))
+                                    {
+                                        <div class="col-12 mb-3">
+                                            <strong>Birth Registration Image:</strong>
+                                            <img src="@Model.BirthRegistrationImagePath" alt="Birth Registration" class="img-fluid mt-2 border p-1" style="max-height: 200px;" />
+                                        </div>
+                                    }
+                                }
+                                
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mb-3 mt-4"><i class="fas fa-user me-2 text-primary"></i> Personal Information</h5>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Full Name:</strong> @Model.FullName
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Date of Birth:</strong> @Model.DateOfBirth.ToString("MMM dd, yyyy")
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Father's Name:</strong> @Model.FatherName
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Mother's Name:</strong> @Model.MotherName
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Gender:</strong> @Model.Gender
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Blood Group:</strong> @Model.BloodGroup
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Nationality:</strong> @Model.Nationality
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <strong>Profession:</strong> @Model.Profession
+                                </div>
+                                
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mb-3 mt-4"><i class="fas fa-map-marker-alt me-2 text-primary"></i> Location Information</h5>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <strong>Division:</strong> @Model.Division
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <strong>District:</strong> @Model.District
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <strong>Upazila:</strong> @Model.Upazila
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Decline Modal -->
+<div class="modal fade" id="declineModal" tabindex="-1" aria-labelledby="declineModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="DeclineProfile" asp-route-id="@Model.Id" method="post">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="declineModalLabel">Decline Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to decline this renter profile?</p>
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason (Optional)</label>
+                        <textarea id="reason" name="reason" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Decline Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,122 @@
+@model List<Bashinda.ViewModels.ApartmentListDto>
+@{
+    ViewData["Title"] = "My Apartments";
+}
+
+<div class="container-fluid my-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">My Apartments</h3>
+                <a asp-controller="Apartment" asp-action="CreateApartment" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add New Apartment
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+                    You haven't added any apartments yet. Click the "Add New Apartment" button to get started.
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var apartment in Model)
+                    {
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                @if (!string.IsNullOrEmpty(apartment.ImagePath))
+                                {
+                                    <img src="@apartment.ImagePath" class="card-img-top" alt="@apartment.BuildingName" style="height: 200px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <img src="/images/apartment-placeholder.jpg" class="card-img-top" alt="Apartment" style="height: 200px; object-fit: cover;">
+                                }
+                                <div class="card-body">
+                                    <h5 class="card-title">@apartment.BuildingName</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">@apartment.ApartmentNumber</h6>
+                                    <p class="card-text">
+                                        <strong>Address:</strong> @apartment.Address<br>
+                                        <strong>Rooms:</strong> @apartment.NumberOfRooms<br>
+                                        <strong>Monthly Rent:</strong> $@apartment.MonthlyRent
+                                    </p>
+                                    <div class="mt-2">
+                                        <span class="badge @(apartment.IsAvailable ? "bg-success" : "bg-danger")">
+                                            @(apartment.IsAvailable ? "Available" : "Not Available")
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group w-100" role="group">
+                                        <a asp-controller="Home" asp-action="ApartmentDetails" asp-route-id="@apartment.Id" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        <a asp-controller="Apartment" asp-action="EditApartment" asp-route-id="@apartment.Id" class="btn btn-outline-secondary">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" onclick="confirmDelete(@apartment.Id, '@apartment.BuildingName - @apartment.ApartmentNumber')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <span id="apartmentName" class="fw-bold"></span>? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" asp-controller="Apartment" asp-action="DeleteApartment" method="post">
+                    <input type="hidden" id="apartmentId" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            document.getElementById('apartmentId').value = id;
+            document.getElementById('apartmentName').textContent = name;
+            
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+} 
