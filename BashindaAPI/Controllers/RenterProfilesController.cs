@@ -34,14 +34,23 @@ namespace BashindaAPI.Controllers
         public async Task<ActionResult<ApiResponse<IEnumerable<RenterProfileListDto>>>> GetRenterProfiles()
         {
             var profiles = await _context.RenterProfiles
+                .Include(p => p.Division)
+                .Include(p => p.District)
+                .Include(p => p.Upazila)
                 .Select(p => new RenterProfileListDto
                 {
                     Id = p.Id,
                     FullName = p.FullName,
                     MobileNo = p.MobileNo,
                     Email = p.Email,
+                    NationalId = p.NationalId,
+                    BirthRegistrationNo = p.BirthRegistrationNo,
+                    DateOfBirth = p.DateOfBirth,
                     SelfImagePath = p.SelfImagePath,
-                    IsApproved = p.IsApproved
+                    IsApproved = p.IsApproved,
+                    DivisionName = p.Division != null ? p.Division.Name : string.Empty,
+                    DistrictName = p.District != null ? p.District.Name : string.Empty,
+                    UpazilaName = p.Upazila != null ? p.Upazila.Name : string.Empty
                 })
                 .ToListAsync();
 
@@ -57,6 +66,11 @@ namespace BashindaAPI.Controllers
 
             var renterProfile = await _context.RenterProfiles
                 .Include(r => r.User)
+                .Include(r => r.Division)
+                .Include(r => r.District)
+                .Include(r => r.Upazila)
+                .Include(r => r.Ward)
+                .Include(r => r.Village)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (renterProfile == null)
@@ -90,9 +104,22 @@ namespace BashindaAPI.Controllers
                 MobileNo = renterProfile.MobileNo,
                 Email = renterProfile.Email,
                 SelfImagePath = renterProfile.SelfImagePath,
-                Division = renterProfile.Division,
-                District = renterProfile.District,
-                Upazila = renterProfile.Upazila,
+                Address = new AddressDto
+                {
+                    DivisionId = renterProfile.DivisionId,
+                    DivisionName = _context.Divisions.FirstOrDefault(d => d.Id == renterProfile.DivisionId)?.Name ?? string.Empty,
+                    DistrictId = renterProfile.DistrictId,
+                    DistrictName = _context.Districts.FirstOrDefault(d => d.Id == renterProfile.DistrictId)?.Name ?? string.Empty,
+                    UpazilaId = renterProfile.UpazilaId,
+                    UpazilaName = _context.Upazilas.FirstOrDefault(u => u.Id == renterProfile.UpazilaId)?.Name ?? string.Empty,
+                    AreaType = renterProfile.AreaType,
+                    WardId = renterProfile.WardId,
+                    WardName = _context.Wards.FirstOrDefault(w => w.Id == renterProfile.WardId)?.Name ?? string.Empty,
+                    VillageId = renterProfile.VillageId,
+                    VillageName = _context.Villages.FirstOrDefault(v => v.Id == renterProfile.VillageId)?.Name ?? string.Empty,
+                    PostCode = renterProfile.PostCode,
+                    HoldingNo = renterProfile.HoldingNo
+                },
                 IsApproved = renterProfile.IsApproved,
                 User = renterProfile.User != null ? new UserDto
                 {
@@ -121,6 +148,11 @@ namespace BashindaAPI.Controllers
 
             var renterProfile = await _context.RenterProfiles
                 .Include(r => r.User)
+                .Include(r => r.Division)
+                .Include(r => r.District)
+                .Include(r => r.Upazila)
+                .Include(r => r.Ward)
+                .Include(r => r.Village)
                 .FirstOrDefaultAsync(r => r.UserId.ToString() == userId);
 
             if (renterProfile == null)
@@ -148,10 +180,32 @@ namespace BashindaAPI.Controllers
                 MobileNo = renterProfile.MobileNo,
                 Email = renterProfile.Email,
                 SelfImagePath = renterProfile.SelfImagePath,
-                Division = renterProfile.Division,
-                District = renterProfile.District,
-                Upazila = renterProfile.Upazila,
-                IsApproved = renterProfile.IsApproved
+                Address = new AddressDto
+                {
+                    DivisionId = renterProfile.DivisionId,
+                    DivisionName = _context.Divisions.FirstOrDefault(d => d.Id == renterProfile.DivisionId)?.Name ?? string.Empty,
+                    DistrictId = renterProfile.DistrictId,
+                    DistrictName = _context.Districts.FirstOrDefault(d => d.Id == renterProfile.DistrictId)?.Name ?? string.Empty,
+                    UpazilaId = renterProfile.UpazilaId,
+                    UpazilaName = _context.Upazilas.FirstOrDefault(u => u.Id == renterProfile.UpazilaId)?.Name ?? string.Empty,
+                    AreaType = renterProfile.AreaType,
+                    WardId = renterProfile.WardId,
+                    WardName = _context.Wards.FirstOrDefault(w => w.Id == renterProfile.WardId)?.Name ?? string.Empty,
+                    VillageId = renterProfile.VillageId,
+                    VillageName = _context.Villages.FirstOrDefault(v => v.Id == renterProfile.VillageId)?.Name ?? string.Empty,
+                    PostCode = renterProfile.PostCode,
+                    HoldingNo = renterProfile.HoldingNo
+                },
+                IsApproved = renterProfile.IsApproved,
+                User = renterProfile.User != null ? new UserDto
+                {
+                    Id = renterProfile.User.Id,
+                    UserName = renterProfile.User.UserName,
+                    Email = renterProfile.User.Email,
+                    PhoneNumber = renterProfile.User.PhoneNumber,
+                    Role = renterProfile.User.Role.ToString(),
+                    IsVerified = renterProfile.User.IsVerified
+                } : null
             };
 
             return Ok(dto);
@@ -164,14 +218,23 @@ namespace BashindaAPI.Controllers
         {
             var profiles = await _context.RenterProfiles
                 .Where(p => !p.IsApproved)
+                .Include(p => p.Division)
+                .Include(p => p.District)
+                .Include(p => p.Upazila)
                 .Select(p => new RenterProfileListDto
                 {
                     Id = p.Id,
                     FullName = p.FullName,
                     MobileNo = p.MobileNo,
                     Email = p.Email,
+                    NationalId = p.NationalId,
+                    BirthRegistrationNo = p.BirthRegistrationNo,
+                    DateOfBirth = p.DateOfBirth,
                     SelfImagePath = p.SelfImagePath,
-                    IsApproved = p.IsApproved
+                    IsApproved = p.IsApproved,
+                    DivisionName = p.Division != null ? p.Division.Name : string.Empty,
+                    DistrictName = p.District != null ? p.District.Name : string.Empty,
+                    UpazilaName = p.Upazila != null ? p.Upazila.Name : string.Empty
                 })
                 .ToListAsync();
 
@@ -194,6 +257,37 @@ namespace BashindaAPI.Controllers
                 return Conflict("You already have a profile");
             }
 
+            // Validate location data
+            if (!await _context.Divisions.AnyAsync(d => d.Id == dto.DivisionId))
+            {
+                ModelState.AddModelError("DivisionId", "Invalid Division");
+                return BadRequest(ModelState);
+            }
+
+            if (!await _context.Districts.AnyAsync(d => d.Id == dto.DistrictId && d.DivisionId == dto.DivisionId))
+            {
+                ModelState.AddModelError("DistrictId", "Invalid District for the selected Division");
+                return BadRequest(ModelState);
+            }
+
+            if (!await _context.Upazilas.AnyAsync(u => u.Id == dto.UpazilaId && u.DistrictId == dto.DistrictId))
+            {
+                ModelState.AddModelError("UpazilaId", "Invalid Upazila for the selected District");
+                return BadRequest(ModelState);
+            }
+
+            if (!await _context.Wards.AnyAsync(w => w.Id == dto.WardId && w.UpazilaId == dto.UpazilaId && w.AreaType == dto.AreaType))
+            {
+                ModelState.AddModelError("WardId", "Invalid Ward for the selected Upazila and Area Type");
+                return BadRequest(ModelState);
+            }
+
+            if (!await _context.Villages.AnyAsync(v => v.Id == dto.VillageId && v.WardId == dto.WardId))
+            {
+                ModelState.AddModelError("VillageId", "Invalid Village/Area for the selected Ward");
+                return BadRequest(ModelState);
+            }
+
             var renterProfile = new RenterProfile
             {
                 UserId = int.Parse(userId),
@@ -210,9 +304,14 @@ namespace BashindaAPI.Controllers
                 Gender = dto.Gender,
                 MobileNo = dto.MobileNo,
                 Email = dto.Email,
-                Division = dto.Division,
-                District = dto.District,
-                Upazila = dto.Upazila,
+                DivisionId = dto.DivisionId,
+                DistrictId = dto.DistrictId,
+                UpazilaId = dto.UpazilaId,
+                AreaType = dto.AreaType,
+                WardId = dto.WardId,
+                VillageId = dto.VillageId,
+                PostCode = dto.PostCode,
+                HoldingNo = dto.HoldingNo,
                 IsApproved = false // Requires admin approval
             };
 
@@ -235,9 +334,22 @@ namespace BashindaAPI.Controllers
                 Gender = renterProfile.Gender.ToString(),
                 MobileNo = renterProfile.MobileNo,
                 Email = renterProfile.Email,
-                Division = renterProfile.Division,
-                District = renterProfile.District,
-                Upazila = renterProfile.Upazila,
+                Address = new AddressDto
+                {
+                    DivisionId = renterProfile.DivisionId,
+                    DivisionName = _context.Divisions.FirstOrDefault(d => d.Id == renterProfile.DivisionId)?.Name ?? string.Empty,
+                    DistrictId = renterProfile.DistrictId,
+                    DistrictName = _context.Districts.FirstOrDefault(d => d.Id == renterProfile.DistrictId)?.Name ?? string.Empty,
+                    UpazilaId = renterProfile.UpazilaId,
+                    UpazilaName = _context.Upazilas.FirstOrDefault(u => u.Id == renterProfile.UpazilaId)?.Name ?? string.Empty,
+                    AreaType = renterProfile.AreaType,
+                    WardId = renterProfile.WardId,
+                    WardName = _context.Wards.FirstOrDefault(w => w.Id == renterProfile.WardId)?.Name ?? string.Empty,
+                    VillageId = renterProfile.VillageId,
+                    VillageName = _context.Villages.FirstOrDefault(v => v.Id == renterProfile.VillageId)?.Name ?? string.Empty,
+                    PostCode = renterProfile.PostCode,
+                    HoldingNo = renterProfile.HoldingNo
+                },
                 IsApproved = renterProfile.IsApproved
             });
         }
@@ -275,9 +387,14 @@ namespace BashindaAPI.Controllers
             renterProfile.Gender = dto.Gender;
             renterProfile.MobileNo = dto.MobileNo;
             renterProfile.Email = dto.Email;
-            renterProfile.Division = dto.Division;
-            renterProfile.District = dto.District;
-            renterProfile.Upazila = dto.Upazila;
+            renterProfile.DivisionId = dto.DivisionId;
+            renterProfile.DistrictId = dto.DistrictId;
+            renterProfile.UpazilaId = dto.UpazilaId;
+            renterProfile.AreaType = dto.AreaType;
+            renterProfile.WardId = dto.WardId;
+            renterProfile.VillageId = dto.VillageId;
+            renterProfile.PostCode = dto.PostCode;
+            renterProfile.HoldingNo = dto.HoldingNo;
 
             _context.Entry(renterProfile).State = EntityState.Modified;
 

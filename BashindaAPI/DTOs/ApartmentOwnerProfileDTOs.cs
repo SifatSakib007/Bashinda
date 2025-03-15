@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using BashindaAPI.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace BashindaAPI.DTOs
@@ -9,14 +10,15 @@ namespace BashindaAPI.DTOs
         public int UserId { get; set; }
         public string FullName { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
-        public string NationalId { get; set; } = string.Empty;
+        public string? NationalId { get; set; }
         public string? NationalIdImagePath { get; set; }
         public string? SelfImagePath { get; set; }
-        public string? MobileNo { get; set; }
-        public string? Email { get; set; }
-        public string? Address { get; set; }
-        public string? Profession { get; set; }
+        public string MobileNo { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public AddressDto Address { get; set; } = new AddressDto();
+        public string Profession { get; set; } = string.Empty;
         public bool IsApproved { get; set; }
+        public string? RejectionReason { get; set; }
         public UserDto? User { get; set; }
     }
 
@@ -24,92 +26,137 @@ namespace BashindaAPI.DTOs
     {
         [Required]
         [StringLength(100)]
-        [Display(Name = "Full Name")]
         public string FullName { get; set; } = string.Empty;
 
         [Required]
-        [DataType(DataType.Date)]
-        [Display(Name = "Date of Birth")]
         public DateTime DateOfBirth { get; set; }
 
         [Required]
         [StringLength(20)]
-        [Display(Name = "National ID")]
         public string NationalId { get; set; } = string.Empty;
 
-        [Display(Name = "Contact Number")]
-        [Phone]
-        [StringLength(15)]
-        public string? MobileNo { get; set; }
+        [Required]
+        [StringLength(20)]
+        public string MobileNo { get; set; } = string.Empty;
 
-        [Display(Name = "Email Address")]
+        [Required]
         [EmailAddress]
         [StringLength(100)]
-        public string? Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
-        [Display(Name = "Address")]
-        [StringLength(200)]
-        public string? Address { get; set; }
+        // Location information
+        [Required]
+        public int DivisionId { get; set; }
 
-        [Display(Name = "Profession")]
+        [Required]
+        public int DistrictId { get; set; }
+
+        [Required]
+        public int UpazilaId { get; set; }
+
+        [Required]
+        public AreaType AreaType { get; set; }
+
+        [Required]
+        public int WardId { get; set; }
+
+        [Required]
+        public int VillageId { get; set; }
+
+        [Required]
+        [StringLength(10)]
+        public string PostCode { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(50)]
+        public string HoldingNo { get; set; } = string.Empty;
+
+        [Required]
         [StringLength(100)]
-        public string? Profession { get; set; }
+        public string Profession { get; set; } = string.Empty;
     }
 
     public class UpdateApartmentOwnerProfileDto
     {
+        [Required]
         [StringLength(100)]
-        [Display(Name = "Full Name")]
         public string FullName { get; set; } = string.Empty;
 
-        [DataType(DataType.Date)]
-        [Display(Name = "Date of Birth")]
+        [Required]
         public DateTime DateOfBirth { get; set; }
 
+        [Required]
         [StringLength(20)]
-        [Display(Name = "National ID")]
         public string NationalId { get; set; } = string.Empty;
 
-        [Display(Name = "Contact Number")]
-        [Phone]
-        [StringLength(15)]
-        public string? MobileNo { get; set; }
+        [Required]
+        [StringLength(20)]
+        public string MobileNo { get; set; } = string.Empty;
 
-        [Display(Name = "Email Address")]
+        [Required]
         [EmailAddress]
         [StringLength(100)]
-        public string? Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
-        [Display(Name = "Address")]
-        [StringLength(200)]
-        public string? Address { get; set; }
+        // Location information
+        [Required]
+        public int DivisionId { get; set; }
 
-        [Display(Name = "Profession")]
+        [Required]
+        public int DistrictId { get; set; }
+
+        [Required]
+        public int UpazilaId { get; set; }
+
+        [Required]
+        public AreaType AreaType { get; set; }
+
+        [Required]
+        public int WardId { get; set; }
+
+        [Required]
+        public int VillageId { get; set; }
+
+        [Required]
+        [StringLength(10)]
+        public string PostCode { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(50)]
+        public string HoldingNo { get; set; } = string.Empty;
+
+        [Required]
         [StringLength(100)]
-        public string? Profession { get; set; }
+        public string Profession { get; set; } = string.Empty;
     }
 
     public class ApartmentOwnerProfileListDto
     {
         public int Id { get; set; }
         public string FullName { get; set; } = string.Empty;
-        public string? MobileNo { get; set; }
-        public string? Email { get; set; }
+        public string MobileNo { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string? NationalId { get; set; }
         public string? SelfImagePath { get; set; }
         public bool IsApproved { get; set; }
+        public string DivisionName { get; set; } = string.Empty;
+        public string DistrictName { get; set; } = string.Empty;
+        public string UpazilaName { get; set; } = string.Empty;
     }
 
     public class ApproveApartmentOwnerProfileDto
     {
+        [Required]
         public bool IsApproved { get; set; }
+        public string? RejectionReason { get; set; }
     }
 
     public class UploadOwnerImageDto
     {
         [Required]
-        public IFormFile Image { get; set; }
-        
-        public string ImageType { get; set; } = "Self"; // "Self" or "NationalId"
+        public IFormFile Image { get; set; } = null!;
+
+        [Required]
+        public string ImageType { get; set; } = string.Empty; // self or nationalid
     }
 }

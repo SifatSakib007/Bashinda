@@ -42,9 +42,40 @@ namespace BashindaAPI.Models
         [StringLength(100)]
         public string? Email { get; set; }
         
-        [Display(Name = "Address")]
-        [StringLength(200)]
-        public string? Address { get; set; }
+        // Permanent Resident Information
+        [Required]
+        [Display(Name = "Division")]
+        public int DivisionId { get; set; }
+        
+        [Required]
+        [Display(Name = "District")]
+        public int DistrictId { get; set; }
+        
+        [Required]
+        [Display(Name = "Upazila")]
+        public int UpazilaId { get; set; }
+        
+        [Required]
+        [Display(Name = "Area Type")]
+        public AreaType AreaType { get; set; }
+        
+        [Required]
+        [Display(Name = "Ward")]
+        public int WardId { get; set; }
+        
+        [Required]
+        [Display(Name = "Village/Area")]
+        public int VillageId { get; set; }
+        
+        [Required]
+        [StringLength(10)]
+        [Display(Name = "Post Code")]
+        public string PostCode { get; set; } = string.Empty;
+        
+        [Required]
+        [StringLength(50)]
+        [Display(Name = "Holding No")]
+        public string HoldingNo { get; set; } = string.Empty;
         
         [Display(Name = "Profession")]
         [StringLength(100)]
@@ -55,8 +86,23 @@ namespace BashindaAPI.Models
         // Reason for rejection if not approved
         public string? RejectionReason { get; set; }
         
-        // Navigation property
+        // Navigation properties
         [ForeignKey("UserId")]
         public User? User { get; set; }
+        
+        [ForeignKey("DivisionId")]
+        public Division? Division { get; set; }
+        
+        [ForeignKey("DistrictId")]
+        public District? District { get; set; }
+        
+        [ForeignKey("UpazilaId")]
+        public Upazila? Upazila { get; set; }
+        
+        [ForeignKey("WardId")]
+        public Ward? Ward { get; set; }
+        
+        [ForeignKey("VillageId")]
+        public Village? Village { get; set; }
     }
 } 

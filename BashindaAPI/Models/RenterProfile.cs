@@ -63,18 +63,33 @@ namespace BashindaAPI.Models
         
         public string? SelfImagePath { get; set; }
 
-        // Permanent Resident Information
+        // Permanent Resident Information - Basic (already in the model)
         [Required]
-        [StringLength(50)]
-        public string Division { get; set; } = string.Empty;
+        public int DivisionId { get; set; }
+        
+        [Required]
+        public int DistrictId { get; set; }
+        
+        [Required]
+        public int UpazilaId { get; set; }
+        
+        // New Permanent Resident Information
+        [Required]
+        public AreaType AreaType { get; set; }
+        
+        [Required]
+        public int WardId { get; set; }
+        
+        [Required]
+        public int VillageId { get; set; }
+        
+        [Required]
+        [StringLength(10)]
+        public string PostCode { get; set; } = string.Empty;
         
         [Required]
         [StringLength(50)]
-        public string District { get; set; } = string.Empty;
-        
-        [Required]
-        [StringLength(50)]
-        public string Upazila { get; set; } = string.Empty;
+        public string HoldingNo { get; set; } = string.Empty;
 
         // Approval flag – user access granted after admin approval
         public bool IsApproved { get; set; } = false;
@@ -82,9 +97,24 @@ namespace BashindaAPI.Models
         // Reason for rejection if not approved
         public string? RejectionReason { get; set; }
 
-        // Navigation property
+        // Navigation properties
         [ForeignKey("UserId")]
         public User? User { get; set; }
+        
+        [ForeignKey("DivisionId")]
+        public Division? Division { get; set; }
+        
+        [ForeignKey("DistrictId")]
+        public District? District { get; set; }
+        
+        [ForeignKey("UpazilaId")]
+        public Upazila? Upazila { get; set; }
+        
+        [ForeignKey("WardId")]
+        public Ward? Ward { get; set; }
+        
+        [ForeignKey("VillageId")]
+        public Village? Village { get; set; }
     }
 
     // Enums for the dropdowns and bullet selections:
