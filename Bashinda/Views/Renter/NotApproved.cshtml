@@ -1,35 +1,33 @@
 @{
-    ViewData["Title"] = "Approval Required";
+    ViewData["Title"] = "Approval Pending";
 }
 
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Admin Approval Required</h4>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-user-clock fa-4x text-warning mb-3"></i>
-                        <h5>@ViewBag.Message</h5>
-                        <p class="text-muted">
-                            Your profile is currently waiting for approval. The admin will review your 
-                            information and approve your account soon.
-                        </p>
-                    </div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-clock text-warning mb-4" style="font-size: 4rem;"></i>
                     
-                    <div class="alert alert-info mb-4">
-                        <h6><i class="fas fa-info-circle me-2"></i>What happens next?</h6>
+                    <h2 class="card-title mb-3">Approval Pending</h2>
+                    <p class="lead text-muted mb-4">
+                        @(ViewBag.Message ?? "Your profile is currently awaiting approval from an administrator.")
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>What's Next?</h5>
                         <p class="mb-0">
-                            Once approved, you'll gain access to all renter features including maintenance requests, 
-                            community information, and apartment resources. This usually takes 1-2 business days.
+                            Our team will review your profile shortly. This usually takes 1-2 business days.
+                            You'll be notified once your profile is approved.
                         </p>
                     </div>
                     
-                    <div class="text-center">
+                    <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
                         <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
-                            <i class="fas fa-home me-2"></i>Return to Dashboard
+                            <i class="fas fa-home me-2"></i> Go to Home
+                        </a>
+                        <a asp-controller="Renter" asp-action="ViewProfile" class="btn btn-outline-secondary">
+                            <i class="fas fa-user me-2"></i> View My Profile
                         </a>
                     </div>
                 </div>

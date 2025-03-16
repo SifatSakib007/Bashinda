@@ -373,40 +373,49 @@ namespace BashindaAPI.Controllers
                 return Forbid();
             }
 
-            // Update fields
-            renterProfile.IsAdult = dto.IsAdult;
-            renterProfile.NationalId = dto.IsAdult ? dto.NationalId : null;
-            renterProfile.BirthRegistrationNo = !dto.IsAdult ? dto.BirthRegistrationNo : null;
-            renterProfile.DateOfBirth = dto.DateOfBirth;
-            renterProfile.FullName = dto.FullName;
-            renterProfile.FatherName = dto.FatherName;
-            renterProfile.MotherName = dto.MotherName;
-            renterProfile.Nationality = dto.Nationality;
-            renterProfile.BloodGroup = dto.BloodGroup;
-            renterProfile.Profession = dto.Profession;
-            renterProfile.Gender = dto.Gender;
-            renterProfile.MobileNo = dto.MobileNo;
-            renterProfile.Email = dto.Email;
-            renterProfile.DivisionId = dto.DivisionId;
-            renterProfile.DistrictId = dto.DistrictId;
-            renterProfile.UpazilaId = dto.UpazilaId;
-            renterProfile.AreaType = dto.AreaType;
-            renterProfile.WardId = dto.WardId;
-            renterProfile.VillageId = dto.VillageId;
-            renterProfile.PostCode = dto.PostCode;
-            renterProfile.HoldingNo = dto.HoldingNo;
-
-            _context.Entry(renterProfile).State = EntityState.Modified;
-
-            // Don't allow non-admins to change approval status
-            if (userRole != "Admin")
-            {
-                _context.Entry(renterProfile).Property(x => x.IsApproved).IsModified = false;
-            }
-
             try
             {
+                // Validate location hierarchy
+                if (!await ValidateLocationHierarchy(dto.DivisionId, dto.DistrictId, dto.UpazilaId, dto.AreaType, dto.WardId, dto.VillageId))
+                {
+                    return BadRequest(ApiResponse<object>.ErrorResponse(
+                        "Invalid location hierarchy. Please ensure Division, District, Upazila, Ward, and Village/Area are related correctly."));
+                }
+
+                // Update fields
+                renterProfile.IsAdult = dto.IsAdult;
+                renterProfile.NationalId = dto.IsAdult ? dto.NationalId : null;
+                renterProfile.BirthRegistrationNo = !dto.IsAdult ? dto.BirthRegistrationNo : null;
+                renterProfile.DateOfBirth = dto.DateOfBirth;
+                renterProfile.FullName = dto.FullName;
+                renterProfile.FatherName = dto.FatherName;
+                renterProfile.MotherName = dto.MotherName;
+                renterProfile.Nationality = dto.Nationality;
+                renterProfile.BloodGroup = dto.BloodGroup;
+                renterProfile.Profession = dto.Profession;
+                renterProfile.Gender = dto.Gender;
+                renterProfile.MobileNo = dto.MobileNo;
+                renterProfile.Email = dto.Email;
+                renterProfile.DivisionId = dto.DivisionId;
+                renterProfile.DistrictId = dto.DistrictId;
+                renterProfile.UpazilaId = dto.UpazilaId;
+                renterProfile.AreaType = dto.AreaType;
+                renterProfile.WardId = dto.WardId;
+                renterProfile.VillageId = dto.VillageId;
+                renterProfile.PostCode = dto.PostCode;
+                renterProfile.HoldingNo = dto.HoldingNo;
+
+                _context.Entry(renterProfile).State = EntityState.Modified;
+
+                // Don't allow non-admins to change approval status
+                if (userRole != "Admin")
+                {
+                    _context.Entry(renterProfile).Property(x => x.IsApproved).IsModified = false;
+                }
+
                 await _context.SaveChangesAsync();
+                
+                return Ok(ApiResponse<object>.SuccessResponse(null, "Profile updated successfully."));
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -419,8 +428,37 @@ namespace BashindaAPI.Controllers
                     throw;
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating renter profile {ProfileId}", id);
+                return StatusCode(500, ApiResponse<object>.ErrorResponse("An error occurred while updating the profile."));
+            }
+        }
 
-            return NoContent();
+        // Helper method to validate location hierarchy
+        private async Task<bool> ValidateLocationHierarchy(int divisionId, int districtId, int upazilaId, AreaType areaType, int wardId, int villageId)
+        {
+            // Check if division exists
+            var division = await _context.Divisions.FindAsync(divisionId);
+            if (division == null) return false;
+            
+            // Check if district exists and belongs to the specified division
+            var district = await _context.Districts.FirstOrDefaultAsync(d => d.Id == districtId && d.DivisionId == divisionId);
+            if (district == null) return false;
+            
+            // Check if upazila exists and belongs to the specified district
+            var upazila = await _context.Upazilas.FirstOrDefaultAsync(u => u.Id == upazilaId && u.DistrictId == districtId);
+            if (upazila == null) return false;
+            
+            // Check if ward exists, belongs to the specified upazila, and has the correct area type
+            var ward = await _context.Wards.FirstOrDefaultAsync(w => w.Id == wardId && w.UpazilaId == upazilaId && w.AreaType == areaType);
+            if (ward == null) return false;
+            
+            // Check if village exists and belongs to the specified ward
+            var village = await _context.Villages.FirstOrDefaultAsync(v => v.Id == villageId && v.WardId == wardId);
+            if (village == null) return false;
+            
+            return true;
         }
 
         // PATCH: api/RenterProfiles/5/approve

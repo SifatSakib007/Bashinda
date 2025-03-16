@@ -1,0 +1,661 @@
+@model Bashinda.ViewModels.RenterProfileViewModel
+@{
+    ViewData["Title"] = "Create Renter Profile";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Create Your Renter Profile</h2>
+                    
+                    @if (TempData["InfoMessage"] != null)
+                    {
+                        <div class="alert alert-info">
+                            @TempData["InfoMessage"]
+                        </div>
+                    }
+                    
+                    @if (!ViewContext.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach (var modelError in ViewContext.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@modelError.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Basic Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label asp-for="FullName" class="form-label required">Full Name</label>
+                                    <input asp-for="FullName" class="form-control" />
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Email" class="form-label required">Email</label>
+                                        <input asp-for="Email" class="form-control" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="MobileNo" class="form-label required">Mobile Number</label>
+                                        <input asp-for="MobileNo" class="form-control" />
+                                        <span asp-validation-for="MobileNo" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="DateOfBirth" class="form-label required">Date of Birth</label>
+                                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Gender" class="form-label required">Gender</label>
+                                        <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<Bashinda.Models.Gender>()">
+                                            <option value="">-- Select Gender --</option>
+                                        </select>
+                                        <span asp-validation-for="Gender" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Nationality" class="form-label required">Nationality</label>
+                                        <select asp-for="Nationality" class="form-select" asp-items="Html.GetEnumSelectList<Bashinda.Models.Nationality>()">
+                                            <option value="">-- Select Nationality --</option>
+                                        </select>
+                                        <span asp-validation-for="Nationality" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="BloodGroup" class="form-label required">Blood Group</label>
+                                        <select asp-for="BloodGroup" class="form-select" asp-items="Html.GetEnumSelectList<Bashinda.Models.BloodGroup>()">
+                                            <option value="">-- Select Blood Group --</option>
+                                        </select>
+                                        <span asp-validation-for="BloodGroup" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="FatherName" class="form-label required">Father's Name</label>
+                                        <input asp-for="FatherName" class="form-control" />
+                                        <span asp-validation-for="FatherName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="MotherName" class="form-label required">Mother's Name</label>
+                                        <input asp-for="MotherName" class="form-control" />
+                                        <span asp-validation-for="MotherName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label asp-for="Profession" class="form-label required">Profession</label>
+                                    <select asp-for="Profession" class="form-select" asp-items="Html.GetEnumSelectList<Bashinda.Models.Profession>()">
+                                        <option value="">-- Select Profession --</option>
+                                    </select>
+                                    <span asp-validation-for="Profession" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Identity Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="form-check form-check-inline">
+                                        <input asp-for="IsAdult" class="form-check-input" type="radio" value="true" id="isAdultYes" />
+                                        <label class="form-check-label" for="isAdultYes">I'm an Adult</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input asp-for="IsAdult" class="form-check-input" type="radio" value="false" id="isAdultNo" />
+                                        <label class="form-check-label" for="isAdultNo">I'm not an Adult</label>
+                                    </div>
+                                    <span asp-validation-for="IsAdult" class="text-danger d-block"></span>
+                                </div>
+                                
+                                <div id="adultSection" class="mb-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label asp-for="NationalId" class="form-label">National ID</label>
+                                            <input asp-for="NationalId" class="form-control" />
+                                            <span asp-validation-for="NationalId" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label asp-for="NationalIdImage" class="form-label">National ID Image</label>
+                                            <input asp-for="NationalIdImage" class="form-control" type="file" accept="image/*" />
+                                            <span asp-validation-for="NationalIdImage" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="nonAdultSection" class="mb-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label asp-for="BirthRegistrationNo" class="form-label">Birth Registration Number</label>
+                                            <input asp-for="BirthRegistrationNo" class="form-control" />
+                                            <span asp-validation-for="BirthRegistrationNo" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label asp-for="BirthRegistrationImage" class="form-label">Birth Registration Image</label>
+                                            <input asp-for="BirthRegistrationImage" class="form-control" type="file" accept="image/*" />
+                                            <span asp-validation-for="BirthRegistrationImage" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label asp-for="SelfImage" class="form-label">Your Photo</label>
+                                    <input asp-for="SelfImage" class="form-control" type="file" accept="image/*" />
+                                    <span asp-validation-for="SelfImage" class="text-danger"></span>
+                                    <div class="form-text">Upload a clear photo of yourself.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Permanent Residence Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fa fa-info-circle"></i> For this demo, please select <strong>Dhaka</strong> as Division, <strong>Dhaka</strong> as District, <strong>Dhaka North</strong> as Upazila, <strong>CityCorporation</strong> as Locality Type, <strong>Ward 1</strong> as Ward, and <strong>Mohakhali</strong> as Village/Area.
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label asp-for="Division" class="form-label required">Division</label>
+                                        <select asp-for="Division" id="division" class="form-select">
+                                            <option value="">-- Select Division --</option>
+                                            <option value="Dhaka" selected data-id="1">Dhaka</option>
+                                            <option value="Chittagong" data-id="2">Chittagong</option>
+                                            <option value="Khulna" data-id="3">Khulna</option>
+                                            <option value="Rajshahi" data-id="4">Rajshahi</option>
+                                            <option value="Sylhet" data-id="5">Sylhet</option>
+                                        </select>
+                                        <span asp-validation-for="Division" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label asp-for="District" class="form-label required">District</label>
+                                        <select asp-for="District" id="district" class="form-select">
+                                            <option value="">-- Select District --</option>
+                                            <option value="Dhaka" selected data-id="101">Dhaka</option>
+                                            <!-- Options will be populated via JavaScript -->
+                                        </select>
+                                        <span asp-validation-for="District" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label asp-for="Upazila" class="form-label required">Upazila</label>
+                                        <select asp-for="Upazila" id="upazila" class="form-select">
+                                            <option value="">-- Select Upazila --</option>
+                                            <option value="Dhaka North" selected data-id="10101">Dhaka North</option>
+                                            <!-- Options will be populated via JavaScript -->
+                                        </select>
+                                        <span asp-validation-for="Upazila" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label asp-for="LocalityType" class="form-label required">Type</label>
+                                        <select asp-for="LocalityType" id="localityType" class="form-select">
+                                            <option value="">-- Select Type --</option>
+                                            <option value="CityCorporation" selected>City Corporation</option>
+                                            <option value="Pourashava">Pourashava</option>
+                                            <option value="Union">Union</option>
+                                        </select>
+                                        <span asp-validation-for="LocalityType" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label asp-for="Ward" class="form-label required">Ward</label>
+                                        <select asp-for="Ward" id="ward" class="form-select">
+                                            <option value="">-- Select Ward --</option>
+                                            <option value="Ward 1" selected data-id="1010101">Ward 1</option>
+                                            <!-- Options will be populated via JavaScript -->
+                                        </select>
+                                        <span asp-validation-for="Ward" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label asp-for="VillageArea" class="form-label required">Village/Area</label>
+                                        <select asp-for="VillageArea" id="villageArea" class="form-select">
+                                            <option value="">-- Select Village/Area --</option>
+                                            <option value="Mohakhali" selected data-id="101010101">Mohakhali</option>
+                                            <!-- Options will be populated via JavaScript -->
+                                        </select>
+                                        <span asp-validation-for="VillageArea" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="PostCode" class="form-label required">Post Code</label>
+                                        <input asp-for="PostCode" class="form-control" value="1212" />
+                                        <span asp-validation-for="PostCode" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="HoldingNo" class="form-label required">Holding No</label>
+                                        <input asp-for="HoldingNo" class="form-control" value="123/A" />
+                                        <span asp-validation-for="HoldingNo" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Profile</button>
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Toggle adult/non-adult sections based on selection
+        $(document).ready(function() {
+            // Initial state
+            toggleAdultSections();
+            
+            // Handle changes
+            $('input[name="IsAdult"]').change(function() {
+                toggleAdultSections();
+            });
+            
+            function toggleAdultSections() {
+                if ($('#isAdultYes').is(':checked')) {
+                    $('#adultSection').show();
+                    $('#nonAdultSection').hide();
+                } else if ($('#isAdultNo').is(':checked')) {
+                    $('#adultSection').hide();
+                    $('#nonAdultSection').show();
+                } else {
+                    // Default state if nothing selected
+                    $('#adultSection').show();
+                    $('#nonAdultSection').show();
+                }
+            }
+            
+            // Location cascading dropdowns
+            setupLocationDropdowns();
+        });
+        
+        function setupLocationDropdowns() {
+            // Define the token for API calls
+            const token = getCookie('jwt_token');
+            
+            // Fetch divisions from API on page load
+            fetchDivisions();
+            
+            // Division change event
+            $('#division').change(function() {
+                const division = $(this).val();
+                const divisionId = getDivisionId(division);
+                
+                // Clear subsequent dropdowns
+                clearDistricts();
+                clearUpazilas();
+                clearWards();
+                clearVillages();
+                
+                if (division && divisionId) {
+                    fetchDistricts(divisionId);
+                }
+            });
+            
+            // District change event
+            $('#district').change(function() {
+                const district = $(this).val();
+                const districtId = getDistrictId(district);
+                
+                // Clear subsequent dropdowns
+                clearUpazilas();
+                clearWards();
+                clearVillages();
+                
+                if (district && districtId) {
+                    fetchUpazilas(districtId);
+                }
+            });
+            
+            // Upazila change event
+            $('#upazila').change(function() {
+                const upazila = $(this).val();
+                const upazilaId = getUpazilaId(upazila);
+                const areaType = getAreaType();
+                
+                // Clear subsequent dropdowns
+                clearWards();
+                clearVillages();
+                
+                if (upazila && upazilaId && areaType) {
+                    fetchWards(upazilaId, areaType);
+                }
+            });
+            
+            // Locality type change event
+            $('#localityType').change(function() {
+                // Refresh wards when locality type changes
+                const upazila = $('#upazila').val();
+                if (upazila) {
+                    $('#upazila').trigger('change');
+                }
+            });
+            
+            // Ward change event
+            $('#ward').change(function() {
+                const ward = $(this).val();
+                const wardId = getWardId(ward);
+                
+                // Clear villages dropdown
+                clearVillages();
+                
+                if (ward && wardId) {
+                    fetchVillages(wardId);
+                }
+            });
+            
+            // Get cookie function
+            function getCookie(name) {
+                // Try to get either JwtToken or jwt_token
+                if (name === 'jwt_token') {
+                    // First try jwt_token
+                    const jwtCookie = getCookieValue('jwt_token');
+                    if (jwtCookie) {
+                        return jwtCookie;
+                    }
+                    // Fallback to JwtToken
+                    return getCookieValue('JwtToken');
+                }
+                
+                // For other cookies, just use the regular function
+                return getCookieValue(name);
+            }
+            
+            function getCookieValue(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return '';
+            }
+            
+            // API calls
+            function fetchDivisions() {
+                const token = getCookie('jwt_token');
+                console.log('JWT Token for API calls:', token ? 'Present (masked)' : 'Not found');
+                
+                $.ajax({
+                    url: '/api/location/divisions',
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function(data) {
+                        console.log('Divisions API response:', data);
+                        if (data && data.length > 0) {
+                            console.log('Divisions fetched successfully:', data);
+                            const $dropdown = $('#division');
+                            $dropdown.empty();
+                            $dropdown.append('<option value="">-- Select Division --</option>');
+                            
+                            $.each(data, function(i, division) {
+                                const selected = division.name === 'Dhaka' ? 'selected' : '';
+                                $dropdown.append(`<option value="${division.name}" data-id="${division.id}" ${selected}>${division.name}</option>`);
+                            });
+                            
+                            // Trigger change to load districts for the selected division
+                            $dropdown.trigger('change');
+                        } else {
+                            console.error('Failed to fetch divisions or no data returned');
+                            // Use default values as fallback
+                            clearDistricts();
+                            clearUpazilas();
+                            clearWards();
+                            clearVillages();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching divisions:', error);
+                        console.error('Status:', xhr.status);
+                        console.error('Response:', xhr.responseText);
+                        // Use default values as fallback
+                        clearDistricts();
+                        clearUpazilas();
+                        clearWards();
+                        clearVillages();
+                    }
+                });
+            }
+            
+            function fetchDistricts(divisionId) {
+                const token = getCookie('jwt_token');
+                $.ajax({
+                    url: `/api/location/divisions/${divisionId}/districts`,
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function(data) {
+                        console.log('Districts API response:', data);
+                        if (data && data.length > 0) {
+                            console.log(`Districts for division ${divisionId} fetched successfully:`, data);
+                            const $dropdown = $('#district');
+                            $dropdown.empty();
+                            $dropdown.append('<option value="">-- Select District --</option>');
+                            
+                            $.each(data, function(i, district) {
+                                const selected = i === 0 ? 'selected' : '';  // Select first by default
+                                $dropdown.append(`<option value="${district.name}" data-id="${district.id}" ${selected}>${district.name}</option>`);
+                            });
+                            
+                            // Trigger change to load upazilas for the selected district
+                            $dropdown.trigger('change');
+                        } else {
+                            console.error('Failed to fetch districts or no data returned');
+                            // Use default values as fallback
+                            clearUpazilas();
+                            clearWards();
+                            clearVillages();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(`Error fetching districts for division ${divisionId}:`, error);
+                        console.error('Status:', xhr.status);
+                        console.error('Response:', xhr.responseText);
+                        // Use default values as fallback
+                        clearUpazilas();
+                        clearWards();
+                        clearVillages();
+                    }
+                });
+            }
+            
+            function fetchUpazilas(districtId) {
+                const token = getCookie('jwt_token');
+                $.ajax({
+                    url: `/api/location/districts/${districtId}/upazilas`,
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function(data) {
+                        console.log('Upazilas API response:', data);
+                        if (data && data.length > 0) {
+                            console.log(`Upazilas for district ${districtId} fetched successfully:`, data);
+                            const $dropdown = $('#upazila');
+                            $dropdown.empty();
+                            $dropdown.append('<option value="">-- Select Upazila --</option>');
+                            
+                            $.each(data, function(i, upazila) {
+                                const selected = i === 0 ? 'selected' : '';  // Select first by default
+                                $dropdown.append(`<option value="${upazila.name}" data-id="${upazila.id}" ${selected}>${upazila.name}</option>`);
+                            });
+                            
+                            // Trigger change to update dependent dropdowns
+                            $dropdown.trigger('change');
+                        } else {
+                            console.error('Failed to fetch upazilas or no data returned');
+                            // Use default values as fallback
+                            clearWards();
+                            clearVillages();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(`Error fetching upazilas for district ${districtId}:`, error);
+                        console.error('Status:', xhr.status);
+                        console.error('Response:', xhr.responseText);
+                        // Use default values as fallback
+                        clearWards();
+                        clearVillages();
+                    }
+                });
+            }
+            
+            function fetchWards(upazilaId, areaType) {
+                const token = getCookie('jwt_token');
+                $.ajax({
+                    url: `/api/location/upazilas/${upazilaId}/wards?areaType=${areaType}`,
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function(data) {
+                        console.log('Wards API response:', data);
+                        if (data && data.length > 0) {
+                            console.log(`Wards for upazila ${upazilaId} (${areaType}) fetched successfully:`, data);
+                            const $dropdown = $('#ward');
+                            $dropdown.empty();
+                            $dropdown.append('<option value="">-- Select Ward --</option>');
+                            
+                            $.each(data, function(i, ward) {
+                                const selected = i === 0 ? 'selected' : '';  // Select first by default
+                                $dropdown.append(`<option value="${ward.name}" data-id="${ward.id}" ${selected}>${ward.name}</option>`);
+                            });
+                            
+                            // Trigger change to load villages for the selected ward
+                            $dropdown.trigger('change');
+                        } else {
+                            console.error('Failed to fetch wards or no data returned');
+                            // Use default values as fallback
+                            clearVillages();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(`Error fetching wards for upazila ${upazilaId} (${areaType}):`, error);
+                        console.error('Status:', xhr.status);
+                        console.error('Response:', xhr.responseText);
+                        // Use default values as fallback
+                        clearVillages();
+                    }
+                });
+            }
+            
+            function fetchVillages(wardId) {
+                const token = getCookie('jwt_token');
+                $.ajax({
+                    url: `/api/location/wards/${wardId}/villages`,
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function(data) {
+                        console.log('Villages API response:', data);
+                        if (data && data.length > 0) {
+                            console.log(`Villages for ward ${wardId} fetched successfully:`, data);
+                            const $dropdown = $('#villageArea');
+                            $dropdown.empty();
+                            $dropdown.append('<option value="">-- Select Village/Area --</option>');
+                            
+                            $.each(data, function(i, village) {
+                                const selected = i === 0 ? 'selected' : '';  // Select first by default
+                                $dropdown.append(`<option value="${village.name}" data-id="${village.id}" ${selected}>${village.name}</option>`);
+                            });
+                        } else {
+                            console.error('Failed to fetch villages or no data returned');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(`Error fetching villages for ward ${wardId}:`, error);
+                        console.error('Status:', xhr.status);
+                        console.error('Response:', xhr.responseText);
+                    }
+                });
+            }
+            
+            // Helper functions for clearing dropdowns
+            function clearDistricts() {
+                $('#district').html('<option value="">-- Select District --</option><option value="Dhaka" selected data-id="101">Dhaka</option>');
+            }
+            
+            function clearUpazilas() {
+                $('#upazila').html('<option value="">-- Select Upazila --</option><option value="Dhaka North" selected data-id="10101">Dhaka North</option>');
+            }
+            
+            function clearWards() {
+                $('#ward').html('<option value="">-- Select Ward --</option><option value="Ward 1" selected data-id="1010101">Ward 1</option>');
+            }
+            
+            function clearVillages() {
+                $('#villageArea').html('<option value="">-- Select Village/Area --</option><option value="Mohakhali" selected data-id="101010101">Mohakhali</option>');
+            }
+            
+            // Helper functions to get IDs based on dropdown selections
+            function getDivisionId(divisionName) {
+                const option = $(`#division option[value="${divisionName}"]`);
+                if (option.length) {
+                    return option.data('id');
+                }
+                // Default to Dhaka's ID if not found
+                return 1;
+            }
+            
+            function getDistrictId(districtName) {
+                const option = $(`#district option[value="${districtName}"]`);
+                if (option.length) {
+                    return option.data('id');
+                }
+                // Default to Dhaka's district ID if not found
+                return 101;
+            }
+            
+            function getUpazilaId(upazilaName) {
+                const option = $(`#upazila option[value="${upazilaName}"]`);
+                if (option.length) {
+                    return option.data('id');
+                }
+                // Default to Dhaka North's ID if not found
+                return 10101;
+            }
+            
+            function getWardId(wardName) {
+                const option = $(`#ward option[value="${wardName}"]`);
+                if (option.length) {
+                    return option.data('id');
+                }
+                // Default to Ward 1's ID if not found
+                return 1010101;
+            }
+            
+            function getAreaType() {
+                const localityType = $('#localityType').val();
+                return localityType;
+            }
+        }
+    </script>
+} 

@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace Bashinda.Services
 {
@@ -19,11 +20,16 @@ namespace Bashinda.Services
         private readonly IHttpClientFactory _clientFactory;
         private readonly JsonSerializerOptions _jsonOptions;
         private readonly ILogger<ApiService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ApiService(IHttpClientFactory clientFactory, ILogger<ApiService> logger)
+        public ApiService(
+            IHttpClientFactory clientFactory, 
+            ILogger<ApiService> logger,
+            IHttpContextAccessor httpContextAccessor)
         {
             _clientFactory = clientFactory;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -32,9 +38,34 @@ namespace Bashinda.Services
             };
         }
 
+        // Helper method to get token from cookie if not provided
+        private string? GetEffectiveToken(string? providedToken)
+        {
+            if (!string.IsNullOrEmpty(providedToken))
+            {
+                return providedToken;
+            }
+
+            // Try to get token from cookie
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                var tokenFromCookie = _httpContextAccessor.HttpContext.Request.Cookies["JwtToken"];
+                if (!string.IsNullOrEmpty(tokenFromCookie))
+                {
+                    _logger.LogDebug("Using JWT token from cookie");
+                    return tokenFromCookie;
+                }
+            }
+
+            _logger.LogWarning("No token provided and no token found in cookie");
+            return null;
+        }
+
         public async Task<HttpResponseMessage> GetAsync(string endpoint, string? token = null)
         {
             var client = _clientFactory.CreateClient("BashindaAPI");
+            token = GetEffectiveToken(token);
+            
             if (!string.IsNullOrEmpty(token))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -89,6 +120,8 @@ namespace Bashinda.Services
         public async Task<HttpResponseMessage> PostAsync<T>(string endpoint, T data, string? token = null)
         {
             var client = _clientFactory.CreateClient("BashindaAPI");
+            token = GetEffectiveToken(token);
+            
             if (!string.IsNullOrEmpty(token))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -127,6 +160,8 @@ namespace Bashinda.Services
         public async Task<HttpResponseMessage> PutAsync<T>(string endpoint, T data, string? token = null)
         {
             var client = _clientFactory.CreateClient("BashindaAPI");
+            token = GetEffectiveToken(token);
+            
             if (!string.IsNullOrEmpty(token))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -159,6 +194,8 @@ namespace Bashinda.Services
         public async Task<HttpResponseMessage> DeleteAsync(string endpoint, string? token = null)
         {
             var client = _clientFactory.CreateClient("BashindaAPI");
+            token = GetEffectiveToken(token);
+            
             if (!string.IsNullOrEmpty(token))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -187,6 +224,8 @@ namespace Bashinda.Services
         public async Task<HttpResponseMessage> PatchAsync<T>(string endpoint, T data, string? token = null)
         {
             var client = _clientFactory.CreateClient("BashindaAPI");
+            token = GetEffectiveToken(token);
+            
             if (!string.IsNullOrEmpty(token))
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

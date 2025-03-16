@@ -1,5 +1,6 @@
 using Bashinda.Data;
 using Bashinda.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,9 @@ builder.Services.AddHttpClient("BashindaAPI", client =>
     UseCookies = true
 });
 
+// Add HttpContextAccessor for accessing the current HttpContext
+builder.Services.AddHttpContextAccessor();
+
 // Register API service
 builder.Services.AddScoped<IApiService, ApiService>();
 
@@ -47,6 +51,8 @@ builder.Services.AddScoped<ApiHealthService>();
 // Register custom services
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IRenterProfileService, RenterProfileService>();
+builder.Services.AddScoped<ILocationDataService, LocationDataService>();
+builder.Services.AddScoped<ILocationApiService, LocationApiService>();
 
 // Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -62,8 +68,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.Path = "/";
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromDays(1);
+        
         options.Events = new CookieAuthenticationEvents
         {
             OnRedirectToLogin = context =>
@@ -74,9 +82,22 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
                 }
                 else
                 {
-                    context.Response.Redirect(context.RedirectUri);
+                    var returnUrl = context.Request.Path + context.Request.QueryString;
+                    context.Response.Redirect($"/Account/Login?ReturnUrl={Uri.EscapeDataString(returnUrl)}");
                 }
                 return Task.CompletedTask;
+            },
+            
+            OnValidatePrincipal = async context =>
+            {
+                if (context.HttpContext.Request.Cookies.TryGetValue("JwtToken", out var token))
+                {
+                    if (string.IsNullOrEmpty(token) || token.Count(c => c == '.') != 2)
+                    {
+                        context.RejectPrincipal();
+                        await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    }
+                }
             }
         };
     });

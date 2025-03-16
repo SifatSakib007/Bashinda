@@ -24,55 +24,11 @@ namespace Bashinda.Controllers
         }
 
         // GET: /Profile/Renter
-        public async Task<IActionResult> Renter()
+        public IActionResult Renter()
         {
-            try
-            {
-                // Check if user ID is available in claims
-                var userIdClaim = User.FindFirst("UserId");
-                if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-                {
-                    _logger.LogWarning("User ID not found in claims");
-                    TempData["ErrorMessage"] = "Unable to retrieve user information. Please log out and log in again.";
-                    return RedirectToAction("Dashboard", "Home");
-                }
-
-                // Check if the user already has a profile
-                var existingProfile = await _context.RenterProfiles
-                    .FirstOrDefaultAsync(p => p.UserId == userId);
-
-                if (existingProfile != null)
-                {
-                    // User already has a profile, show the profile view
-                    _logger.LogInformation("Showing existing profile for user {UserId}", userId);
-                    
-                    // Check if the User navigation property is loaded
-                    if (existingProfile.User == null)
-                    {
-                        existingProfile.User = await _context.Users.FindAsync(userId);
-                    }
-                    
-                    return View("RenterProfile", existingProfile);
-                }
-
-                // User doesn't have a profile, show the form
-                var model = new RenterProfileViewModel();
-                
-                // Pre-fill the model with logged in user's email if available
-                if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.Email) != null)
-                {
-                    model.Email = User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value;
-                    _logger.LogInformation("Pre-filled email for user: {Email}", model.Email);
-                }
-                
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading Renter profile form");
-                TempData["ErrorMessage"] = "Error loading the profile form. Please try again.";
-                return RedirectToAction("Dashboard", "Home");
-            }
+            _logger.LogInformation("Redirecting from ProfileController.Renter to RenterController.ViewProfile");
+            // Redirect to the new RenterController.ViewProfile action
+            return RedirectToAction("ViewProfile", "Renter");
         }
 
         // POST: /Profile/Renter

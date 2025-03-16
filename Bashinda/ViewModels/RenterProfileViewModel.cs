@@ -5,6 +5,11 @@ namespace Bashinda.ViewModels
 {
     public class RenterProfileViewModel
     {
+        // Added missing properties
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public bool IsApproved { get; set; }
+
         // Radio option: I'm Adult or I'm not Adult
         [Required(ErrorMessage = "Please select your adult status.")]
         public bool IsAdult { get; set; }
@@ -67,6 +72,23 @@ namespace Bashinda.ViewModels
 
         [Required]
         public string? Upazila { get; set; }
+        
+        // New fields for permanent residence
+        [Required]
+        public string? LocalityType { get; set; }
+        
+        [Required]
+        public string? Ward { get; set; }
+        
+        [Required]
+        public string? VillageArea { get; set; }
+        
+        [Required]
+        [RegularExpression(@"^\d{4}$", ErrorMessage = "Post code must be a 4-digit number.")]
+        public string? PostCode { get; set; }
+        
+        [Required]
+        public string? HoldingNo { get; set; }
     }
 
     // Custom validation attribute for conditional validation

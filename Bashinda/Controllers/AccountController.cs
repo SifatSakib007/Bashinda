@@ -88,7 +88,7 @@ namespace Bashinda.Controllers
             
             return View(model);
         }
-        
+
         // POST: /Account/ConfirmOTP
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -129,14 +129,34 @@ namespace Bashinda.Controllers
                         
                         // Store the token in session
                         HttpContext.Session.SetString("AuthToken", loginResult.Token);
+                        // Also store the user ID in session for easy access
                         HttpContext.Session.SetInt32("UserId", loginResult.User.Id);
+                        // Store user ID as string as well
+                        HttpContext.Session.SetString("UserId", loginResult.User.Id.ToString());
                         
+                        // Add a claim for the JWT token and store it in a cookie
+                        _logger.LogInformation("Storing JWT token in cookie");
+                        
+                        // Store the JWT token in a cookie for API requests
+                        Response.Cookies.Append("JwtToken", loginResult.Token, new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = true, // Set to true in production with HTTPS
+                            SameSite = SameSiteMode.Lax, // Changed from Strict to Lax to allow cross-site requests
+                            Expires = DateTimeOffset.UtcNow.AddHours(1), // Match the token expiration time
+                            Path = "/" // Explicitly set the path to root to make it available to all pages
+                        });
+
+                        // Ensure the userId is stored properly
+                        var userId = loginResult.User.Id.ToString();
+                        _logger.LogInformation("User ID for claims: {UserId}", userId);
+
                         // Create claims
                         var claims = new List<Claim>
                         {
-                            new Claim(ClaimTypes.NameIdentifier, loginResult.User.UserName),
+                            new Claim(ClaimTypes.NameIdentifier, userId),
                             new Claim(ClaimTypes.Name, loginResult.User.UserName),
-                            new Claim("UserId", loginResult.User.Id.ToString()),
+                            new Claim("UserId", userId),
                             new Claim("Token", loginResult.Token)
                         };
                         
@@ -174,6 +194,33 @@ namespace Bashinda.Controllers
                         // Force a session commit
                         await HttpContext.Session.CommitAsync();
                         
+                        // If the user is a renter, try to fetch their profile image
+                        bool isRenter = (loginResult.User.Roles != null && loginResult.User.Roles.Contains("ApartmentRenter")) ||
+                                       loginResult.User.Role == "ApartmentRenter";
+                        
+                        if (isRenter)
+                        {
+                            try
+                            {
+                                // Get renter profile using the API
+                                var renterApiService = HttpContext.RequestServices.GetService<IRenterProfileApiService>();
+                                if (renterApiService != null)
+                                {
+                                    var (profileSuccess, profile, _) = await renterApiService.GetCurrentAsync(loginResult.Token);
+                                    if (profileSuccess && profile != null && !string.IsNullOrEmpty(profile.SelfImagePath))
+                                    {
+                                        HttpContext.Session.SetString("UserProfileImage", profile.SelfImagePath);
+                                        _logger.LogInformation("Stored user profile image in session: {ImagePath}", profile.SelfImagePath);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                // Don't fail login if we can't get the profile image
+                                _logger.LogWarning(ex, "Could not retrieve renter profile image");
+                            }
+                        }
+
                         _logger.LogInformation("User authenticated successfully after registration, redirecting to dashboard");
                         return RedirectToDashboard();
                     }
@@ -285,18 +332,37 @@ namespace Bashinda.Controllers
                     HttpContext.Session.SetString("AuthToken", loginResult.Token);
                     // Also store the user ID in session for easy access
                     HttpContext.Session.SetInt32("UserId", loginResult.User.Id);
+                    // Store user ID as string as well
+                    HttpContext.Session.SetString("UserId", loginResult.User.Id.ToString());
                     
                     // Temporarily store credentials in TempData for token refresh (This is relatively secure as TempData is server-side)
                     // Note: In a production environment, consider more secure approaches like ASP.NET Core Data Protection API
                     TempData["UserEmail"] = model.Email;
                     TempData["UserPassword"] = model.Password;
                     
+                    // Add a claim for the JWT token and store it in a cookie
+                    _logger.LogInformation("Storing JWT token in cookie");
+                    
+                    // Store the JWT token in a cookie for API requests
+                    Response.Cookies.Append("JwtToken", loginResult.Token, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true, // Set to true in production with HTTPS
+                        SameSite = SameSiteMode.Lax, // Changed from Strict to Lax to allow cross-site requests
+                        Expires = DateTimeOffset.UtcNow.AddHours(1), // Match the token expiration time
+                        Path = "/" // Explicitly set the path to root to make it available to all pages
+                    });
+
+                    // Ensure the userId is stored properly
+                    var userId = loginResult.User.Id.ToString();
+                    _logger.LogInformation("User ID for claims: {UserId}", userId);
+
                     // Create claims
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.NameIdentifier, loginResult.User.UserName),
+                        new Claim(ClaimTypes.NameIdentifier, userId),
                         new Claim(ClaimTypes.Name, loginResult.User.UserName),
-                        new Claim("UserId", loginResult.User.Id.ToString()),
+                        new Claim("UserId", userId),
                         new Claim("Token", loginResult.Token)
                     };
                     
@@ -333,6 +399,33 @@ namespace Bashinda.Controllers
                     // Force a session commit
                     await HttpContext.Session.CommitAsync();
                     
+                    // If the user is a renter, try to fetch their profile image
+                    bool isRenter = (loginResult.User.Roles != null && loginResult.User.Roles.Contains("ApartmentRenter")) ||
+                                   loginResult.User.Role == "ApartmentRenter";
+                    
+                    if (isRenter)
+                    {
+                        try
+                        {
+                            // Get renter profile using the API
+                            var renterApiService = HttpContext.RequestServices.GetService<IRenterProfileApiService>();
+                            if (renterApiService != null)
+                            {
+                                var (profileSuccess, profile, _) = await renterApiService.GetCurrentAsync(loginResult.Token);
+                                if (profileSuccess && profile != null && !string.IsNullOrEmpty(profile.SelfImagePath))
+                                {
+                                    HttpContext.Session.SetString("UserProfileImage", profile.SelfImagePath);
+                                    _logger.LogInformation("Stored user profile image in session: {ImagePath}", profile.SelfImagePath);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Don't fail login if we can't get the profile image
+                            _logger.LogWarning(ex, "Could not retrieve renter profile image");
+                        }
+                    }
+
                     // Log the final user identity for debugging
                     _logger.LogInformation("Final user identity: {Identity}", 
                         string.Join(", ", claims.Select(c => $"{c.Type}: {c.Value}")));
@@ -355,7 +448,7 @@ namespace Bashinda.Controllers
                 return View(model);
             }
         }
-        
+
         // Helper method to redirect to appropriate dashboard based on role
         private IActionResult RedirectToDashboard()
         {

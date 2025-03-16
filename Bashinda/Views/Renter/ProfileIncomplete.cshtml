@@ -1,38 +1,33 @@
 @{
-    ViewData["Title"] = "Complete Your Profile";
+    ViewData["Title"] = "Profile Incomplete";
 }
 
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Profile Completion Required</h4>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-clipboard-list fa-4x text-primary mb-3"></i>
-                        <h5>@ViewBag.Message</h5>
-                        <p class="text-muted">
-                            You need to complete your profile before accessing this page. This helps us 
-                            verify your identity and provide you with the best experience.
-                        </p>
-                    </div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-exclamation-circle text-warning mb-4" style="font-size: 4rem;"></i>
                     
-                    <div class="alert alert-warning mb-4">
-                        <h6><i class="fas fa-exclamation-circle me-2"></i>Why is this important?</h6>
+                    <h2 class="card-title mb-3">Complete Your Profile</h2>
+                    <p class="lead text-muted mb-4">
+                        @(ViewBag.Message ?? "You need to complete your renter profile before accessing this feature.")
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>Why Complete Your Profile?</h5>
                         <p class="mb-0">
-                            A complete profile allows us to verify your identity, provide personalized services,
-                            and ensure the security of our community. This is a one-time process.
+                            A complete profile helps apartment owners verify your identity and ensures a smooth rental process. 
+                            It takes just a few minutes and unlocks all features of the Bashinda platform.
                         </p>
                     </div>
                     
-                    <div class="text-center">
-                        <a asp-controller="Profile" asp-action="Renter" class="btn btn-success">
-                            <i class="fas fa-user-edit me-2"></i>Complete Your Profile
+                    <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                        <a asp-controller="Renter" asp-action="Create" class="btn btn-primary">
+                            <i class="fas fa-user-edit me-2"></i> Complete My Profile
                         </a>
-                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary ms-2">
-                            <i class="fas fa-home me-2"></i>Return to Dashboard
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i> Back to Home
                         </a>
                     </div>
                 </div>

@@ -1,0 +1,129 @@
+@model BashindaAPI.ViewModels.ApartmentOwnerProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Apartment Owner Profile";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form id="apartment-owner-profile-form" asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Personal Information</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="FullName" class="control-label">Full Name</label>
+                        <input asp-for="FullName" class="form-control" required maxlength="100" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="DateOfBirth" class="control-label">Date of Birth</label>
+                        <input asp-for="DateOfBirth" class="form-control" type="date" required />
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="NationalId" class="control-label">National ID</label>
+                        <input asp-for="NationalId" class="form-control" required maxlength="20" />
+                        <span asp-validation-for="NationalId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Profession" class="control-label">Profession</label>
+                        <input asp-for="Profession" class="form-control" required maxlength="100" />
+                        <span asp-validation-for="Profession" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="MobileNo" class="control-label">Mobile Number</label>
+                        <input asp-for="MobileNo" class="form-control" required maxlength="20" />
+                        <span asp-validation-for="MobileNo" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Email" class="control-label">Email</label>
+                        <input asp-for="Email" class="form-control" required maxlength="100" type="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">National ID Image</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="nationalid-image" name="NationalIdImage" accept="image/*">
+                            <label class="custom-file-label" for="nationalid-image">Choose file</label>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.NationalIdImagePath))
+                        {
+                            <div class="mt-2">
+                                <img src="@Model.NationalIdImagePath" alt="National ID" style="max-width: 100%; max-height: 200px;" />
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">Self Image</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="self-image" name="SelfImage" accept="image/*">
+                            <label class="custom-file-label" for="self-image">Choose file</label>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.SelfImagePath))
+                        {
+                            <div class="mt-2">
+                                <img src="@Model.SelfImagePath" alt="Self Image" style="max-width: 100%; max-height: 200px;" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Permanent Resident Information</h4>
+        </div>
+        <div class="card-body">
+            <!-- Include the location fields partial -->
+            <partial name="_LocationFields" model="Model.Location" />
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/location-dropdowns.js"></script>
+    <script src="~/js/apartment-owner-profile.js"></script>
+    
+    <!-- Include Toastr for nicer notifications -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+} 

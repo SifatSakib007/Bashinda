@@ -132,14 +132,43 @@ namespace Bashinda.ViewModels
         [Required]
         public string Email { get; set; } = string.Empty;
         
-        [Required]
+        // String location properties for reference
         public string Division { get; set; } = string.Empty;
         
-        [Required]
         public string District { get; set; } = string.Empty;
         
-        [Required]
         public string Upazila { get; set; } = string.Empty;
+        
+        public string LocalityType { get; set; } = string.Empty;
+        
+        public string Ward { get; set; } = string.Empty;
+        
+        public string VillageArea { get; set; } = string.Empty;
+        
+        // Add the ID properties that the API expects
+        [Required]
+        public int DivisionId { get; set; }
+        
+        [Required]
+        public int DistrictId { get; set; }
+        
+        [Required]
+        public int UpazilaId { get; set; }
+        
+        [Required]
+        public Bashinda.Models.AreaType AreaType { get; set; }
+        
+        [Required]
+        public int WardId { get; set; }
+        
+        [Required]
+        public int VillageId { get; set; }
+        
+        [Required]
+        public string PostCode { get; set; } = string.Empty;
+        
+        [Required]
+        public string HoldingNo { get; set; } = string.Empty;
     }
 
     public class ApproveRenterProfileDto
