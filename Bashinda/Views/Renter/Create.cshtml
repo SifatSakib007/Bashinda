@@ -179,11 +179,6 @@
                                         <label asp-for="Division" class="form-label required">Division</label>
                                         <select asp-for="Division" id="division" class="form-select">
                                             <option value="">-- Select Division --</option>
-                                            <option value="Dhaka" selected data-id="1">Dhaka</option>
-                                            <option value="Chittagong" data-id="2">Chittagong</option>
-                                            <option value="Khulna" data-id="3">Khulna</option>
-                                            <option value="Rajshahi" data-id="4">Rajshahi</option>
-                                            <option value="Sylhet" data-id="5">Sylhet</option>
                                         </select>
                                         <span asp-validation-for="Division" class="text-danger"></span>
                                     </div>
@@ -191,17 +186,13 @@
                                         <label asp-for="District" class="form-label required">District</label>
                                         <select asp-for="District" id="district" class="form-select">
                                             <option value="">-- Select District --</option>
-                                            <option value="Dhaka" selected data-id="101">Dhaka</option>
-                                            <!-- Options will be populated via JavaScript -->
                                         </select>
                                         <span asp-validation-for="District" class="text-danger"></span>
                                     </div>
                                     <div class="col-md-4">
                                         <label asp-for="Upazila" class="form-label required">Upazila</label>
                                         <select asp-for="Upazila" id="upazila" class="form-select">
-                                            <option value="">-- Select Upazila --</option>
-                                            <option value="Dhaka North" selected data-id="10101">Dhaka North</option>
-                                            <!-- Options will be populated via JavaScript -->
+                                            <option value="">-- Select Upazila --</option>                                            
                                         </select>
                                         <span asp-validation-for="Upazila" class="text-danger"></span>
                                     </div>
@@ -222,17 +213,14 @@
                                         <label asp-for="Ward" class="form-label required">Ward</label>
                                         <select asp-for="Ward" id="ward" class="form-select">
                                             <option value="">-- Select Ward --</option>
-                                            <option value="Ward 1" selected data-id="1010101">Ward 1</option>
-                                            <!-- Options will be populated via JavaScript -->
+                                            
                                         </select>
                                         <span asp-validation-for="Ward" class="text-danger"></span>
                                     </div>
                                     <div class="col-md-4">
                                         <label asp-for="VillageArea" class="form-label required">Village/Area</label>
                                         <select asp-for="VillageArea" id="villageArea" class="form-select">
-                                            <option value="">-- Select Village/Area --</option>
-                                            <option value="Mohakhali" selected data-id="101010101">Mohakhali</option>
-                                            <!-- Options will be populated via JavaScript -->
+                                            
                                         </select>
                                         <span asp-validation-for="VillageArea" class="text-danger"></span>
                                     </div>
@@ -268,6 +256,10 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
+
+        const API_BASE_URL = 'https://localhost:7127'; // Match your WebAPI port
+
+
         // Toggle adult/non-adult sections based on selection
         $(document).ready(function() {
             // Initial state
@@ -401,7 +393,7 @@
                 console.log('JWT Token for API calls:', token ? 'Present (masked)' : 'Not found');
                 
                 $.ajax({
-                    url: '/api/location/divisions',
+                    url: '${API_BASE_URL}/api/locations/divisions',
                     type: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + token
@@ -415,8 +407,8 @@
                             $dropdown.append('<option value="">-- Select Division --</option>');
                             
                             $.each(data, function(i, division) {
-                                const selected = division.name === 'Dhaka' ? 'selected' : '';
-                                $dropdown.append(`<option value="${division.name}" data-id="${division.id}" ${selected}>${division.name}</option>`);
+                                //const selected = division.name === 'Dhaka' ? 'selected' : '';
+                                $dropdown.append(`<option value="${division.name}" data-id="${division.id}">${division.name}</option>`);
                             });
                             
                             // Trigger change to load districts for the selected division
@@ -446,7 +438,7 @@
             function fetchDistricts(divisionId) {
                 const token = getCookie('jwt_token');
                 $.ajax({
-                    url: `/api/location/divisions/${divisionId}/districts`,
+                    url: `${API_BASE_URL}/api/locations/districts/${divisionId}`,
                     type: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + token
@@ -489,7 +481,7 @@
             function fetchUpazilas(districtId) {
                 const token = getCookie('jwt_token');
                 $.ajax({
-                    url: `/api/location/districts/${districtId}/upazilas`,
+                    url: `${API_BASE_URL}/api/locations/upazilas/${districtId}`,
                     type: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + token
@@ -530,7 +522,7 @@
             function fetchWards(upazilaId, areaType) {
                 const token = getCookie('jwt_token');
                 $.ajax({
-                    url: `/api/location/upazilas/${upazilaId}/wards?areaType=${areaType}`,
+                    url: `${API_BASE_URL}/api/locations/wards/${upazilaId}/${areaType}`,
                     type: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + token
@@ -569,7 +561,7 @@
             function fetchVillages(wardId) {
                 const token = getCookie('jwt_token');
                 $.ajax({
-                    url: `/api/location/wards/${wardId}/villages`,
+                    url: `${API_BASE_URL}/api/locations/villages/${wardId}`,
                     type: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + token
@@ -600,56 +592,40 @@
             
             // Helper functions for clearing dropdowns
             function clearDistricts() {
-                $('#district').html('<option value="">-- Select District --</option><option value="Dhaka" selected data-id="101">Dhaka</option>');
+                $('#district').html('<option value="">-- Select District --</option><option value="Dhaka" selected data-id="1">Dhaka</option>');
             }
             
             function clearUpazilas() {
-                $('#upazila').html('<option value="">-- Select Upazila --</option><option value="Dhaka North" selected data-id="10101">Dhaka North</option>');
+                $('#upazila').html('<option value="">-- Select Upazila --</option><option value="Dhaka North" selected data-id="1">Dhaka North</option>');
             }
             
             function clearWards() {
-                $('#ward').html('<option value="">-- Select Ward --</option><option value="Ward 1" selected data-id="1010101">Ward 1</option>');
+                $('#ward').html('<option value="">-- Select Ward --</option><option value="Ward 1" selected data-id="1">Ward 1</option>');
             }
             
             function clearVillages() {
-                $('#villageArea').html('<option value="">-- Select Village/Area --</option><option value="Mohakhali" selected data-id="101010101">Mohakhali</option>');
+                $('#villageArea').html('<option value="">-- Select Village/Area --</option><option value="Mohakhali" selected data-id="1">Mohakhali</option>');
             }
             
             // Helper functions to get IDs based on dropdown selections
             function getDivisionId(divisionName) {
-                const option = $(`#division option[value="${divisionName}"]`);
-                if (option.length) {
-                    return option.data('id');
-                }
-                // Default to Dhaka's ID if not found
-                return 1;
+              const option = $(`#division option[value="${divisionName}"]`);
+              return option.length ? option.data('id') : null; // No fallback
             }
-            
+
             function getDistrictId(districtName) {
-                const option = $(`#district option[value="${districtName}"]`);
-                if (option.length) {
-                    return option.data('id');
-                }
-                // Default to Dhaka's district ID if not found
-                return 101;
+              const option = $(`#district option[value="${districtName}"]`);
+              return option.length ? option.data('id') : null; // No fallback
             }
             
             function getUpazilaId(upazilaName) {
                 const option = $(`#upazila option[value="${upazilaName}"]`);
-                if (option.length) {
-                    return option.data('id');
-                }
-                // Default to Dhaka North's ID if not found
-                return 10101;
+                return option.length ? option.data('id') : null; // No fallback
             }
             
             function getWardId(wardName) {
                 const option = $(`#ward option[value="${wardName}"]`);
-                if (option.length) {
-                    return option.data('id');
-                }
-                // Default to Ward 1's ID if not found
-                return 1010101;
+                return option.length ? option.data('id') : null; // No fallback
             }
             
             function getAreaType() {

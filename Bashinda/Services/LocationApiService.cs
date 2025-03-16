@@ -34,21 +34,15 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync("api/location/divisions", token);
+                var response = await _apiService.GetAsync("api/locations/divisions", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("Divisions API response content: {Content}", content);
                     
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LocationItemDto>>>(content, _jsonOptions);
-                    
-                    if (result != null && result.Success)
-                    {
-                        return result.Data ?? new List<LocationItemDto>();
-                    }
-                    
-                    _logger.LogWarning("Failed to get divisions: {Errors}", string.Join(", ", result?.Errors ?? Array.Empty<string>()));
+                    var result = JsonSerializer.Deserialize<List<LocationItemDto>>(content, _jsonOptions);
+                    return result ?? new List<LocationItemDto>();
                 }
                 else
                 {
@@ -70,21 +64,15 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync($"api/location/divisions/{divisionId}/districts", token);
+                var response = await _apiService.GetAsync($"api/locations/districts/{divisionId}", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("Districts API response content: {Content}", content);
                     
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LocationItemDto>>>(content, _jsonOptions);
-                    
-                    if (result != null && result.Success)
-                    {
-                        return result.Data ?? new List<LocationItemDto>();
-                    }
-                    
-                    _logger.LogWarning("Failed to get districts: {Errors}", string.Join(", ", result?.Errors ?? Array.Empty<string>()));
+                    var result = JsonSerializer.Deserialize<List<LocationItemDto>>(content, _jsonOptions);
+                    return result ?? new List<LocationItemDto>();
                 }
                 else
                 {
@@ -106,21 +94,15 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync($"api/location/districts/{districtId}/upazilas", token);
+                var response = await _apiService.GetAsync($"api/locations/upazilas/{districtId}", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("Upazilas API response content: {Content}", content);
                     
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LocationItemDto>>>(content, _jsonOptions);
-                    
-                    if (result != null && result.Success)
-                    {
-                        return result.Data ?? new List<LocationItemDto>();
-                    }
-                    
-                    _logger.LogWarning("Failed to get upazilas: {Errors}", string.Join(", ", result?.Errors ?? Array.Empty<string>()));
+                    var result = JsonSerializer.Deserialize<List<LocationItemDto>>(content, _jsonOptions);
+                    return result ?? new List<LocationItemDto>();
                 }
                 else
                 {
@@ -142,21 +124,15 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync($"api/location/upazilas/{upazilaId}/wards?areaType={areaType}", token);
+                var response = await _apiService.GetAsync($"api/locations/wards/{upazilaId}/{areaType}", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("Wards API response content: {Content}", content);
                     
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LocationItemDto>>>(content, _jsonOptions);
-                    
-                    if (result != null && result.Success)
-                    {
-                        return result.Data ?? new List<LocationItemDto>();
-                    }
-                    
-                    _logger.LogWarning("Failed to get wards: {Errors}", string.Join(", ", result?.Errors ?? Array.Empty<string>()));
+                    var result = JsonSerializer.Deserialize<List<LocationItemDto>>(content, _jsonOptions);
+                    return result ?? new List<LocationItemDto>();
                 }
                 else
                 {
@@ -178,21 +154,15 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync($"api/location/wards/{wardId}/villages", token);
+                var response = await _apiService.GetAsync($"api/locations/villages/{wardId}", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("Villages API response content: {Content}", content);
                     
-                    var result = JsonSerializer.Deserialize<ApiResponse<List<LocationItemDto>>>(content, _jsonOptions);
-                    
-                    if (result != null && result.Success)
-                    {
-                        return result.Data ?? new List<LocationItemDto>();
-                    }
-                    
-                    _logger.LogWarning("Failed to get villages: {Errors}", string.Join(", ", result?.Errors ?? Array.Empty<string>()));
+                    var result = JsonSerializer.Deserialize<List<LocationItemDto>>(content, _jsonOptions);
+                    return result ?? new List<LocationItemDto>();
                 }
                 else
                 {

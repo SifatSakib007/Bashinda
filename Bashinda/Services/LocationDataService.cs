@@ -26,11 +26,11 @@ namespace Bashinda.Services
 
         private readonly Dictionary<(int DivisionId, string District), int> _districts = new Dictionary<(int, string), int>(new DistrictComparer())
         {
-            { (1, "Dhaka"), 101 },
-            { (1, "Gazipur"), 102 },
-            { (1, "Narayanganj"), 103 },
-            { (1, "Narsingdi"), 104 },
-            { (1, "Tangail"), 105 },
+            { (1, "Dhaka"), 1 },
+            { (1, "Gazipur"), 2 },
+            { (1, "Narayanganj"), 3 },
+            { (1, "Narsingdi"), 4 },
+            { (1, "Tangail"), 5 },
             { (2, "Chittagong"), 201 },
             { (2, "Cox's Bazar"), 202 },
             { (2, "Bandarban"), 203 },
@@ -54,11 +54,11 @@ namespace Bashinda.Services
 
         private readonly Dictionary<(int DistrictId, string Upazila), int> _upazilas = new Dictionary<(int, string), int>(new UpazilaComparer())
         {
-            { (101, "Dhaka North"), 10101 },
-            { (101, "Dhaka South"), 10102 },
-            { (101, "Savar"), 10103 },
-            { (101, "Dhamrai"), 10104 },
-            { (101, "Keraniganj"), 10105 },
+            { (1, "Dhaka North"), 1 },
+            { (1, "Dhaka South"), 2 },
+            { (1, "Savar"), 3 },
+            { (1, "Dhamrai"), 4 },
+            { (1, "Keraniganj"), 5 },
             { (102, "Gazipur Sadar"), 10201 },
             { (102, "Kaliakoir"), 10202 },
             { (102, "Kaliganj"), 10203 },
@@ -73,11 +73,11 @@ namespace Bashinda.Services
 
         private readonly Dictionary<(int UpazilaId, string Ward, AreaType AreaType), int> _wards = new Dictionary<(int, string, AreaType), int>(new WardComparer())
         {
-            { (10101, "Ward 1", AreaType.CityCorporation), 1010101 },
-            { (10101, "Ward 2", AreaType.CityCorporation), 1010102 },
-            { (10101, "Ward 3", AreaType.CityCorporation), 1010103 },
-            { (10101, "Ward 4", AreaType.CityCorporation), 1010104 },
-            { (10101, "Ward 5", AreaType.CityCorporation), 1010105 },
+            { (1, "Ward 1", AreaType.CityCorporation), 1010101 },
+            { (1, "Ward 2", AreaType.CityCorporation), 1010102 },
+            { (1, "Ward 3", AreaType.CityCorporation), 1010103 },
+            { (1, "Ward 4", AreaType.CityCorporation), 1010104 },
+            { (1, "Ward 5", AreaType.CityCorporation), 1010105 },
             { (10102, "Ward 6", AreaType.CityCorporation), 1010201 },
             { (10102, "Ward 7", AreaType.CityCorporation), 1010202 },
             { (10102, "Ward 8", AreaType.CityCorporation), 1010203 },
@@ -90,11 +90,11 @@ namespace Bashinda.Services
 
         private readonly Dictionary<(int WardId, string Village), int> _villages = new Dictionary<(int, string), int>(new VillageComparer())
         {
-            { (1010101, "Mohakhali"), 101010101 },
-            { (1010101, "Banani"), 101010102 },
-            { (1010101, "Gulshan"), 101010103 },
-            { (1010101, "Baridhara"), 101010104 },
-            { (1010101, "Niketan"), 101010105 },
+            { (1, "Mohakhali"), 101010101 },
+            { (1, "Banani"), 101010102 },
+            { (1, "Gulshan"), 101010103 },
+            { (1, "Baridhara"), 101010104 },
+            { (1, "Niketan"), 101010105 },
             { (1010102, "Dhanmondi"), 101010201 },
             { (1010102, "Lalmatia"), 101010202 },
             { (1010102, "Mohammadpur"), 101010203 },

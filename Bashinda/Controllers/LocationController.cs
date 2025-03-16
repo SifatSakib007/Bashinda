@@ -219,11 +219,11 @@ namespace Bashinda.Controllers
                 case 1: // Dhaka
                     return new List<LocationItemDto>
                     {
-                        new LocationItemDto { Id = 101, Name = "Dhaka" },
-                        new LocationItemDto { Id = 102, Name = "Gazipur" },
-                        new LocationItemDto { Id = 103, Name = "Narayanganj" },
-                        new LocationItemDto { Id = 104, Name = "Tangail" },
-                        new LocationItemDto { Id = 105, Name = "Narsingdi" }
+                        new LocationItemDto { Id = 1, Name = "Dhaka" },
+                        new LocationItemDto { Id = 2, Name = "Gazipur" },
+                        new LocationItemDto { Id = 3, Name = "Narayanganj" },
+                        new LocationItemDto { Id = 4, Name = "Narsingdi" },
+                        new LocationItemDto { Id = 5, Name = "Tangail" }
                     };
                 case 2: // Chittagong
                     return new List<LocationItemDto>
@@ -262,14 +262,14 @@ namespace Bashinda.Controllers
             // Different upazilas for each district
             switch (districtId)
             {
-                case 101: // Dhaka
+                case 1: // Dhaka
                     return new List<LocationItemDto>
                     {
-                        new LocationItemDto { Id = 10101, Name = "Dhaka North" },
-                        new LocationItemDto { Id = 10102, Name = "Dhaka South" },
-                        new LocationItemDto { Id = 10103, Name = "Dhamrai" },
-                        new LocationItemDto { Id = 10104, Name = "Keraniganj" },
-                        new LocationItemDto { Id = 10105, Name = "Savar" }
+                        new LocationItemDto { Id = 1, Name = "Dhaka North" },
+                        new LocationItemDto { Id = 2, Name = "Dhaka South" },
+                        new LocationItemDto { Id = 3, Name = "Dhamrai" },
+                        new LocationItemDto { Id = 4, Name = "Keraniganj" },
+                        new LocationItemDto { Id = 5, Name = "Savar" }
                     };
                 case 102: // Gazipur
                     return new List<LocationItemDto>
@@ -301,7 +301,7 @@ namespace Bashinda.Controllers
             
             for (int i = 1; i <= 5; i++)
             {
-                int id = upazilaId * 100 + i;
+                int id = upazilaId + i;
                 wards.Add(new LocationItemDto { Id = id, Name = $"Ward {i}" });
             }
             
@@ -317,7 +317,7 @@ namespace Bashinda.Controllers
             
             for (int i = 1; i <= 5; i++)
             {
-                int id = wardId * 100 + i;
+                int id = wardId  + i;
                 villages.Add(new LocationItemDto { Id = id, Name = $"Village/Area {i}" });
             }
             
