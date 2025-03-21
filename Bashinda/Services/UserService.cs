@@ -1,136 +1,131 @@
-﻿using Bashinda.Data;
+﻿using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Bashinda.Models;
 using Bashinda.ViewModels;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Bashinda.Services
 {
     public class UserService : IUserService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly HttpClient _httpClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailSender _emailSender;
 
-        public UserService(ApplicationDbContext context, IEmailSender emailSender)
+        public UserService(
+            IHttpClientFactory httpClientFactory,
+            IHttpContextAccessor httpContextAccessor,
+            IEmailSender emailSender)
         {
-            _context = context;
+            _httpClient = httpClientFactory.CreateClient("BashindaAPI");
+            _httpContextAccessor = httpContextAccessor;
             _emailSender = emailSender;
         }
 
         public async Task<(bool Success, string[] Errors)> RegisterUserAsync(RegisterViewModel model)
         {
-            if (model == null)
-                return (false, new[] { "Invalid registration data" });
-
-            // Check if email or username already exists
-            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
-                return (false, new[] { "Email already registered" });
-
-            if (await _context.Users.AnyAsync(u => u.UserName == model.UserName))
-                return (false, new[] { "Username already taken" });
-
-            // Convert the string role to the enum
-            if (!Enum.TryParse<UserRole>(model.Role, out var parsedRole))
+            try
             {
-                return (false, new[] { "Invalid role selection" });
+                // Call API registration endpoint
+                var response = await _httpClient.PostAsJsonAsync("api/auth/register", new
+                {
+                    model.UserName,
+                    model.Email,
+                    model.PhoneNumber,
+                    model.Password,
+                    model.Role
+                });
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return (false, new[] { $"Registration failed: {errorContent}" });
+                }
+
+                // Trigger OTP resend through API
+                var otpResponse = await _httpClient.PostAsync(
+                    $"api/auth/resend-otp?email={model.Email}",
+                    null
+                );
+
+                return (true, Array.Empty<string>());
             }
-
-            // Create user with hashed password
-            var user = new User
+            catch (Exception ex)
             {
-                UserName = model.UserName,
-                Email = model.Email,
-                PhoneNumber = model.PhoneNumber,
-                PasswordHash = HashPassword(model.Password),
-                IsVerified = false,
-                Role = parsedRole
-            };
-            
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            // Generate OTP code
-            var otpCode = GenerateOTP();
-            var otpEntry = new UserOTP
-            {
-                UserId = user.Id,
-                Code = otpCode,
-                Expiry = DateTime.UtcNow.AddMinutes(10)
-            };
-
-            _context.UserOTPs.Add(otpEntry);
-            await _context.SaveChangesAsync();
-
-            // Send OTP via email
-            await _emailSender.SendEmailAsync(user.Email, "Your OTP Code", $"Your OTP code is: {otpCode}");
-
-            return (true, Array.Empty<string>());
+                return (false, new[] { ex.Message });
+            }
         }
 
         public async Task<(bool Success, string[] Errors)> ConfirmOTPAsync(string email, string otp)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(otp))
-                return (false, new[] { "Email and OTP are required" });
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user == null)
-                return (false, new[] { "User not found" });
-
-            var otpEntry = await _context.UserOTPs
-                .Where(o => o.UserId == user.Id && o.Code == otp)
-                .OrderByDescending(o => o.Expiry)
-                .FirstOrDefaultAsync();
-
-            if (otpEntry == null || otpEntry.Expiry < DateTime.UtcNow)
-                return (false, new[] { "OTP is invalid or has expired" });
-
-            // Mark the user as verified
-            user.IsVerified = true;
-            _context.Users.Update(user);
-
-            // Remove the used OTP entry
-            _context.UserOTPs.Remove(otpEntry);
-
-            await _context.SaveChangesAsync();
-
-            return (true, Array.Empty<string>());
-        }
-
-        public async Task<User?> AuthenticateUserAsync(LoginViewModel model)
-        {
-            if (model == null)
-                return null;
-
-            // Find the user by email
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-            if (user == null || !user.IsVerified)
-                return null;
-
-            // Verify the password
-            var hashedInput = HashPassword(model.Password);
-            if (user.PasswordHash != hashedInput)
-                return null;
-
-            return user;
-        }
-
-        private string GenerateOTP()
-        {
-            // Generate a simple 6-digit OTP
-            var random = new Random();
-            return random.Next(100000, 999999).ToString();
-        }
-
-        private string HashPassword(string password)
-        {
-            // Use SHA256 for a simple example (consider stronger algorithms and salting in production)
-            using (var sha256 = SHA256.Create())
+            try
             {
-                var bytes = Encoding.UTF8.GetBytes(password);
-                var hash = sha256.ComputeHash(bytes);
-                return Convert.ToBase64String(hash);
+                // Call API OTP verification endpoint
+                var response = await _httpClient.PostAsJsonAsync("api/auth/verify-otp", new
+                {
+                    Email = email,
+                    OtpCode = otp
+                });
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, Array.Empty<string>());
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return (false, new[] { $"OTP verification failed: {errorContent}" });
+            }
+            catch (Exception ex)
+            {
+                return (false, new[] { ex.Message });
             }
         }
+
+        public async Task<AuthResponse> AuthenticateUserAsync(LoginViewModel model)
+        {
+            try
+            {
+                // Call API login endpoint
+                var response = await _httpClient.PostAsJsonAsync("api/auth/login", new
+                {
+                    model.PhoneNumber,
+                    model.Password
+                });
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    return JsonSerializer.Deserialize<AuthResponse>(content);
+                }
+
+                return new AuthResponse { Success = false };
+            }
+            catch
+            {
+                return new AuthResponse { Success = false };
+            }
+        }
+
+        Task<ApplicationUser?> IUserService.AuthenticateUserAsync(LoginViewModel model)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class AuthResponse
+    {
+        public bool Success { get; set; }
+        public string Token { get; set; }
+        public UserInfo User { get; set; }
+    }
+
+    public class UserInfo
+    {
+        public int Id { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Role { get; set; }
+        public bool IsVerified { get; set; }
     }
 }

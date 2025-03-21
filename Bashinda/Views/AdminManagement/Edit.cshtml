@@ -1,0 +1,257 @@
+@model Bashinda.ViewModels.UpdateAdminViewModel
+@{
+    ViewData["Title"] = "Edit Admin";
+}
+
+<div class="container mt-4">
+    <h1>Edit Admin</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Admin Information</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4>User Information</h4>
+                                <div class="mb-3">
+                                    <label asp-for="UserName" class="form-label"></label>
+                                    <input asp-for="UserName" class="form-control" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label"></label>
+                                    <input asp-for="Email" class="form-control" readonly />
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="PhoneNumber" class="form-label"></label>
+                                    <input asp-for="PhoneNumber" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h4>Location Access</h4>
+                                <div class="alert alert-info">
+                                    <small>Leave blank to give access to all locations</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Permissions.Division" class="form-label"></label>
+                                    <select asp-for="Permissions.Division" asp-items="Model.Divisions" class="form-select division-dropdown">
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Permissions.District" class="form-label"></label>
+                                    <select asp-for="Permissions.District" asp-items="Model.Districts" class="form-select district-dropdown">
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Permissions.Upazila" class="form-label"></label>
+                                    <select asp-for="Permissions.Upazila" asp-items="Model.Upazilas" class="form-select upazila-dropdown">
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Permissions.Ward" class="form-label"></label>
+                                    <select asp-for="Permissions.Ward" asp-items="Model.Wards" class="form-select ward-dropdown">
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Permissions.Village" class="form-label"></label>
+                                    <select asp-for="Permissions.Village" asp-items="Model.Villages" class="form-select village-dropdown">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h4>Permission Settings</h4>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h5>View Permissions</h5>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewUserName" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewUserName" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewEmail" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewEmail" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewPhone" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewPhone" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewAddress" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewAddress" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewProfileImage" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewProfileImage" class="form-check-label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h5>Private Data Permissions</h5>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewNationalId" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewNationalId" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewBirthRegistration" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewBirthRegistration" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewDateOfBirth" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewDateOfBirth" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewFamilyInfo" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewFamilyInfo" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanViewProfession" class="form-check-input" />
+                                            <label asp-for="Permissions.CanViewProfession" class="form-check-label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h5>Action Permissions</h5>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanApproveRenters" class="form-check-input" />
+                                            <label asp-for="Permissions.CanApproveRenters" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanApproveOwners" class="form-check-input" />
+                                            <label asp-for="Permissions.CanApproveOwners" class="form-check-label"></label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input asp-for="Permissions.CanManageApartments" class="form-check-input" />
+                                            <label asp-for="Permissions.CanManageApartments" class="form-check-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            // Cascading dropdowns for locations
+            $('.division-dropdown').change(function () {
+                var division = $(this).val();
+                var districtDropdown = $('.district-dropdown');
+                var upazilaDropdown = $('.upazila-dropdown');
+                var wardDropdown = $('.ward-dropdown');
+                var villageDropdown = $('.village-dropdown');
+                
+                // Clear all dependent dropdowns
+                districtDropdown.empty();
+                upazilaDropdown.empty();
+                wardDropdown.empty();
+                villageDropdown.empty();
+                
+                if (division) {
+                    // Fetch districts for selected division
+                    $.getJSON('@Url.Action("GetDistrictsByDivision")', { division: division }, function (districts) {
+                        districtDropdown.append($('<option>').val('').text('Select District'));
+                        $.each(districts, function (i, district) {
+                            districtDropdown.append($('<option>').val(district.value).text(district.text));
+                        });
+                    });
+                } else {
+                    districtDropdown.append($('<option>').val('').text('Select Division First'));
+                    upazilaDropdown.append($('<option>').val('').text('Select District First'));
+                    wardDropdown.append($('<option>').val('').text('Select Upazila First'));
+                    villageDropdown.append($('<option>').val('').text('Select Ward First'));
+                }
+            });
+            
+            $('.district-dropdown').change(function () {
+                var district = $(this).val();
+                var upazilaDropdown = $('.upazila-dropdown');
+                var wardDropdown = $('.ward-dropdown');
+                var villageDropdown = $('.village-dropdown');
+                
+                // Clear all dependent dropdowns
+                upazilaDropdown.empty();
+                wardDropdown.empty();
+                villageDropdown.empty();
+                
+                if (district) {
+                    // Fetch upazilas for selected district
+                    $.getJSON('@Url.Action("GetUpazilasByDistrict")', { district: district }, function (upazilas) {
+                        upazilaDropdown.append($('<option>').val('').text('Select Upazila'));
+                        $.each(upazilas, function (i, upazila) {
+                            upazilaDropdown.append($('<option>').val(upazila.value).text(upazila.text));
+                        });
+                    });
+                } else {
+                    upazilaDropdown.append($('<option>').val('').text('Select District First'));
+                    wardDropdown.append($('<option>').val('').text('Select Upazila First'));
+                    villageDropdown.append($('<option>').val('').text('Select Ward First'));
+                }
+            });
+            
+            $('.upazila-dropdown').change(function () {
+                var upazila = $(this).val();
+                var wardDropdown = $('.ward-dropdown');
+                var villageDropdown = $('.village-dropdown');
+                
+                // Clear all dependent dropdowns
+                wardDropdown.empty();
+                villageDropdown.empty();
+                
+                if (upazila) {
+                    // Fetch wards for selected upazila
+                    $.getJSON('@Url.Action("GetWardsByUpazila")', { upazila: upazila }, function (wards) {
+                        wardDropdown.append($('<option>').val('').text('Select Ward'));
+                        $.each(wards, function (i, ward) {
+                            wardDropdown.append($('<option>').val(ward.value).text(ward.text));
+                        });
+                    });
+                } else {
+                    wardDropdown.append($('<option>').val('').text('Select Upazila First'));
+                    villageDropdown.append($('<option>').val('').text('Select Ward First'));
+                }
+            });
+            
+            $('.ward-dropdown').change(function () {
+                var ward = $(this).val();
+                var villageDropdown = $('.village-dropdown');
+                
+                // Clear village dropdown
+                villageDropdown.empty();
+                
+                if (ward) {
+                    // Fetch villages for selected ward
+                    $.getJSON('@Url.Action("GetVillagesByWard")', { ward: ward }, function (villages) {
+                        villageDropdown.append($('<option>').val('').text('Select Village'));
+                        $.each(villages, function (i, village) {
+                            villageDropdown.append($('<option>').val(village.value).text(village.text));
+                        });
+                    });
+                } else {
+                    villageDropdown.append($('<option>').val('').text('Select Ward First'));
+                }
+            });
+        });
+    </script>
+} 

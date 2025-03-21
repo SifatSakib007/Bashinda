@@ -42,8 +42,11 @@ namespace BashindaAPI.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto model)
         {
+            _logger.LogInformation("Login attempt for phone number: {PhoneNumber}", model.PhoneNumber);
+            
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Invalid model state for login attempt with phone number: {PhoneNumber}", model.PhoneNumber);
                 return BadRequest(new AuthResponseDto
                 {
                     Success = false,

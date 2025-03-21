@@ -75,6 +75,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // Add Swagger
 builder.Services.AddEndpointsApiExplorer();

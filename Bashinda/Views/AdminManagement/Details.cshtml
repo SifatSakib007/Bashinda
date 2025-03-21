@@ -1,0 +1,231 @@
+@model Bashinda.ViewModels.AdminViewModel
+@{
+    ViewData["Title"] = "Admin Details";
+}
+
+<div class="container mt-4">
+    <h1>Admin Details</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Admin Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>User Information</h4>
+                            <dl class="row">
+                                <dt class="col-sm-4">Username</dt>
+                                <dd class="col-sm-8">@Model.UserName</dd>
+
+                                <dt class="col-sm-4">Email</dt>
+                                <dd class="col-sm-8">@Model.Email</dd>
+
+                                <dt class="col-sm-4">Phone Number</dt>
+                                <dd class="col-sm-8">@Model.PhoneNumber</dd>
+
+                                <dt class="col-sm-4">Created Date</dt>
+                                <dd class="col-sm-8">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Location Access</h4>
+                            <dl class="row">
+                                <dt class="col-sm-4">Division</dt>
+                                <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.DivisionName) ? "All Divisions" : Model.DivisionName)</dd>
+
+                                <dt class="col-sm-4">District</dt>
+                                <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.DistrictName) ? "All Districts" : Model.DistrictName)</dd>
+
+                                <dt class="col-sm-4">Upazila</dt>
+                                <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.UpazilaName) ? "All Upazilas" : Model.UpazilaName)</dd>
+
+                                <dt class="col-sm-4">Ward</dt>
+                                <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.WardName) ? "All Wards" : Model.WardName)</dd>
+
+                                <dt class="col-sm-4">Village</dt>
+                                <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.VillageName) ? "All Villages" : Model.VillageName)</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h4>Permission Settings</h4>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h5>View Permissions</h5>
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Username
+                                            @if (Model.Permissions?.CanViewUserName == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Email
+                                            @if (Model.Permissions?.CanViewEmail == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Phone
+                                            @if (Model.Permissions?.CanViewPhone == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Address
+                                            @if (Model.Permissions?.CanViewAddress == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Profile Image
+                                            @if (Model.Permissions?.CanViewProfileImage == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Private Data Permissions</h5>
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View National ID
+                                            @if (Model.Permissions?.CanViewNationalId == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Birth Registration
+                                            @if (Model.Permissions?.CanViewBirthRegistration == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Date of Birth
+                                            @if (Model.Permissions?.CanViewDateOfBirth == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Family Info
+                                            @if (Model.Permissions?.CanViewFamilyInfo == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can View Profession
+                                            @if (Model.Permissions?.CanViewProfession == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Action Permissions</h5>
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can Approve Renters
+                                            @if (Model.Permissions?.CanApproveRenters == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can Approve Owners
+                                            @if (Model.Permissions?.CanApproveOwners == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Can Manage Apartments
+                                            @if (Model.Permissions?.CanManageApartments == true)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No</span>
+                                            }
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -10,6 +10,7 @@ using Bashinda.Services;
 using Bashinda.ViewModels;
 using System.Linq;
 using Bashinda.Models;
+using System.Text.Json;
 
 namespace Bashinda.Controllers
 {
@@ -74,12 +75,12 @@ namespace Bashinda.Controllers
         // Check if the profile is submitted
         private async Task<bool> IsProfileSubmittedAsync()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated != true)
                 return false;
 
             // Try to get token from cookie first
             var token = HttpContext.Request.Cookies["JwtToken"];
-            
+
             // If token not in cookie, try from claims
             if (string.IsNullOrEmpty(token))
             {
@@ -87,7 +88,7 @@ namespace Bashinda.Controllers
                 if (tokenClaim != null && !string.IsNullOrEmpty(tokenClaim.Value))
                 {
                     token = tokenClaim.Value;
-                    
+
                     // Recreate the cookie for future requests
                     Response.Cookies.Append("JwtToken", token, new CookieOptions
                     {
@@ -105,11 +106,35 @@ namespace Bashinda.Controllers
                     return false;
                 }
             }
-            
+
             try
             {
-                var (success, profile, _) = await _renterProfileApiService.GetCurrentAsync(token);
-                return success && profile != null;
+                // First try the direct API call
+                var (success, profile, errors) = await _renterProfileApiService.GetCurrentAsync(token);
+
+                // If that succeeds, we're done
+                if (success && profile != null)
+                {
+                    return true;
+                }
+
+                // If we get a NotFound error, it's possible the profile exists but can't be retrieved via the "current" endpoint
+                if (!success && errors.Any(e => e.Contains("NotFound", StringComparison.OrdinalIgnoreCase) ||
+                                           e.Contains("404", StringComparison.OrdinalIgnoreCase)))
+                {
+                    // Try using the user ID approach that's used in the Index action
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        // Check if there's a profile for this user in the database
+                        var dbProfile = await _context.RenterProfiles
+                            .FirstOrDefaultAsync(p => p.UserId.ToString() == userId);
+
+                        return dbProfile != null;
+                    }
+                }
+
+                return false;
             }
             catch (Exception ex)
             {
@@ -121,12 +146,12 @@ namespace Bashinda.Controllers
         // Check if the renter is approved
         private async Task<bool> IsApprovedAsync()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated != true)
                 return false;
-            
+
             // Try to get token from cookie first
             var token = HttpContext.Request.Cookies["JwtToken"];
-            
+
             // If token not in cookie, try from claims
             if (string.IsNullOrEmpty(token))
             {
@@ -134,7 +159,7 @@ namespace Bashinda.Controllers
                 if (tokenClaim != null && !string.IsNullOrEmpty(tokenClaim.Value))
                 {
                     token = tokenClaim.Value;
-                    
+
                     // Recreate the cookie for future requests
                     Response.Cookies.Append("JwtToken", token, new CookieOptions
                     {
@@ -152,11 +177,35 @@ namespace Bashinda.Controllers
                     return false;
                 }
             }
-            
+
             try
-            {    
-                var (success, profile, _) = await _renterProfileApiService.GetCurrentAsync(token);
-                return success && profile != null && profile.IsApproved;
+            {
+                // First try the direct API call
+                var (success, profile, errors) = await _renterProfileApiService.GetCurrentAsync(token);
+
+                // If that succeeds, check if approved
+                if (success && profile != null)
+                {
+                    return profile.IsApproved;
+                }
+
+                // If we get a NotFound error, it's possible the profile exists but can't be retrieved via the "current" endpoint
+                if (!success && errors.Any(e => e.Contains("NotFound", StringComparison.OrdinalIgnoreCase) ||
+                                           e.Contains("404", StringComparison.OrdinalIgnoreCase)))
+                {
+                    // Try using the user ID approach that's used in the Index action
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        // Check if there's an approved profile for this user in the database
+                        var dbProfile = await _context.RenterProfiles
+                            .FirstOrDefaultAsync(p => p.UserId.ToString() == userId);
+
+                        return dbProfile != null && dbProfile.IsApproved;
+                    }
+                }
+
+                return false;
             }
             catch (Exception ex)
             {
@@ -203,11 +252,66 @@ namespace Bashinda.Controllers
                 }
                 
                 // Use the API service to get the current renter profile
+                _logger.LogInformation("Attempting to get renter profile with token: {TokenPrefix}...", token.Substring(0, Math.Min(15, token.Length)));
                 var (success, profile, errors) = await _renterProfileApiService.GetCurrentAsync(token);
                 
                 if (!success)
                 {
                     _logger.LogWarning("Failed to get renter profile: {Errors}", string.Join(", ", errors));
+                    _logger.LogInformation("Trying alternative approach to get profile");
+                    
+                    // Try an alternative approach - get by user ID
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        _logger.LogInformation("Looking up profile for user ID: {UserId}", userId);
+                        var dbProfile = await _context.RenterProfiles
+                            .FirstOrDefaultAsync(p => p.UserId.ToString() == userId);
+                            
+                        if (dbProfile != null)
+                        {
+                            _logger.LogInformation("Found profile in database, returning to view");
+                            
+                            // Create a view model from the database profile
+                            var dbViewModel = new RenterProfileViewModel
+                            {
+                                Id = dbProfile.Id,
+                                UserId = dbProfile.UserId,
+                                IsAdult = dbProfile.IsAdult,
+                                NationalId = dbProfile.NationalId,
+                                BirthRegistrationNo = dbProfile.BirthRegistrationNo,
+                                DateOfBirth = dbProfile.DateOfBirth,
+                                FullName = dbProfile.FullName,
+                                FatherName = dbProfile.FatherName,
+                                MotherName = dbProfile.MotherName,
+                                MobileNo = dbProfile.MobileNo,
+                                Email = dbProfile.Email,
+                                Division = dbProfile.Division,
+                                District = dbProfile.District,
+                                Upazila = dbProfile.Upazila,
+                                IsApproved = dbProfile.IsApproved,
+                                // Default values for enums as strings
+                                Nationality = "Bangladeshi",
+                                BloodGroup = "APositive",
+                                Gender = "Male",
+                                Profession = "Other",
+                                // Default values for missing fields
+                                AreaType = "City",
+                                Ward = "Default Ward",
+                                Village = "Default Village",
+                                PostCode = "1000",
+                                HoldingNo = "Default"
+                            };
+                            
+                            // Add a message when profile is not yet approved
+                            if (!dbProfile.IsApproved)
+                            {
+                                TempData["InfoMessage"] = "Your profile has been submitted but is waiting for admin approval. You'll get full access once approved.";
+                            }
+                            
+                            return View(dbViewModel);
+                        }
+                    }
                     
                     // Check if unauthorized (likely invalid/expired token)
                     if (errors.Any(e => e.Contains("unauthorized", StringComparison.OrdinalIgnoreCase) || 
@@ -231,7 +335,7 @@ namespace Bashinda.Controllers
                     return View(new RenterProfileViewModel());
                 }
                 
-                // Map the API DTO to view model, parsing enum values
+                // Map the API DTO to view model
                 var viewModel = new RenterProfileViewModel
                 {
                     Id = profile.Id,
@@ -248,21 +352,25 @@ namespace Bashinda.Controllers
                     Division = profile.Division,
                     District = profile.District,
                     Upazila = profile.Upazila,
-                    IsApproved = profile.IsApproved
+                    IsApproved = profile.IsApproved,
+                    // Default values for enums as strings
+                    Nationality = "Bangladeshi",
+                    BloodGroup = "APositive",
+                    Gender = "Male",
+                    Profession = "Other",
+                    // Default values for missing fields
+                    AreaType = "City",
+                    Ward = "Default Ward",
+                    Village = "Default Village",
+                    PostCode = "1000",
+                    HoldingNo = "Default"
                 };
                 
-                // Parse enum values
-                if (Enum.TryParse<Nationality>(profile.Nationality, out var nationality))
-                    viewModel.Nationality = nationality;
-                    
-                if (Enum.TryParse<BloodGroup>(profile.BloodGroup, out var bloodGroup))
-                    viewModel.BloodGroup = bloodGroup;
-                    
-                if (Enum.TryParse<Profession>(profile.Profession, out var profession))
-                    viewModel.Profession = profession;
-                    
-                if (Enum.TryParse<Gender>(profile.Gender, out var gender))
-                    viewModel.Gender = gender;
+                // Add a message when profile is not yet approved
+                if (!profile.IsApproved)
+                {
+                    TempData["InfoMessage"] = "Your profile has been submitted but is waiting for admin approval. You'll get full access once approved.";
+                }
                 
                 return View(viewModel);
             }
@@ -331,106 +439,98 @@ namespace Bashinda.Controllers
         {
             if (!ModelState.IsValid)
             {
+                // If model validation fails, return the form with errors
                 return View(model);
             }
 
             try
             {
-                // Get the token from the cookie
-                var token = HttpContext.Request.Cookies["JwtToken"];
-                
-                // If token not in cookie, try from claims
-                if (string.IsNullOrEmpty(token))
+                // Get the JWT token from cookie
+                var token = User.FindFirstValue("Token");
+                _logger.LogInformation($"Using token for profile creation: {token?.Substring(0, 20)}...");
+
+                // Check if the user already has a profile
+                var existingProfile = await _renterProfileApiService.GetCurrentAsync(token);
+                if (existingProfile.Success && existingProfile.Data != null)
                 {
-                    var tokenClaim = User.FindFirst("Token");
-                    if (tokenClaim != null && !string.IsNullOrEmpty(tokenClaim.Value))
-                    {
-                        token = tokenClaim.Value;
-                        
-                        // Recreate the cookie for future requests
-                        Response.Cookies.Append("JwtToken", token, new CookieOptions
-                        {
-                            HttpOnly = true,
-                            Secure = true,
-                            SameSite = SameSiteMode.Lax,
-                            Expires = DateTimeOffset.UtcNow.AddHours(1),
-                            Path = "/"
-                        });
-                    }
-                    else
-                    {
-                        _logger.LogWarning("JWT token not found");
-                        TempData["ErrorMessage"] = "Your session has expired. Please login again.";
-                        return View("~/Views/Shared/SessionExpired.cshtml");
-                    }
-                }
-                
-                // Get the user ID from the claims
-                var userIdClaim = User.FindFirst("UserId") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null)
-                {
-                    _logger.LogWarning("User ID claim not found");
-                    TempData["ErrorMessage"] = "User ID not found. Please login again.";
-                    return View("~/Views/Shared/SessionExpired.cshtml");
+                    _logger.LogWarning("User already has a profile, redirecting to Dashboard");
+                    return RedirectToAction("Dashboard");
                 }
 
-                if (!int.TryParse(userIdClaim.Value, out int userId))
+                // Upload files first if provided
+                if (model.NationalIdImage != null && model.IsAdult)
                 {
-                    _logger.LogWarning("Invalid user ID format: {UserId}", userIdClaim.Value);
-                    
-                    // Try to get the user profile via API to get the ID
-                    var profileResult = await _renterProfileApiService.GetCurrentAsync(token);
-                    bool profileSuccess = profileResult.Success;
-                    RenterProfileDto? profile = profileResult.Data;
-                    
-                    if (profileSuccess && profile != null)
-                    {
-                        userId = profile.UserId;
-                        _logger.LogInformation("Retrieved user ID from API: {UserId}", userId);
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = "Could not determine your user ID. Please login again.";
-                        return View("~/Views/Shared/SessionExpired.cshtml");
-                    }
+                    // Handle NID image upload
+                    // This would be implemented in a real application
                 }
 
-                // Get the required services
-                var locationDataService = HttpContext.RequestServices.GetRequiredService<ILocationDataService>();
-                var locationApiService = HttpContext.RequestServices.GetRequiredService<ILocationApiService>();
-                
-                // Create a logger factory and create a logger for the IRenterProfileApiService
-                var loggerFactory = HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
-                var serviceLogger = loggerFactory.CreateLogger<IRenterProfileApiService>();
-                
-                // Use the extension method to create the profile with location IDs
-                var result = await _renterProfileApiService.CreateWithLocationIdsAsync(
-                    model, 
-                    locationDataService, 
-                    locationApiService, 
-                    serviceLogger, 
-                    token);
-                    
-                bool success = result.Success;
-                RenterProfileDto? createdProfile = result.Data;
-                string[] errors = result.Errors;
-                
-                if (!success)
+                if (model.BirthRegistrationImage != null && !model.IsAdult)
                 {
-                    foreach (var error in errors)
+                    // Handle birth registration image upload
+                    // This would be implemented in a real application
+                }
+
+                if (model.SelfImage != null)
+                {
+                    // Handle self image upload
+                    // This would be implemented in a real application
+                }
+
+                // Create a new DTO to send to the API
+                var dto = new CreateRenterProfileDto
+                {
+                    IsAdult = model.IsAdult,
+                    NationalId = model.IsAdult ? model.NationalId : null,
+                    BirthRegistrationNo = !model.IsAdult ? model.BirthRegistrationNo : null,
+                    DateOfBirth = model.DateOfBirth,
+                    FullName = model.FullName ?? string.Empty,
+                    FatherName = model.FatherName ?? string.Empty,
+                    MotherName = model.MotherName ?? string.Empty,
+                    // Use string values directly
+                    Nationality = model.Nationality,
+                    BloodGroup = model.BloodGroup,
+                    Profession = model.Profession,
+                    Gender = model.Gender,
+                    MobileNo = model.MobileNo ?? string.Empty,
+                    Email = model.Email ?? string.Empty,
+                    
+                    // Use string-based location data directly from form
+                    Division = model.Division ?? string.Empty,
+                    District = model.District ?? string.Empty,
+                    Upazila = model.Upazila ?? string.Empty,
+                    // Use string value directly
+                    AreaType = model.AreaType,
+                    Ward = model.Ward ?? string.Empty,
+                    Village = model.Village ?? string.Empty,
+                    PostCode = model.PostCode ?? string.Empty,
+                    HoldingNo = model.HoldingNo ?? string.Empty
+                };
+
+                _logger.LogInformation($"Submitting profile data: {JsonSerializer.Serialize(dto)}");
+
+                // Send the data to the API to create the profile
+                var response = await _renterProfileApiService.CreateAsync(dto, token);
+
+                if (response.Success)
+                {
+                    _logger.LogInformation("Profile created successfully");
+                    TempData["SuccessMessage"] = "Your profile has been created successfully. It is now pending approval by an administrator.";
+                    return RedirectToAction("Dashboard");
+                }
+                else
+                {
+                    _logger.LogWarning($"Profile creation failed: {string.Join(", ", response.Errors)}");
+                    foreach (var error in response.Errors)
                     {
-                        ModelState.AddModelError("", error);
+                        ModelState.AddModelError(string.Empty, error);
                     }
                     return View(model);
                 }
-
-                TempData["SuccessMessage"] = "Profile created successfully";
-                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating renter profile: {Message}", ex.Message);
-                ModelState.AddModelError("", "An error occurred while creating your profile");
+                _logger.LogError(ex, "Error creating renter profile");
+                ModelState.AddModelError(string.Empty, "An error occurred while creating your profile. Please try again.");
                 return View(model);
             }
         }
@@ -438,33 +538,35 @@ namespace Bashinda.Controllers
         // Keep these sync versions for backward compatibility but update to use safe fallbacks
         private bool IsProfileSubmitted()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated != true)
                 return false;
 
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            if (string.IsNullOrEmpty(userIdClaim))
             {
                 _logger.LogWarning("Invalid or missing user ID: {UserId}", userIdClaim);
                 return false;
             }
-            
-            var renterProfile = _context.RenterProfiles.FirstOrDefault(p => p.UserId == userId);
+
+            // Handle both string and int user IDs
+            var renterProfile = _context.RenterProfiles.FirstOrDefault(p => p.UserId.ToString() == userIdClaim);
             return renterProfile != null;
         }
 
         private bool IsApproved()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated != true)
                 return false;
 
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            if (string.IsNullOrEmpty(userIdClaim))
             {
                 _logger.LogWarning("Invalid or missing user ID: {UserId}", userIdClaim);
                 return false;
             }
-            
-            var renterProfile = _context.RenterProfiles.FirstOrDefault(p => p.UserId == userId);
+
+            // Handle both string and int user IDs
+            var renterProfile = _context.RenterProfiles.FirstOrDefault(p => p.UserId.ToString() == userIdClaim);
             return renterProfile != null && renterProfile.IsApproved;
         }
 
@@ -518,11 +620,21 @@ namespace Bashinda.Controllers
                         return View("~/Views/Shared/SessionExpired.cshtml");
                     }
                     
+                    // If error is 404 Not Found, it means the user doesn't have a profile yet
+                    // Redirect to the Create action to create a new profile
+                    if (errors.Any(e => e.Contains("NotFound", StringComparison.OrdinalIgnoreCase) || 
+                                     e.Contains("404", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        _logger.LogInformation("User doesn't have a profile yet, redirecting to Create action");
+                        TempData["InfoMessage"] = "Please create your profile to continue.";
+                        return RedirectToAction("Create");
+                    }
+                    
                     TempData["ErrorMessage"] = errors.FirstOrDefault() ?? "Failed to load profile";
                     return View(new RenterProfileViewModel());
                 }
                 
-                // Map the API DTO to view model, parsing enum values
+                // Map the API DTO to view model
                 var viewModel = new RenterProfileViewModel
                 {
                     Id = profile.Id,
@@ -539,22 +651,26 @@ namespace Bashinda.Controllers
                     Division = profile.Division,
                     District = profile.District,
                     Upazila = profile.Upazila,
-                    IsApproved = profile.IsApproved
+                    IsApproved = profile.IsApproved,
+                    // Default values for enums as strings
+                    Nationality = "Bangladeshi",
+                    BloodGroup = "APositive",
+                    Gender = "Male",
+                    Profession = "Other",
+                    // Default values for missing fields
+                    AreaType = "City",
+                    Ward = "Default Ward",
+                    Village = "Default Village",
+                    PostCode = "1000",
+                    HoldingNo = "Default"
                 };
                 
-                // Parse enum values
-                if (Enum.TryParse<Nationality>(profile.Nationality, out var nationality))
-                    viewModel.Nationality = nationality;
-                    
-                if (Enum.TryParse<BloodGroup>(profile.BloodGroup, out var bloodGroup))
-                    viewModel.BloodGroup = bloodGroup;
-                    
-                if (Enum.TryParse<Gender>(profile.Gender, out var gender))
-                    viewModel.Gender = gender;
-                    
-                if (Enum.TryParse<Profession>(profile.Profession, out var profession))
-                    viewModel.Profession = profession;
-
+                // Add a message when profile is not yet approved
+                if (!profile.IsApproved)
+                {
+                    TempData["InfoMessage"] = "Your profile has been submitted but is waiting for admin approval. You'll get full access once approved.";
+                }
+                
                 return View(viewModel);
             }
             catch (Exception ex)

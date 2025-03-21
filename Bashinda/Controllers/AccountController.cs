@@ -41,8 +41,9 @@ namespace Bashinda.Controllers
                 
                 if (success)
                 {
-                    // Store email and password in TempData for the OTP confirmation and auto-login
+                    // Store email, phone, and password in TempData for the OTP confirmation and auto-login
                     TempData["RegisterEmail"] = model.Email;
+                    TempData["RegisterPhoneNumber"] = model.PhoneNumber;
                     TempData["RegisterPassword"] = model.Password;
                     
                     // Redirect to OTP confirmation page with email parameter
@@ -83,7 +84,8 @@ namespace Bashinda.Controllers
             
             var model = new OTPViewModel
             {
-                Email = email
+                Email = email,
+                PhoneNumber = TempData["RegisterPhoneNumber"] as string
             };
             
             return View(model);
@@ -114,9 +116,23 @@ namespace Bashinda.Controllers
                         return RedirectToAction(nameof(Login));
                     }
 
+                    // Get phone number either from model or TempData
+                    var phoneNumber = model.PhoneNumber;
+                    if (string.IsNullOrEmpty(phoneNumber))
+                    {
+                        phoneNumber = TempData["RegisterPhoneNumber"] as string;
+                    }
+
+                    // Fall back to email if phone number is still not available
+                    if (string.IsNullOrEmpty(phoneNumber))
+                    {
+                        _logger.LogWarning("Phone number not available, using email as fallback");
+                        phoneNumber = model.Email;
+                    }
+
                     var loginModel = new LoginRequestDto
                     {
-                        Email = model.Email,
+                        PhoneNumber = phoneNumber,
                         Password = storedPassword
                     };
 
@@ -196,7 +212,7 @@ namespace Bashinda.Controllers
                         
                         // If the user is a renter, try to fetch their profile image
                         bool isRenter = (loginResult.User.Roles != null && loginResult.User.Roles.Contains("ApartmentRenter")) ||
-                                       loginResult.User.Role == "ApartmentRenter";
+                                       loginResult.User.Role.ToString() == "ApartmentRenter";
                         
                         if (isRenter)
                         {
@@ -289,7 +305,7 @@ namespace Bashinda.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginRequestDto model)
         {
-            _logger.LogInformation("Login attempt for email: {Email}", model.Email);
+            _logger.LogInformation("Login attempt for phone number: {PhoneNumber}", model.PhoneNumber);
             
             if (!ModelState.IsValid)
             {
@@ -337,7 +353,7 @@ namespace Bashinda.Controllers
                     
                     // Temporarily store credentials in TempData for token refresh (This is relatively secure as TempData is server-side)
                     // Note: In a production environment, consider more secure approaches like ASP.NET Core Data Protection API
-                    TempData["UserEmail"] = model.Email;
+                    TempData["UserPhoneNumber"] = model.PhoneNumber;
                     TempData["UserPassword"] = model.Password;
                     
                     // Add a claim for the JWT token and store it in a cookie
@@ -401,7 +417,7 @@ namespace Bashinda.Controllers
                     
                     // If the user is a renter, try to fetch their profile image
                     bool isRenter = (loginResult.User.Roles != null && loginResult.User.Roles.Contains("ApartmentRenter")) ||
-                                   loginResult.User.Role == "ApartmentRenter";
+                                   loginResult.User.Role.ToString() == "ApartmentRenter";
                     
                     if (isRenter)
                     {
@@ -443,7 +459,7 @@ namespace Bashinda.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Login error for email: {Email}", model.Email);
+                _logger.LogError(ex, "Login error for phone number: {PhoneNumber}", model.PhoneNumber);
                 ModelState.AddModelError("", "An error occurred during login. Please try again.");
                 return View(model);
             }
@@ -459,7 +475,7 @@ namespace Bashinda.Controllers
             if (User.IsInRole("Admin"))
             {
                 _logger.LogInformation("Redirecting to Admin dashboard");
-                return RedirectToAction("Index", "Admin");
+                return RedirectToAction("Dashboard", "Admin");
             }
             
             // Check if user is apartment owner

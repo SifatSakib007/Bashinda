@@ -2,6 +2,7 @@ using System.Security.Claims;
 using BashindaAPI.Data;
 using BashindaAPI.DTOs;
 using BashindaAPI.Models;
+using BashindaAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,73 +18,219 @@ namespace BashindaAPI.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<RenterProfilesController> _logger;
+        private readonly IAdminService _adminService;
 
         public RenterProfilesController(
             ApplicationDbContext context,
             IWebHostEnvironment env,
-            ILogger<RenterProfilesController> logger)
+            ILogger<RenterProfilesController> logger,
+            IAdminService adminService)
         {
             _context = context;
             _env = env;
             _logger = logger;
+            _adminService = adminService;
         }
 
         // GET: api/RenterProfiles
         [HttpGet]
-        [Authorize(Roles = "Admin,ApartmentOwner")]
+        [Authorize(Roles = "Admin,ApartmentOwner,SuperAdmin")]
         public async Task<ActionResult<ApiResponse<IEnumerable<RenterProfileListDto>>>> GetRenterProfiles()
         {
-            var profiles = await _context.RenterProfiles
-                .Include(p => p.Division)
-                .Include(p => p.District)
-                .Include(p => p.Upazila)
-                .Select(p => new RenterProfileListDto
+            // Get current user's ID from the token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new ApiResponse<string>
                 {
-                    Id = p.Id,
-                    FullName = p.FullName,
-                    MobileNo = p.MobileNo,
-                    Email = p.Email,
-                    NationalId = p.NationalId,
-                    BirthRegistrationNo = p.BirthRegistrationNo,
-                    DateOfBirth = p.DateOfBirth,
-                    SelfImagePath = p.SelfImagePath,
-                    IsApproved = p.IsApproved,
-                    DivisionName = p.Division != null ? p.Division.Name : string.Empty,
-                    DistrictName = p.District != null ? p.District.Name : string.Empty,
-                    UpazilaName = p.Upazila != null ? p.Upazila.Name : string.Empty
-                })
-                .ToListAsync();
+                    Success = false,
+                    Errors = new[] { "Invalid token" }
+                });
+            }
+            
+            // Get user's role
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            var role = roleClaim?.Value;
+            bool isSuperAdmin = role == UserRole.SuperAdmin.ToString();
+            bool isAdmin = role == UserRole.Admin.ToString();
+            
+            // If regular admin, get their permissions
+            User? adminUser = null;
+            AdminPermission? adminPermission = null;
+            
+            if (isAdmin)
+            {
+                adminUser = await _context.Users
+                    .Include(u => u.AdminPermission)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+                
+                adminPermission = adminUser?.AdminPermission;
+                if (adminPermission == null)
+                {
+                    _logger.LogWarning("Admin user {AdminId} has no permissions configured", userId);
+                    return BadRequest(new ApiResponse<string>
+                    {
+                        Success = false,
+                        Errors = new[] { "Admin permissions not configured" }
+                    });
+                }
+            }
+            
+            // Get profiles based on permissions
+            IQueryable<RenterProfile> profilesQuery = _context.RenterProfiles;
+            
+            // Filter by location for admin users (if not SuperAdmin)
+            if (isAdmin && !isSuperAdmin && adminPermission != null)
+            {
+                if (!string.IsNullOrEmpty(adminPermission.Division))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.Division == adminPermission.Division);
+                }
+                
+                if (!string.IsNullOrEmpty(adminPermission.District))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.District == adminPermission.District);
+                }
+                
+                if (!string.IsNullOrEmpty(adminPermission.Upazila))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.Upazila == adminPermission.Upazila);
+                }
+                
+                if (!string.IsNullOrEmpty(adminPermission.Ward))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.Ward == adminPermission.Ward);
+                }
+                
+                if (!string.IsNullOrEmpty(adminPermission.Village))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.Village == adminPermission.Village);
+                }
+            }
+            
+            // Project to DTOs with field visibility based on permissions
+            var profiles = await profilesQuery.Select(p => new RenterProfileListDto
+            {
+                Id = p.Id,
+                FullName = p.FullName,
+                MobileNo = isAdmin && adminPermission != null && !adminPermission.CanViewPhone ? "***Hidden***" : p.MobileNo,
+                Email = isAdmin && adminPermission != null && !adminPermission.CanViewEmail ? "***Hidden***" : p.Email,
+                NationalId = isAdmin && adminPermission != null && !adminPermission.CanViewNationalId ? null : p.NationalId,
+                BirthRegistrationNo = isAdmin && adminPermission != null && !adminPermission.CanViewBirthRegistration ? null : p.BirthRegistrationNo,
+                DateOfBirth = p.DateOfBirth,
+                SelfImagePath = isAdmin && adminPermission != null && !adminPermission.CanViewProfileImage ? null : p.SelfImagePath,
+                IsApproved = p.IsApproved,
+                Division = p.Division,
+                District = p.District,
+                Upazila = p.Upazila
+            }).ToListAsync();
 
             return Ok(ApiResponse<IEnumerable<RenterProfileListDto>>.SuccessResponse(profiles));
         }
 
         // GET: api/RenterProfiles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<RenterProfileDto>> GetRenterProfile(int id)
+        [Authorize(Roles = "Admin,ApartmentOwner,ApartmentRenter,SuperAdmin")]
+        public async Task<ActionResult<ApiResponse<RenterProfileDto>>> GetRenterProfile(int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userRole = User.FindFirstValue(ClaimTypes.Role);
-
+            // Get current user's ID from the token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new ApiResponse<string>
+                {
+                    Success = false,
+                    Errors = new[] { "Invalid token" }
+                });
+            }
+            
+            // Get user's role
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            var role = roleClaim?.Value;
+            bool isSuperAdmin = role == UserRole.SuperAdmin.ToString();
+            bool isAdmin = role == UserRole.Admin.ToString();
+            bool isCurrentUser = await _context.RenterProfiles
+                .AnyAsync(p => p.Id == id && p.UserId == userId);
+            
+            // Find the profile
             var renterProfile = await _context.RenterProfiles
-                .Include(r => r.User)
-                .Include(r => r.Division)
-                .Include(r => r.District)
-                .Include(r => r.Upazila)
-                .Include(r => r.Ward)
-                .Include(r => r.Village)
-                .FirstOrDefaultAsync(r => r.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (renterProfile == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<string>
+                {
+                    Success = false,
+                    Errors = new[] { "Renter profile not found" }
+                });
             }
-
-            // Security check: Users can only access their own profile unless they are Admin or ApartmentOwner
-            if (userRole != "Admin" && userRole != "ApartmentOwner" && renterProfile.UserId.ToString() != userId)
+            
+            // Check permissions for admin users
+            if (isAdmin && !isSuperAdmin)
             {
-                return Forbid();
+                var adminUser = await _context.Users
+                    .Include(u => u.AdminPermission)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+                
+                var adminPermission = adminUser?.AdminPermission;
+                if (adminPermission == null)
+                {
+                    return BadRequest(new ApiResponse<string>
+                    {
+                        Success = false,
+                        Errors = new[] { "Admin permissions not configured" }
+                    });
+                }
+                
+                // Check location-based access
+                bool hasLocationAccess = await _adminService.CanAdminAccessLocationAsync(
+                    userId,
+                    renterProfile.Division,
+                    renterProfile.District,
+                    renterProfile.Upazila,
+                    renterProfile.Ward,
+                    renterProfile.Village);
+                    
+                if (!hasLocationAccess)
+                {
+                    return Forbid();
+                }
+                
+                // Create DTO with field filtering based on permissions
+                var profileDto = new RenterProfileDto
+                {
+                    Id = renterProfile.Id,
+                    UserId = renterProfile.UserId,
+                    IsAdult = renterProfile.IsAdult,
+                    NationalId = adminPermission.CanViewNationalId ? renterProfile.NationalId : null,
+                    NationalIdImagePath = adminPermission.CanViewNationalId ? renterProfile.NationalIdImagePath : null,
+                    BirthRegistrationNo = adminPermission.CanViewBirthRegistration ? renterProfile.BirthRegistrationNo : null,
+                    BirthRegistrationImagePath = adminPermission.CanViewBirthRegistration ? renterProfile.BirthRegistrationImagePath : null,
+                    DateOfBirth = adminPermission.CanViewDateOfBirth ? renterProfile.DateOfBirth : default,
+                    FullName = adminPermission.CanViewUserName ? renterProfile.FullName : "***Hidden***",
+                    FatherName = adminPermission.CanViewFamilyInfo ? renterProfile.FatherName : "***Hidden***",
+                    MotherName = adminPermission.CanViewFamilyInfo ? renterProfile.MotherName : "***Hidden***",
+                    Nationality = renterProfile.Nationality,
+                    BloodGroup = renterProfile.BloodGroup,
+                    Profession = adminPermission.CanViewProfession ? renterProfile.Profession : "***Hidden***",
+                    Gender = renterProfile.Gender,
+                    MobileNo = adminPermission.CanViewPhone ? renterProfile.MobileNo : "***Hidden***",
+                    Email = adminPermission.CanViewEmail ? renterProfile.Email : "***Hidden***",
+                    SelfImagePath = adminPermission.CanViewProfileImage ? renterProfile.SelfImagePath : null,
+                    Division = adminPermission.CanViewAddress ? renterProfile.Division : "***Hidden***",
+                    District = adminPermission.CanViewAddress ? renterProfile.District : "***Hidden***",
+                    Upazila = adminPermission.CanViewAddress ? renterProfile.Upazila : "***Hidden***",
+                    Ward = adminPermission.CanViewAddress ? renterProfile.Ward : "***Hidden***",
+                    Village = adminPermission.CanViewAddress ? renterProfile.Village : "***Hidden***",
+                    PostCode = adminPermission.CanViewAddress ? renterProfile.PostCode : "***Hidden***",
+                    HoldingNo = adminPermission.CanViewAddress ? renterProfile.HoldingNo : "***Hidden***",
+                    IsApproved = renterProfile.IsApproved
+                };
+                
+                return Ok(ApiResponse<RenterProfileDto>.SuccessResponse(profileDto));
             }
-
+            
+            // For SuperAdmin, own profile, or apartment owner - show full details
             var dto = new RenterProfileDto
             {
                 Id = renterProfile.Id,
@@ -97,42 +244,24 @@ namespace BashindaAPI.Controllers
                 FullName = renterProfile.FullName,
                 FatherName = renterProfile.FatherName,
                 MotherName = renterProfile.MotherName,
-                Nationality = renterProfile.Nationality.ToString(),
-                BloodGroup = renterProfile.BloodGroup.ToString(),
-                Profession = renterProfile.Profession.ToString(),
-                Gender = renterProfile.Gender.ToString(),
+                Nationality = renterProfile.Nationality,
+                BloodGroup = renterProfile.BloodGroup,
+                Profession = renterProfile.Profession,
+                Gender = renterProfile.Gender,
                 MobileNo = renterProfile.MobileNo,
                 Email = renterProfile.Email,
                 SelfImagePath = renterProfile.SelfImagePath,
-                Address = new AddressDto
-                {
-                    DivisionId = renterProfile.DivisionId,
-                    DivisionName = _context.Divisions.FirstOrDefault(d => d.Id == renterProfile.DivisionId)?.Name ?? string.Empty,
-                    DistrictId = renterProfile.DistrictId,
-                    DistrictName = _context.Districts.FirstOrDefault(d => d.Id == renterProfile.DistrictId)?.Name ?? string.Empty,
-                    UpazilaId = renterProfile.UpazilaId,
-                    UpazilaName = _context.Upazilas.FirstOrDefault(u => u.Id == renterProfile.UpazilaId)?.Name ?? string.Empty,
-                    AreaType = renterProfile.AreaType,
-                    WardId = renterProfile.WardId,
-                    WardName = _context.Wards.FirstOrDefault(w => w.Id == renterProfile.WardId)?.Name ?? string.Empty,
-                    VillageId = renterProfile.VillageId,
-                    VillageName = _context.Villages.FirstOrDefault(v => v.Id == renterProfile.VillageId)?.Name ?? string.Empty,
-                    PostCode = renterProfile.PostCode,
-                    HoldingNo = renterProfile.HoldingNo
-                },
-                IsApproved = renterProfile.IsApproved,
-                User = renterProfile.User != null ? new UserDto
-                {
-                    Id = renterProfile.User.Id,
-                    UserName = renterProfile.User.UserName,
-                    Email = renterProfile.User.Email,
-                    PhoneNumber = renterProfile.User.PhoneNumber,
-                    Role = renterProfile.User.Role.ToString(),
-                    IsVerified = renterProfile.User.IsVerified
-                } : null
+                Division = renterProfile.Division,
+                District = renterProfile.District,
+                Upazila = renterProfile.Upazila,
+                Ward = renterProfile.Ward,
+                Village = renterProfile.Village,
+                PostCode = renterProfile.PostCode,
+                HoldingNo = renterProfile.HoldingNo,
+                IsApproved = renterProfile.IsApproved
             };
 
-            return Ok(dto);
+            return Ok(ApiResponse<RenterProfileDto>.SuccessResponse(dto));
         }
 
         // GET: api/RenterProfiles/current
@@ -148,11 +277,6 @@ namespace BashindaAPI.Controllers
 
             var renterProfile = await _context.RenterProfiles
                 .Include(r => r.User)
-                .Include(r => r.Division)
-                .Include(r => r.District)
-                .Include(r => r.Upazila)
-                .Include(r => r.Ward)
-                .Include(r => r.Village)
                 .FirstOrDefaultAsync(r => r.UserId.ToString() == userId);
 
             if (renterProfile == null)
@@ -180,23 +304,17 @@ namespace BashindaAPI.Controllers
                 MobileNo = renterProfile.MobileNo,
                 Email = renterProfile.Email,
                 SelfImagePath = renterProfile.SelfImagePath,
-                Address = new AddressDto
-                {
-                    DivisionId = renterProfile.DivisionId,
-                    DivisionName = _context.Divisions.FirstOrDefault(d => d.Id == renterProfile.DivisionId)?.Name ?? string.Empty,
-                    DistrictId = renterProfile.DistrictId,
-                    DistrictName = _context.Districts.FirstOrDefault(d => d.Id == renterProfile.DistrictId)?.Name ?? string.Empty,
-                    UpazilaId = renterProfile.UpazilaId,
-                    UpazilaName = _context.Upazilas.FirstOrDefault(u => u.Id == renterProfile.UpazilaId)?.Name ?? string.Empty,
-                    AreaType = renterProfile.AreaType,
-                    WardId = renterProfile.WardId,
-                    WardName = _context.Wards.FirstOrDefault(w => w.Id == renterProfile.WardId)?.Name ?? string.Empty,
-                    VillageId = renterProfile.VillageId,
-                    VillageName = _context.Villages.FirstOrDefault(v => v.Id == renterProfile.VillageId)?.Name ?? string.Empty,
-                    PostCode = renterProfile.PostCode,
-                    HoldingNo = renterProfile.HoldingNo
-                },
+                // Map location fields directly
+                Division = renterProfile.Division,
+                District = renterProfile.District,
+                Upazila = renterProfile.Upazila,
+                AreaType = renterProfile.AreaType,
+                Ward = renterProfile.Ward,
+                Village = renterProfile.Village,
+                PostCode = renterProfile.PostCode,
+                HoldingNo = renterProfile.HoldingNo,
                 IsApproved = renterProfile.IsApproved,
+                RejectionReason = renterProfile.RejectionReason,
                 User = renterProfile.User != null ? new UserDto
                 {
                     Id = renterProfile.User.Id,
@@ -213,31 +331,105 @@ namespace BashindaAPI.Controllers
 
         // GET: api/RenterProfiles/pending
         [HttpGet("pending")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<ActionResult<ApiResponse<IEnumerable<RenterProfileListDto>>>> GetPendingRenterProfiles()
         {
-            var profiles = await _context.RenterProfiles
-                .Where(p => !p.IsApproved)
-                .Include(p => p.Division)
-                .Include(p => p.District)
-                .Include(p => p.Upazila)
+            // Get current user's ID from the token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new ApiResponse<string>
+                {
+                    Success = false,
+                    Errors = new[] { "Invalid token" }
+                });
+            }
+            
+            // Get user's role
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            var role = roleClaim?.Value;
+            bool isSuperAdmin = role == UserRole.SuperAdmin.ToString();
+            bool isAdmin = role == UserRole.Admin.ToString();
+            
+            // If regular admin, get their permissions
+            User? adminUser = null;
+            AdminPermission? adminPermission = null;
+            
+            if (isAdmin && !isSuperAdmin)
+            {
+                adminUser = await _context.Users
+                    .Include(u => u.AdminPermission)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+                
+                adminPermission = adminUser?.AdminPermission;
+                if (adminPermission == null)
+                {
+                    _logger.LogWarning("Admin user {AdminId} has no permissions configured", userId);
+                    return BadRequest(new ApiResponse<string>
+                    {
+                        Success = false,
+                        Errors = new[] { "Admin permissions not configured" }
+                    });
+                }
+                
+                // Check if admin has permission to approve renters
+                if (!adminPermission.CanApproveRenters)
+                {
+                    return Forbid();
+                }
+            }
+            
+            // Get profiles based on permissions
+            IQueryable<RenterProfile> profilesQuery = _context.RenterProfiles
+                .Where(p => !p.IsApproved);
+            
+            // Filter by location for admin users (if not SuperAdmin)
+            if (isAdmin && !isSuperAdmin && adminPermission != null)
+            {
+                if (!string.IsNullOrEmpty(adminPermission.Division))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.Division == adminPermission.Division);
+                }
+                
+                if (!string.IsNullOrEmpty(adminPermission.District))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.District == adminPermission.District);
+                }
+                
+                if (!string.IsNullOrEmpty(adminPermission.Upazila))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.Upazila == adminPermission.Upazila);
+                }
+                
+                if (!string.IsNullOrEmpty(adminPermission.Ward))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.Ward == adminPermission.Ward);
+                }
+                
+                if (!string.IsNullOrEmpty(adminPermission.Village))
+                {
+                    profilesQuery = profilesQuery.Where(p => p.Village == adminPermission.Village);
+                }
+            }
+            
+            var profiles = await profilesQuery
                 .Select(p => new RenterProfileListDto
                 {
                     Id = p.Id,
                     FullName = p.FullName,
-                    MobileNo = p.MobileNo,
-                    Email = p.Email,
-                    NationalId = p.NationalId,
-                    BirthRegistrationNo = p.BirthRegistrationNo,
+                    MobileNo = isAdmin && adminPermission != null && !adminPermission.CanViewPhone ? "***Hidden***" : p.MobileNo,
+                    Email = isAdmin && adminPermission != null && !adminPermission.CanViewEmail ? "***Hidden***" : p.Email,
+                    NationalId = isAdmin && adminPermission != null && !adminPermission.CanViewNationalId ? null : p.NationalId,
+                    BirthRegistrationNo = isAdmin && adminPermission != null && !adminPermission.CanViewBirthRegistration ? null : p.BirthRegistrationNo,
                     DateOfBirth = p.DateOfBirth,
-                    SelfImagePath = p.SelfImagePath,
+                    SelfImagePath = isAdmin && adminPermission != null && !adminPermission.CanViewProfileImage ? null : p.SelfImagePath,
                     IsApproved = p.IsApproved,
-                    DivisionName = p.Division != null ? p.Division.Name : string.Empty,
-                    DistrictName = p.District != null ? p.District.Name : string.Empty,
-                    UpazilaName = p.Upazila != null ? p.Upazila.Name : string.Empty
+                    Division = p.Division,
+                    District = p.District,
+                    Upazila = p.Upazila
                 })
                 .ToListAsync();
-
+            
             return Ok(ApiResponse<IEnumerable<RenterProfileListDto>>.SuccessResponse(profiles));
         }
 
@@ -257,36 +449,7 @@ namespace BashindaAPI.Controllers
                 return Conflict("You already have a profile");
             }
 
-            // Validate location data
-            if (!await _context.Divisions.AnyAsync(d => d.Id == dto.DivisionId))
-            {
-                ModelState.AddModelError("DivisionId", "Invalid Division");
-                return BadRequest(ModelState);
-            }
-
-            if (!await _context.Districts.AnyAsync(d => d.Id == dto.DistrictId && d.DivisionId == dto.DivisionId))
-            {
-                ModelState.AddModelError("DistrictId", "Invalid District for the selected Division");
-                return BadRequest(ModelState);
-            }
-
-            if (!await _context.Upazilas.AnyAsync(u => u.Id == dto.UpazilaId && u.DistrictId == dto.DistrictId))
-            {
-                ModelState.AddModelError("UpazilaId", "Invalid Upazila for the selected District");
-                return BadRequest(ModelState);
-            }
-
-            if (!await _context.Wards.AnyAsync(w => w.Id == dto.WardId && w.UpazilaId == dto.UpazilaId && w.AreaType == dto.AreaType))
-            {
-                ModelState.AddModelError("WardId", "Invalid Ward for the selected Upazila and Area Type");
-                return BadRequest(ModelState);
-            }
-
-            if (!await _context.Villages.AnyAsync(v => v.Id == dto.VillageId && v.WardId == dto.WardId))
-            {
-                ModelState.AddModelError("VillageId", "Invalid Village/Area for the selected Ward");
-                return BadRequest(ModelState);
-            }
+            // No need to validate locations anymore as we're using strings
 
             var renterProfile = new RenterProfile
             {
@@ -304,12 +467,12 @@ namespace BashindaAPI.Controllers
                 Gender = dto.Gender,
                 MobileNo = dto.MobileNo,
                 Email = dto.Email,
-                DivisionId = dto.DivisionId,
-                DistrictId = dto.DistrictId,
-                UpazilaId = dto.UpazilaId,
+                Division = dto.Division,
+                District = dto.District,
+                Upazila = dto.Upazila,
                 AreaType = dto.AreaType,
-                WardId = dto.WardId,
-                VillageId = dto.VillageId,
+                Ward = dto.Ward,
+                Village = dto.Village,
                 PostCode = dto.PostCode,
                 HoldingNo = dto.HoldingNo,
                 IsApproved = false // Requires admin approval
@@ -334,22 +497,15 @@ namespace BashindaAPI.Controllers
                 Gender = renterProfile.Gender.ToString(),
                 MobileNo = renterProfile.MobileNo,
                 Email = renterProfile.Email,
-                Address = new AddressDto
-                {
-                    DivisionId = renterProfile.DivisionId,
-                    DivisionName = _context.Divisions.FirstOrDefault(d => d.Id == renterProfile.DivisionId)?.Name ?? string.Empty,
-                    DistrictId = renterProfile.DistrictId,
-                    DistrictName = _context.Districts.FirstOrDefault(d => d.Id == renterProfile.DistrictId)?.Name ?? string.Empty,
-                    UpazilaId = renterProfile.UpazilaId,
-                    UpazilaName = _context.Upazilas.FirstOrDefault(u => u.Id == renterProfile.UpazilaId)?.Name ?? string.Empty,
-                    AreaType = renterProfile.AreaType,
-                    WardId = renterProfile.WardId,
-                    WardName = _context.Wards.FirstOrDefault(w => w.Id == renterProfile.WardId)?.Name ?? string.Empty,
-                    VillageId = renterProfile.VillageId,
-                    VillageName = _context.Villages.FirstOrDefault(v => v.Id == renterProfile.VillageId)?.Name ?? string.Empty,
-                    PostCode = renterProfile.PostCode,
-                    HoldingNo = renterProfile.HoldingNo
-                },
+                // Use the location fields directly instead of an Address object
+                Division = renterProfile.Division,
+                District = renterProfile.District,
+                Upazila = renterProfile.Upazila,
+                AreaType = renterProfile.AreaType,
+                Ward = renterProfile.Ward,
+                Village = renterProfile.Village,
+                PostCode = renterProfile.PostCode,
+                HoldingNo = renterProfile.HoldingNo,
                 IsApproved = renterProfile.IsApproved
             });
         }
@@ -375,13 +531,6 @@ namespace BashindaAPI.Controllers
 
             try
             {
-                // Validate location hierarchy
-                if (!await ValidateLocationHierarchy(dto.DivisionId, dto.DistrictId, dto.UpazilaId, dto.AreaType, dto.WardId, dto.VillageId))
-                {
-                    return BadRequest(ApiResponse<object>.ErrorResponse(
-                        "Invalid location hierarchy. Please ensure Division, District, Upazila, Ward, and Village/Area are related correctly."));
-                }
-
                 // Update fields
                 renterProfile.IsAdult = dto.IsAdult;
                 renterProfile.NationalId = dto.IsAdult ? dto.NationalId : null;
@@ -396,12 +545,12 @@ namespace BashindaAPI.Controllers
                 renterProfile.Gender = dto.Gender;
                 renterProfile.MobileNo = dto.MobileNo;
                 renterProfile.Email = dto.Email;
-                renterProfile.DivisionId = dto.DivisionId;
-                renterProfile.DistrictId = dto.DistrictId;
-                renterProfile.UpazilaId = dto.UpazilaId;
+                renterProfile.Division = dto.Division;
+                renterProfile.District = dto.District;
+                renterProfile.Upazila = dto.Upazila;
                 renterProfile.AreaType = dto.AreaType;
-                renterProfile.WardId = dto.WardId;
-                renterProfile.VillageId = dto.VillageId;
+                renterProfile.Ward = dto.Ward;
+                renterProfile.Village = dto.Village;
                 renterProfile.PostCode = dto.PostCode;
                 renterProfile.HoldingNo = dto.HoldingNo;
 
@@ -435,47 +584,92 @@ namespace BashindaAPI.Controllers
             }
         }
 
-        // Helper method to validate location hierarchy
-        private async Task<bool> ValidateLocationHierarchy(int divisionId, int districtId, int upazilaId, AreaType areaType, int wardId, int villageId)
-        {
-            // Check if division exists
-            var division = await _context.Divisions.FindAsync(divisionId);
-            if (division == null) return false;
-            
-            // Check if district exists and belongs to the specified division
-            var district = await _context.Districts.FirstOrDefaultAsync(d => d.Id == districtId && d.DivisionId == divisionId);
-            if (district == null) return false;
-            
-            // Check if upazila exists and belongs to the specified district
-            var upazila = await _context.Upazilas.FirstOrDefaultAsync(u => u.Id == upazilaId && u.DistrictId == districtId);
-            if (upazila == null) return false;
-            
-            // Check if ward exists, belongs to the specified upazila, and has the correct area type
-            var ward = await _context.Wards.FirstOrDefaultAsync(w => w.Id == wardId && w.UpazilaId == upazilaId && w.AreaType == areaType);
-            if (ward == null) return false;
-            
-            // Check if village exists and belongs to the specified ward
-            var village = await _context.Villages.FirstOrDefaultAsync(v => v.Id == villageId && v.WardId == wardId);
-            if (village == null) return false;
-            
-            return true;
-        }
-
         // PATCH: api/RenterProfiles/5/approve
         [HttpPatch("{id}/approve")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ApproveRenterProfile(int id, ApproveRenterProfileDto dto)
+        [Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> ApproveRenterProfile(int id, ApproveProfileDto dto)
         {
+            // Get current user's ID from the token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new ApiResponse<string>
+                {
+                    Success = false,
+                    Errors = new[] { "Invalid token" }
+                });
+            }
+            
+            // Get user's role
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            var role = roleClaim?.Value;
+            bool isSuperAdmin = role == UserRole.SuperAdmin.ToString();
+            bool isAdmin = role == UserRole.Admin.ToString();
+            
             var renterProfile = await _context.RenterProfiles.FindAsync(id);
             if (renterProfile == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse<string>
+                {
+                    Success = false,
+                    Errors = new[] { "Renter profile not found" }
+                });
             }
-
+            
+            // Check admin's permission to approve renter profiles
+            if (isAdmin && !isSuperAdmin)
+            {
+                var adminUser = await _context.Users
+                    .Include(u => u.AdminPermission)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+                
+                var adminPermission = adminUser?.AdminPermission;
+                if (adminPermission == null)
+                {
+                    return BadRequest(new ApiResponse<string>
+                    {
+                        Success = false,
+                        Errors = new[] { "Admin permissions not configured" }
+                    });
+                }
+                
+                // Check if admin has permission to approve renters
+                if (!adminPermission.CanApproveRenters)
+                {
+                    return Forbid();
+                }
+                
+                // Check location-based access
+                bool hasLocationAccess = await _adminService.CanAdminAccessLocationAsync(
+                    userId,
+                    renterProfile.Division,
+                    renterProfile.District,
+                    renterProfile.Upazila,
+                    renterProfile.Ward,
+                    renterProfile.Village);
+                    
+                if (!hasLocationAccess)
+                {
+                    return Forbid();
+                }
+            }
+            
             renterProfile.IsApproved = dto.IsApproved;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            renterProfile.RejectionReason = !dto.IsApproved ? dto.Reason : null;
+            
+            try
+            {
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!RenterProfileExists(id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
         }
 
         // POST: api/RenterProfiles/5/upload-image

@@ -34,9 +34,6 @@ namespace BashindaAPI.Controllers
         public async Task<ActionResult<IEnumerable<ApartmentOwnerProfileListDto>>> GetApartmentOwnerProfiles()
         {
             var profiles = await _context.ApartmentOwnerProfiles
-                .Include(p => p.Division)
-                .Include(p => p.District)
-                .Include(p => p.Upazila)
                 .Select(p => new ApartmentOwnerProfileListDto
                 {
                     Id = p.Id,
@@ -46,9 +43,9 @@ namespace BashindaAPI.Controllers
                     NationalId = p.NationalId,
                     SelfImagePath = p.SelfImagePath,
                     IsApproved = p.IsApproved,
-                    DivisionName = p.Division != null ? p.Division.Name : string.Empty,
-                    DistrictName = p.District != null ? p.District.Name : string.Empty,
-                    UpazilaName = p.Upazila != null ? p.Upazila.Name : string.Empty
+                    DivisionName = p.Division,
+                    DistrictName = p.District,
+                    UpazilaName = p.Upazila
                 })
                 .ToListAsync();
 
@@ -64,11 +61,6 @@ namespace BashindaAPI.Controllers
 
             var ownerProfile = await _context.ApartmentOwnerProfiles
                 .Include(r => r.User)
-                .Include(r => r.Division)
-                .Include(r => r.District)
-                .Include(r => r.Upazila)
-                .Include(r => r.Ward)
-                .Include(r => r.Village)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (ownerProfile == null)
@@ -93,22 +85,14 @@ namespace BashindaAPI.Controllers
                 SelfImagePath = ownerProfile.SelfImagePath,
                 MobileNo = ownerProfile.MobileNo,
                 Email = ownerProfile.Email,
-                Address = new AddressDto
-                {
-                    DivisionId = ownerProfile.DivisionId,
-                    DivisionName = ownerProfile.Division?.Name ?? string.Empty,
-                    DistrictId = ownerProfile.DistrictId,
-                    DistrictName = ownerProfile.District?.Name ?? string.Empty,
-                    UpazilaId = ownerProfile.UpazilaId,
-                    UpazilaName = ownerProfile.Upazila?.Name ?? string.Empty,
-                    AreaType = ownerProfile.AreaType,
-                    WardId = ownerProfile.WardId,
-                    WardName = ownerProfile.Ward?.Name ?? string.Empty,
-                    VillageId = ownerProfile.VillageId,
-                    VillageName = ownerProfile.Village?.Name ?? string.Empty,
-                    PostCode = ownerProfile.PostCode,
-                    HoldingNo = ownerProfile.HoldingNo
-                },
+                Division = ownerProfile.Division,
+                District = ownerProfile.District,
+                Upazila = ownerProfile.Upazila,
+                AreaType = ownerProfile.AreaType.ToString(),
+                Ward = ownerProfile.Ward,
+                Village = ownerProfile.Village,
+                PostCode = ownerProfile.PostCode,
+                HoldingNo = ownerProfile.HoldingNo,
                 Profession = ownerProfile.Profession,
                 IsApproved = ownerProfile.IsApproved,
                 User = ownerProfile.User != null ? new UserDto
@@ -138,11 +122,6 @@ namespace BashindaAPI.Controllers
 
             var ownerProfile = await _context.ApartmentOwnerProfiles
                 .Include(r => r.User)
-                .Include(r => r.Division)
-                .Include(r => r.District)
-                .Include(r => r.Upazila)
-                .Include(r => r.Ward)
-                .Include(r => r.Village)
                 .FirstOrDefaultAsync(r => r.UserId.ToString() == userId);
 
             if (ownerProfile == null)
@@ -161,22 +140,14 @@ namespace BashindaAPI.Controllers
                 SelfImagePath = ownerProfile.SelfImagePath,
                 MobileNo = ownerProfile.MobileNo,
                 Email = ownerProfile.Email,
-                Address = new AddressDto
-                {
-                    DivisionId = ownerProfile.DivisionId,
-                    DivisionName = ownerProfile.Division?.Name ?? string.Empty,
-                    DistrictId = ownerProfile.DistrictId,
-                    DistrictName = ownerProfile.District?.Name ?? string.Empty,
-                    UpazilaId = ownerProfile.UpazilaId,
-                    UpazilaName = ownerProfile.Upazila?.Name ?? string.Empty,
-                    AreaType = ownerProfile.AreaType,
-                    WardId = ownerProfile.WardId,
-                    WardName = ownerProfile.Ward?.Name ?? string.Empty,
-                    VillageId = ownerProfile.VillageId,
-                    VillageName = ownerProfile.Village?.Name ?? string.Empty,
-                    PostCode = ownerProfile.PostCode,
-                    HoldingNo = ownerProfile.HoldingNo
-                },
+                Division = ownerProfile.Division,
+                District = ownerProfile.District,
+                Upazila = ownerProfile.Upazila,
+                AreaType = ownerProfile.AreaType.ToString(),
+                Ward = ownerProfile.Ward,
+                Village = ownerProfile.Village,
+                PostCode = ownerProfile.PostCode,
+                HoldingNo = ownerProfile.HoldingNo,
                 Profession = ownerProfile.Profession,
                 IsApproved = ownerProfile.IsApproved
             };
@@ -191,9 +162,6 @@ namespace BashindaAPI.Controllers
         {
             var profiles = await _context.ApartmentOwnerProfiles
                 .Where(p => !p.IsApproved)
-                .Include(p => p.Division)
-                .Include(p => p.District)
-                .Include(p => p.Upazila)
                 .Select(p => new ApartmentOwnerProfileListDto
                 {
                     Id = p.Id,
@@ -203,9 +171,9 @@ namespace BashindaAPI.Controllers
                     NationalId = p.NationalId,
                     SelfImagePath = p.SelfImagePath,
                     IsApproved = p.IsApproved,
-                    DivisionName = p.Division != null ? p.Division.Name : string.Empty,
-                    DistrictName = p.District != null ? p.District.Name : string.Empty,
-                    UpazilaName = p.Upazila != null ? p.Upazila.Name : string.Empty
+                    DivisionName = p.Division,
+                    DistrictName = p.District,
+                    UpazilaName = p.Upazila
                 })
                 .ToListAsync();
 
@@ -228,36 +196,7 @@ namespace BashindaAPI.Controllers
                 return Conflict("You already have a profile");
             }
             
-            // Validate location data
-            if (!await _context.Divisions.AnyAsync(d => d.Id == dto.DivisionId))
-            {
-                ModelState.AddModelError("DivisionId", "Invalid Division");
-                return BadRequest(ModelState);
-            }
-
-            if (!await _context.Districts.AnyAsync(d => d.Id == dto.DistrictId && d.DivisionId == dto.DivisionId))
-            {
-                ModelState.AddModelError("DistrictId", "Invalid District for the selected Division");
-                return BadRequest(ModelState);
-            }
-
-            if (!await _context.Upazilas.AnyAsync(u => u.Id == dto.UpazilaId && u.DistrictId == dto.DistrictId))
-            {
-                ModelState.AddModelError("UpazilaId", "Invalid Upazila for the selected District");
-                return BadRequest(ModelState);
-            }
-
-            if (!await _context.Wards.AnyAsync(w => w.Id == dto.WardId && w.UpazilaId == dto.UpazilaId && w.AreaType == dto.AreaType))
-            {
-                ModelState.AddModelError("WardId", "Invalid Ward for the selected Upazila and Area Type");
-                return BadRequest(ModelState);
-            }
-
-            if (!await _context.Villages.AnyAsync(v => v.Id == dto.VillageId && v.WardId == dto.WardId))
-            {
-                ModelState.AddModelError("VillageId", "Invalid Village/Area for the selected Ward");
-                return BadRequest(ModelState);
-            }
+            // No need to validate location data with string-based fields
 
             var ownerProfile = new ApartmentOwnerProfile
             {
@@ -267,12 +206,12 @@ namespace BashindaAPI.Controllers
                 NationalId = dto.NationalId,
                 MobileNo = dto.MobileNo,
                 Email = dto.Email,
-                DivisionId = dto.DivisionId,
-                DistrictId = dto.DistrictId,
-                UpazilaId = dto.UpazilaId,
+                Division = dto.Division,
+                District = dto.District,
+                Upazila = dto.Upazila,
                 AreaType = dto.AreaType,
-                WardId = dto.WardId,
-                VillageId = dto.VillageId,
+                Ward = dto.Ward,
+                Village = dto.Village,
                 PostCode = dto.PostCode,
                 HoldingNo = dto.HoldingNo,
                 Profession = dto.Profession,
@@ -291,22 +230,14 @@ namespace BashindaAPI.Controllers
                 NationalId = ownerProfile.NationalId,
                 MobileNo = ownerProfile.MobileNo,
                 Email = ownerProfile.Email,
-                Address = new AddressDto
-                {
-                    DivisionId = ownerProfile.DivisionId,
-                    DivisionName = _context.Divisions.FirstOrDefault(d => d.Id == ownerProfile.DivisionId)?.Name ?? string.Empty,
-                    DistrictId = ownerProfile.DistrictId,
-                    DistrictName = _context.Districts.FirstOrDefault(d => d.Id == ownerProfile.DistrictId)?.Name ?? string.Empty,
-                    UpazilaId = ownerProfile.UpazilaId,
-                    UpazilaName = _context.Upazilas.FirstOrDefault(u => u.Id == ownerProfile.UpazilaId)?.Name ?? string.Empty,
-                    AreaType = ownerProfile.AreaType,
-                    WardId = ownerProfile.WardId,
-                    WardName = _context.Wards.FirstOrDefault(w => w.Id == ownerProfile.WardId)?.Name ?? string.Empty,
-                    VillageId = ownerProfile.VillageId,
-                    VillageName = _context.Villages.FirstOrDefault(v => v.Id == ownerProfile.VillageId)?.Name ?? string.Empty,
-                    PostCode = ownerProfile.PostCode,
-                    HoldingNo = ownerProfile.HoldingNo
-                },
+                Division = ownerProfile.Division,
+                District = ownerProfile.District,
+                Upazila = ownerProfile.Upazila,
+                AreaType = ownerProfile.AreaType.ToString(),
+                Ward = ownerProfile.Ward,
+                Village = ownerProfile.Village,
+                PostCode = ownerProfile.PostCode,
+                HoldingNo = ownerProfile.HoldingNo,
                 Profession = ownerProfile.Profession,
                 IsApproved = ownerProfile.IsApproved
             });
@@ -333,25 +264,18 @@ namespace BashindaAPI.Controllers
 
             try
             {
-                // Validate location hierarchy
-                if (!await ValidateLocationHierarchy(dto.DivisionId, dto.DistrictId, dto.UpazilaId, dto.AreaType, dto.WardId, dto.VillageId))
-                {
-                    return BadRequest(ApiResponse<object>.ErrorResponse(
-                        "Invalid location hierarchy. Please ensure Division, District, Upazila, Ward, and Village/Area are related correctly."));
-                }
-
-                // Update fields
+                // Update fields with string-based location data
                 ownerProfile.FullName = dto.FullName;
                 ownerProfile.DateOfBirth = dto.DateOfBirth;
                 ownerProfile.NationalId = dto.NationalId;
                 ownerProfile.MobileNo = dto.MobileNo;
                 ownerProfile.Email = dto.Email;
-                ownerProfile.DivisionId = dto.DivisionId;
-                ownerProfile.DistrictId = dto.DistrictId;
-                ownerProfile.UpazilaId = dto.UpazilaId;
+                ownerProfile.Division = dto.Division;
+                ownerProfile.District = dto.District;
+                ownerProfile.Upazila = dto.Upazila;
                 ownerProfile.AreaType = dto.AreaType;
-                ownerProfile.WardId = dto.WardId;
-                ownerProfile.VillageId = dto.VillageId;
+                ownerProfile.Ward = dto.Ward;
+                ownerProfile.Village = dto.Village;
                 ownerProfile.PostCode = dto.PostCode;
                 ownerProfile.HoldingNo = dto.HoldingNo;
                 ownerProfile.Profession = dto.Profession;
@@ -384,32 +308,6 @@ namespace BashindaAPI.Controllers
                 _logger.LogError(ex, "Error updating apartment owner profile {ProfileId}", id);
                 return StatusCode(500, ApiResponse<object>.ErrorResponse("An error occurred while updating the profile."));
             }
-        }
-
-        // Helper method to validate location hierarchy
-        private async Task<bool> ValidateLocationHierarchy(int divisionId, int districtId, int upazilaId, AreaType areaType, int wardId, int villageId)
-        {
-            // Check if division exists
-            var division = await _context.Divisions.FindAsync(divisionId);
-            if (division == null) return false;
-            
-            // Check if district exists and belongs to the specified division
-            var district = await _context.Districts.FirstOrDefaultAsync(d => d.Id == districtId && d.DivisionId == divisionId);
-            if (district == null) return false;
-            
-            // Check if upazila exists and belongs to the specified district
-            var upazila = await _context.Upazilas.FirstOrDefaultAsync(u => u.Id == upazilaId && u.DistrictId == districtId);
-            if (upazila == null) return false;
-            
-            // Check if ward exists, belongs to the specified upazila, and has the correct area type
-            var ward = await _context.Wards.FirstOrDefaultAsync(w => w.Id == wardId && w.UpazilaId == upazilaId && w.AreaType == areaType);
-            if (ward == null) return false;
-            
-            // Check if village exists and belongs to the specified ward
-            var village = await _context.Villages.FirstOrDefaultAsync(v => v.Id == villageId && v.WardId == wardId);
-            if (village == null) return false;
-            
-            return true;
         }
 
         // PATCH: api/ApartmentOwnerProfiles/5/approve

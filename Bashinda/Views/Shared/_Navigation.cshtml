@@ -102,7 +102,7 @@
                 </div>
                 
                 <a class="nav-link @(currentController == "Admin" && currentAction == "Index" ? "active" : "")" 
-                   asp-controller="Admin" asp-action="Index">
+                   asp-controller="Admin" asp-action="Dashboard">
                     <i class="fas fa-tachometer-alt"></i>
                     Admin Dashboard
                 </a>
@@ -123,11 +123,25 @@
                    asp-controller="Admin" asp-action="UserAccounts">
                     <i class="fas fa-users-cog"></i>
                     User Management
-                </a>
+                </a>                
                 
                 <div class="sidebar-heading">
                     <div class="small px-3 py-2 text-muted">GENERAL</div>
                 </div>
+            }
+            @if (User.IsInRole("SuperAdmin"))
+            {
+
+                <a class="nav-link @(currentController == "AdminManagement" && currentAction == "Index" ? "active" : "")"
+                   asp-controller="AdminManagement" asp-action="Index">
+                <i class="fas fa-users-cog"></i>
+                View Admins
+                </a>
+                <a class="nav-link @(currentController == "AdminManagement" && currentAction == "Create" ? "active" : "")"
+                   asp-controller="AdminManagement" asp-action="Create">
+                <i class="fas fa-users-cog"></i>
+                Create Admins
+                </a>
             }
             
             <!-- Show renters link only to apartment owners and admins -->
@@ -145,22 +159,6 @@
                 <i class="fas fa-shield-alt"></i>
                 Privacy
             </a>
-            
-            <a class="nav-link" href="#">
-                <i class="fas fa-building"></i>
-                Properties
-            </a>
-            
-            <a class="nav-link" href="#">
-                <i class="fas fa-file-invoice-dollar"></i>
-                Payments
-            </a>
-            
-            <a class="nav-link" href="#">
-                <i class="fas fa-cog"></i>
-                Settings
-            </a>
-
             <!-- Renter Section - Only visible to apartment renters -->
             @if (User.IsInRole("ApartmentRenter"))
             {

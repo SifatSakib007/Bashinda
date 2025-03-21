@@ -4,157 +4,103 @@ namespace Bashinda.Services
 {
     public interface ILocationDataService
     {
-        Task<int> GetDivisionIdAsync(string divisionName);
-        Task<int> GetDistrictIdAsync(string districtName, int divisionId);
-        Task<int> GetUpazilaIdAsync(string upazilaName, int districtId);
-        Task<int> GetWardIdAsync(string wardName, int upazilaId, string localityType);
-        Task<int> GetVillageIdAsync(string villageName, int wardId);
+        Task<List<string>> GetDivisionsAsync();
+        Task<List<string>> GetDistrictsAsync(string division);
+        Task<List<string>> GetUpazilasAsync(string district);
+        Task<List<string>> GetWardsAsync(string upazila, AreaType areaType);
+        Task<List<string>> GetVillagesAsync(string ward);
         Task<AreaType> GetAreaTypeAsync(string localityTypeName);
+        Task<List<string>> GetAreaTypesAsync();
+
+
     }
 
     public class LocationDataService : ILocationDataService
     {
-        // Mock data for location IDs (in a real application, this would come from the database)
-        private readonly Dictionary<string, int> _divisions = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        // Mock data for locations as string lists
+        private readonly Dictionary<string, List<string>> _districtsByDivision = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         {
-            { "Dhaka", 1 },
-            { "Chittagong", 2 },
-            { "Khulna", 3 },
-            { "Rajshahi", 4 },
-            { "Sylhet", 5 }
+            { "Dhaka", new List<string> { "Dhaka", "Gazipur", "Narayanganj", "Narsingdi", "Tangail" } },
+            { "Chittagong", new List<string> { "Chittagong", "Cox's Bazar", "Bandarban", "Rangamati", "Khagrachari" } },
+            { "Khulna", new List<string> { "Khulna", "Bagerhat", "Satkhira", "Jessore", "Jhenaidah" } },
+            { "Rajshahi", new List<string> { "Rajshahi", "Chapainawabganj", "Natore", "Naogaon", "Bogra" } },
+            { "Sylhet", new List<string> { "Sylhet", "Moulvibazar", "Habiganj", "Sunamganj", "Sreemangal" } },
+            { "Barisal", new List<string> { "Barisal", "Bhola", "Patuakhali", "Pirojpur", "Jhalokati" } },
+            { "Rangpur", new List<string> { "Rangpur", "Dinajpur", "Kurigram", "Gaibandha", "Nilphamari" } },
+            { "Mymensingh", new List<string> { "Mymensingh", "Jamalpur", "Sherpur", "Netrokona", "Kishoreganj" } }
         };
 
-        private readonly Dictionary<(int DivisionId, string District), int> _districts = new Dictionary<(int, string), int>(new DistrictComparer())
+        private readonly Dictionary<string, List<string>> _upazilasByDistrict = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         {
-            { (1, "Dhaka"), 1 },
-            { (1, "Gazipur"), 2 },
-            { (1, "Narayanganj"), 3 },
-            { (1, "Narsingdi"), 4 },
-            { (1, "Tangail"), 5 },
-            { (2, "Chittagong"), 201 },
-            { (2, "Cox's Bazar"), 202 },
-            { (2, "Bandarban"), 203 },
-            { (2, "Rangamati"), 204 },
-            { (2, "Khagrachari"), 205 },
-            { (3, "Khulna"), 301 },
-            { (3, "Bagerhat"), 302 },
-            { (3, "Satkhira"), 303 },
-            { (3, "Jessore"), 304 },
-            { (3, "Jhenaidah"), 305 },
-            { (4, "Rajshahi"), 401 },
-            { (4, "Chapainawabganj"), 402 },
-            { (4, "Natore"), 403 },
-            { (4, "Naogaon"), 404 },
-            { (4, "Bogra"), 405 },
-            { (5, "Sylhet"), 501 },
-            { (5, "Moulvibazar"), 502 },
-            { (5, "Habiganj"), 503 },
-            { (5, "Sunamganj"), 504 }
+            { "Dhaka", new List<string> { "Dhaka North", "Dhaka South", "Savar", "Dhamrai", "Keraniganj" } },
+            { "Gazipur", new List<string> { "Gazipur Sadar", "Kaliakoir", "Kaliganj", "Kapasia", "Sreepur" } },
+            { "Chittagong", new List<string> { "Chittagong City", "Anwara", "Boalkhali", "Chandanaish", "Fatikchhari" } }
+            // Add more districts as needed
         };
 
-        private readonly Dictionary<(int DistrictId, string Upazila), int> _upazilas = new Dictionary<(int, string), int>(new UpazilaComparer())
+        private readonly Dictionary<(string Upazila, AreaType AreaType), List<string>> _wardsByUpazilaAndType = new Dictionary<(string, AreaType), List<string>>(new WardComparer())
         {
-            { (1, "Dhaka North"), 1 },
-            { (1, "Dhaka South"), 2 },
-            { (1, "Savar"), 3 },
-            { (1, "Dhamrai"), 4 },
-            { (1, "Keraniganj"), 5 },
-            { (102, "Gazipur Sadar"), 10201 },
-            { (102, "Kaliakoir"), 10202 },
-            { (102, "Kaliganj"), 10203 },
-            { (102, "Kapasia"), 10204 },
-            { (102, "Sreepur"), 10205 },
-            { (201, "Chittagong City"), 20101 },
-            { (201, "Anwara"), 20102 },
-            { (201, "Boalkhali"), 20103 },
-            { (201, "Chandanaish"), 20104 },
-            { (201, "Fatikchhari"), 20105 }
+            { ("Dhaka North", AreaType.CityCorporation), new List<string> { "Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5" } },
+            { ("Dhaka South", AreaType.CityCorporation), new List<string> { "Ward 6", "Ward 7", "Ward 8", "Ward 9", "Ward 10" } },
+            { ("Savar", AreaType.Pourashava), new List<string> { "Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5" } },
+            { ("Savar", AreaType.Union), new List<string> { "Union 1", "Union 2", "Union 3", "Union 4", "Union 5" } }
+            // Add more upazilas and area types as needed
         };
 
-        private readonly Dictionary<(int UpazilaId, string Ward, AreaType AreaType), int> _wards = new Dictionary<(int, string, AreaType), int>(new WardComparer())
+        private readonly Dictionary<string, List<string>> _villagesByWard = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         {
-            { (1, "Ward 1", AreaType.CityCorporation), 1010101 },
-            { (1, "Ward 2", AreaType.CityCorporation), 1010102 },
-            { (1, "Ward 3", AreaType.CityCorporation), 1010103 },
-            { (1, "Ward 4", AreaType.CityCorporation), 1010104 },
-            { (1, "Ward 5", AreaType.CityCorporation), 1010105 },
-            { (10102, "Ward 6", AreaType.CityCorporation), 1010201 },
-            { (10102, "Ward 7", AreaType.CityCorporation), 1010202 },
-            { (10102, "Ward 8", AreaType.CityCorporation), 1010203 },
-            { (10102, "Ward 9", AreaType.CityCorporation), 1010204 },
-            { (10102, "Ward 10", AreaType.CityCorporation), 1010205 },
-            { (10103, "Ward 1", AreaType.Pourashava), 1010301 },
-            { (10103, "Ward 2", AreaType.Pourashava), 1010302 },
-            { (10103, "Ward 3", AreaType.Pourashava), 1010303 }
+            { "Ward 1", new List<string> { "Mohakhali", "Banani", "Gulshan", "Baridhara", "Niketan" } },
+            { "Ward 2", new List<string> { "Dhanmondi", "Lalmatia", "Mohammadpur", "Adabar", "Shyamoli" } },
+            { "Ward 6", new List<string> { "Lalbagh", "Hazaribagh", "Nawabganj", "Kamrangirchar", "Chawkbazar" } }
+            // Add more wards as needed
         };
 
-        private readonly Dictionary<(int WardId, string Village), int> _villages = new Dictionary<(int, string), int>(new VillageComparer())
+        public Task<List<string>> GetDivisionsAsync()
         {
-            { (1, "Mohakhali"), 101010101 },
-            { (1, "Banani"), 101010102 },
-            { (1, "Gulshan"), 101010103 },
-            { (1, "Baridhara"), 101010104 },
-            { (1, "Niketan"), 101010105 },
-            { (1010102, "Dhanmondi"), 101010201 },
-            { (1010102, "Lalmatia"), 101010202 },
-            { (1010102, "Mohammadpur"), 101010203 },
-            { (1010102, "Adabar"), 101010204 },
-            { (1010102, "Shyamoli"), 101010205 },
-            { (1010201, "Lalbagh"), 101020101 },
-            { (1010201, "Hazaribagh"), 101020102 },
-            { (1010201, "Nawabganj"), 101020103 },
-            { (1010201, "Kamrangirchar"), 101020104 },
-            { (1010201, "Chawkbazar"), 101020105 }
-        };
-
-        public Task<int> GetDivisionIdAsync(string divisionName)
-        {
-            if (_divisions.TryGetValue(divisionName, out int id))
-            {
-                return Task.FromResult(id);
-            }
-            return Task.FromResult(1); // Default to Dhaka if not found
+            return Task.FromResult(_districtsByDivision.Keys.ToList());
         }
 
-        public Task<int> GetDistrictIdAsync(string districtName, int divisionId)
+        public Task<List<string>> GetDistrictsAsync(string division)
         {
-            var key = (divisionId, districtName);
-            if (_districts.TryGetValue(key, out int id))
+            if (_districtsByDivision.TryGetValue(division, out var districts))
             {
-                return Task.FromResult(id);
+                return Task.FromResult(districts);
             }
-            return Task.FromResult(101); // Default to Dhaka district if not found
+            return Task.FromResult(new List<string> { "Dhaka" }); // Default
         }
 
-        public Task<int> GetUpazilaIdAsync(string upazilaName, int districtId)
+        public Task<List<string>> GetUpazilasAsync(string district)
         {
-            var key = (districtId, upazilaName);
-            if (_upazilas.TryGetValue(key, out int id))
+            if (_upazilasByDistrict.TryGetValue(district, out var upazilas))
             {
-                return Task.FromResult(id);
+                return Task.FromResult(upazilas);
             }
-            return Task.FromResult(10101); // Default to Dhaka North if not found
+            
+            // If district not found in the dictionary, return a default list
+            return Task.FromResult(new List<string> { "Dhaka North", "Dhaka South" });
         }
 
-        public Task<int> GetWardIdAsync(string wardName, int upazilaId, string localityType)
+        public Task<List<string>> GetWardsAsync(string upazila, AreaType areaType)
         {
-            AreaType areaType = GetAreaTypeAsync(localityType).Result;
-            var key = (upazilaId, wardName, areaType);
-            if (_wards.TryGetValue(key, out int id))
+            var key = (upazila, areaType);
+            if (_wardsByUpazilaAndType.TryGetValue(key, out var wards))
             {
-                return Task.FromResult(id);
+                return Task.FromResult(wards);
             }
-            return Task.FromResult(1010101); // Default to Ward 1 if not found
+            
+            // If not found, return a default list
+            return Task.FromResult(new List<string> { "Ward 1", "Ward 2", "Ward 3" });
         }
 
-        public Task<int> GetVillageIdAsync(string villageName, int wardId)
+        public Task<List<string>> GetVillagesAsync(string ward)
         {
-            var key = (wardId, villageName);
-            if (_villages.TryGetValue(key, out int id))
+            if (_villagesByWard.TryGetValue(ward, out var villages))
             {
-                return Task.FromResult(id);
+                return Task.FromResult(villages);
             }
-            return Task.FromResult(101010101); // Default to Mohakhali if not found
+            
+            // If not found, return a default list
+            return Task.FromResult(new List<string> { "Area 1", "Area 2", "Area 3" });
         }
 
         public Task<AreaType> GetAreaTypeAsync(string localityTypeName)
@@ -168,61 +114,24 @@ namespace Bashinda.Services
             });
         }
 
-        // Custom comparer classes for complex keys
-        private class DistrictComparer : IEqualityComparer<(int DivisionId, string District)>
+        public Task<List<string>> GetAreaTypesAsync()
         {
-            public bool Equals((int DivisionId, string District) x, (int DivisionId, string District) y)
-            {
-                return x.DivisionId == y.DivisionId && 
-                       string.Equals(x.District, y.District, StringComparison.OrdinalIgnoreCase);
-            }
-
-            public int GetHashCode((int DivisionId, string District) obj)
-            {
-                return HashCode.Combine(obj.DivisionId, obj.District.ToLower());
-            }
+            // Return the enum values as strings, including all possible values
+            return Task.FromResult(Enum.GetNames(typeof(AreaType)).ToList());
         }
 
-        private class UpazilaComparer : IEqualityComparer<(int DistrictId, string Upazila)>
+        // Custom comparer class for complex key
+        private class WardComparer : IEqualityComparer<(string Upazila, AreaType AreaType)>
         {
-            public bool Equals((int DistrictId, string Upazila) x, (int DistrictId, string Upazila) y)
+            public bool Equals((string Upazila, AreaType AreaType) x, (string Upazila, AreaType AreaType) y)
             {
-                return x.DistrictId == y.DistrictId && 
-                       string.Equals(x.Upazila, y.Upazila, StringComparison.OrdinalIgnoreCase);
-            }
-
-            public int GetHashCode((int DistrictId, string Upazila) obj)
-            {
-                return HashCode.Combine(obj.DistrictId, obj.Upazila.ToLower());
-            }
-        }
-
-        private class WardComparer : IEqualityComparer<(int UpazilaId, string Ward, AreaType AreaType)>
-        {
-            public bool Equals((int UpazilaId, string Ward, AreaType AreaType) x, (int UpazilaId, string Ward, AreaType AreaType) y)
-            {
-                return x.UpazilaId == y.UpazilaId && 
-                       string.Equals(x.Ward, y.Ward, StringComparison.OrdinalIgnoreCase) &&
+                return string.Equals(x.Upazila, y.Upazila, StringComparison.OrdinalIgnoreCase) && 
                        x.AreaType == y.AreaType;
             }
 
-            public int GetHashCode((int UpazilaId, string Ward, AreaType AreaType) obj)
+            public int GetHashCode((string Upazila, AreaType AreaType) obj)
             {
-                return HashCode.Combine(obj.UpazilaId, obj.Ward.ToLower(), obj.AreaType);
-            }
-        }
-
-        private class VillageComparer : IEqualityComparer<(int WardId, string Village)>
-        {
-            public bool Equals((int WardId, string Village) x, (int WardId, string Village) y)
-            {
-                return x.WardId == y.WardId && 
-                       string.Equals(x.Village, y.Village, StringComparison.OrdinalIgnoreCase);
-            }
-
-            public int GetHashCode((int WardId, string Village) obj)
-            {
-                return HashCode.Combine(obj.WardId, obj.Village.ToLower());
+                return HashCode.Combine(obj.Upazila.ToLower(), obj.AreaType);
             }
         }
     }

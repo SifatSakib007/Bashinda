@@ -6,9 +6,11 @@ namespace Bashinda.ViewModels
     // Authentication DTOs
     public class LoginRequestDto
     {
-        [Required]
-        [EmailAddress] 
-        public string Email { get; set; } = string.Empty; 
+        [Phone]
+        public string? PhoneNumber { get; set; }
+
+        [EmailAddress]
+        public string? Email { get; set; }
 
         [Required]
         public string Password { get; set; } = string.Empty;
@@ -91,6 +93,11 @@ namespace Bashinda.ViewModels
         public DateTime DateOfBirth { get; set; }
         public string? SelfImagePath { get; set; }
         public bool IsApproved { get; set; }
+        
+        // Location information
+        public string Division { get; set; } = string.Empty;
+        public string District { get; set; } = string.Empty;
+        public string Upazila { get; set; } = string.Empty;
     }
 
     public class CreateRenterProfileDto
@@ -132,42 +139,14 @@ namespace Bashinda.ViewModels
         [Required]
         public string Email { get; set; } = string.Empty;
         
-        // String location properties for reference
+        // Location information - string-based fields
         public string Division { get; set; } = string.Empty;
-        
         public string District { get; set; } = string.Empty;
-        
         public string Upazila { get; set; } = string.Empty;
-        
-        public string LocalityType { get; set; } = string.Empty;
-        
+        public string AreaType { get; set; } = string.Empty;
         public string Ward { get; set; } = string.Empty;
-        
-        public string VillageArea { get; set; } = string.Empty;
-        
-        // Add the ID properties that the API expects
-        [Required]
-        public int DivisionId { get; set; }
-        
-        [Required]
-        public int DistrictId { get; set; }
-        
-        [Required]
-        public int UpazilaId { get; set; }
-        
-        [Required]
-        public Bashinda.Models.AreaType AreaType { get; set; }
-        
-        [Required]
-        public int WardId { get; set; }
-        
-        [Required]
-        public int VillageId { get; set; }
-        
-        [Required]
+        public string Village { get; set; } = string.Empty;
         public string PostCode { get; set; } = string.Empty;
-        
-        [Required]
         public string HoldingNo { get; set; } = string.Empty;
     }
 

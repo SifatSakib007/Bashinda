@@ -22,6 +22,79 @@ namespace BashindaAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("BashindaAPI.Models.AdminPermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("CanApproveOwners")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanApproveRenters")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanManageApartments")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewAddress")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewBirthRegistration")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewDateOfBirth")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewEmail")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewFamilyInfo")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewNationalId")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewPhone")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewProfession")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewProfileImage")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanViewUserName")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("District")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Division")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Upazila")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Village")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ward")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("AdminPermissions");
+                });
+
             modelBuilder.Entity("BashindaAPI.Models.Apartment", b =>
                 {
                     b.Property<int>("Id")
@@ -94,11 +167,15 @@ namespace BashindaAPI.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DistrictId")
-                        .HasColumnType("int");
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("DivisionId")
-                        .HasColumnType("int");
+                    b.Property<string>("Division")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -144,31 +221,27 @@ namespace BashindaAPI.Migrations
                     b.Property<string>("SelfImagePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UpazilaId")
-                        .HasColumnType("int");
+                    b.Property<string>("Upazila")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("VillageId")
-                        .HasColumnType("int");
+                    b.Property<string>("Village")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("WardId")
-                        .HasColumnType("int");
+                    b.Property<string>("Ward")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DistrictId");
-
-                    b.HasIndex("DivisionId");
-
-                    b.HasIndex("UpazilaId");
-
                     b.HasIndex("UserId");
-
-                    b.HasIndex("VillageId");
-
-                    b.HasIndex("WardId");
 
                     b.ToTable("ApartmentOwnerProfiles");
                 });
@@ -222,8 +295,10 @@ namespace BashindaAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AreaType")
-                        .HasColumnType("int");
+                    b.Property<string>("AreaType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("BirthRegistrationImagePath")
                         .HasColumnType("nvarchar(max)");
@@ -231,17 +306,23 @@ namespace BashindaAPI.Migrations
                     b.Property<string>("BirthRegistrationNo")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("BloodGroup")
-                        .HasColumnType("int");
+                    b.Property<string>("BloodGroup")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DistrictId")
-                        .HasColumnType("int");
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("DivisionId")
-                        .HasColumnType("int");
+                    b.Property<string>("Division")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -258,8 +339,10 @@ namespace BashindaAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("Gender")
-                        .HasColumnType("int");
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("HoldingNo")
                         .IsRequired()
@@ -288,16 +371,20 @@ namespace BashindaAPI.Migrations
                     b.Property<string>("NationalIdImagePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Nationality")
-                        .HasColumnType("int");
+                    b.Property<string>("Nationality")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("PostCode")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<int>("Profession")
-                        .HasColumnType("int");
+                    b.Property<string>("Profession")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("RejectionReason")
                         .HasColumnType("nvarchar(max)");
@@ -305,31 +392,27 @@ namespace BashindaAPI.Migrations
                     b.Property<string>("SelfImagePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UpazilaId")
-                        .HasColumnType("int");
+                    b.Property<string>("Upazila")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("VillageId")
-                        .HasColumnType("int");
+                    b.Property<string>("Village")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("WardId")
-                        .HasColumnType("int");
+                    b.Property<string>("Ward")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DistrictId");
-
-                    b.HasIndex("DivisionId");
-
-                    b.HasIndex("UpazilaId");
-
                     b.HasIndex("UserId");
-
-                    b.HasIndex("VillageId");
-
-                    b.HasIndex("WardId");
 
                     b.ToTable("RenterProfiles");
                 });
@@ -365,31 +448,70 @@ namespace BashindaAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Email")
-                        .IsRequired()
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserName")
-                        .IsRequired()
+                    b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("BashindaAPI.Models.UserOTP", b =>
@@ -466,6 +588,150 @@ namespace BashindaAPI.Migrations
                     b.ToTable("Wards");
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("BashindaAPI.Models.AdminPermission", b =>
+                {
+                    b.HasOne("BashindaAPI.Models.User", "User")
+                        .WithOne("AdminPermission")
+                        .HasForeignKey("BashindaAPI.Models.AdminPermission", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BashindaAPI.Models.Apartment", b =>
                 {
                     b.HasOne("BashindaAPI.Models.ApartmentOwnerProfile", "Owner")
@@ -479,53 +745,13 @@ namespace BashindaAPI.Migrations
 
             modelBuilder.Entity("BashindaAPI.Models.ApartmentOwnerProfile", b =>
                 {
-                    b.HasOne("BashindaAPI.Models.District", "District")
-                        .WithMany()
-                        .HasForeignKey("DistrictId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BashindaAPI.Models.Division", "Division")
-                        .WithMany()
-                        .HasForeignKey("DivisionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BashindaAPI.Models.Upazila", "Upazila")
-                        .WithMany()
-                        .HasForeignKey("UpazilaId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("BashindaAPI.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BashindaAPI.Models.Village", "Village")
-                        .WithMany()
-                        .HasForeignKey("VillageId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BashindaAPI.Models.Ward", "Ward")
-                        .WithMany()
-                        .HasForeignKey("WardId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("District");
-
-                    b.Navigation("Division");
-
-                    b.Navigation("Upazila");
-
                     b.Navigation("User");
-
-                    b.Navigation("Village");
-
-                    b.Navigation("Ward");
                 });
 
             modelBuilder.Entity("BashindaAPI.Models.District", b =>
@@ -541,53 +767,13 @@ namespace BashindaAPI.Migrations
 
             modelBuilder.Entity("BashindaAPI.Models.RenterProfile", b =>
                 {
-                    b.HasOne("BashindaAPI.Models.District", "District")
-                        .WithMany()
-                        .HasForeignKey("DistrictId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BashindaAPI.Models.Division", "Division")
-                        .WithMany()
-                        .HasForeignKey("DivisionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BashindaAPI.Models.Upazila", "Upazila")
-                        .WithMany()
-                        .HasForeignKey("UpazilaId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("BashindaAPI.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BashindaAPI.Models.Village", "Village")
-                        .WithMany()
-                        .HasForeignKey("VillageId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BashindaAPI.Models.Ward", "Ward")
-                        .WithMany()
-                        .HasForeignKey("WardId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("District");
-
-                    b.Navigation("Division");
-
-                    b.Navigation("Upazila");
-
                     b.Navigation("User");
-
-                    b.Navigation("Village");
-
-                    b.Navigation("Ward");
                 });
 
             modelBuilder.Entity("BashindaAPI.Models.Upazila", b =>
@@ -634,6 +820,57 @@ namespace BashindaAPI.Migrations
                     b.Navigation("Upazila");
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.HasOne("BashindaAPI.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.HasOne("BashindaAPI.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BashindaAPI.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.HasOne("BashindaAPI.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("BashindaAPI.Models.District", b =>
                 {
                     b.Navigation("Upazilas");
@@ -647,6 +884,11 @@ namespace BashindaAPI.Migrations
             modelBuilder.Entity("BashindaAPI.Models.Upazila", b =>
                 {
                     b.Navigation("Wards");
+                });
+
+            modelBuilder.Entity("BashindaAPI.Models.User", b =>
+                {
+                    b.Navigation("AdminPermission");
                 });
 
             modelBuilder.Entity("BashindaAPI.Models.Ward", b =>

@@ -25,8 +25,15 @@ namespace BashindaAPI.DTOs
         public string Email { get; set; } = string.Empty;
         public string? SelfImagePath { get; set; }
         
-        // Address information
-        public AddressDto Address { get; set; } = new AddressDto();
+        // Location information - string-based fields
+        public string Division { get; set; } = string.Empty;
+        public string District { get; set; } = string.Empty;
+        public string Upazila { get; set; } = string.Empty;
+        public string AreaType { get; set; } = string.Empty;
+        public string Ward { get; set; } = string.Empty;
+        public string Village { get; set; } = string.Empty;
+        public string PostCode { get; set; } = string.Empty;
+        public string HoldingNo { get; set; } = string.Empty;
         
         public bool IsApproved { get; set; }
         public string? RejectionReason { get; set; }
@@ -58,16 +65,20 @@ namespace BashindaAPI.DTOs
         public string MotherName { get; set; } = string.Empty;
 
         [Required]
-        public Nationality Nationality { get; set; }
+        [StringLength(50)]
+        public string Nationality { get; set; } = string.Empty;
 
         [Required]
-        public BloodGroup BloodGroup { get; set; }
+        [StringLength(50)]
+        public string BloodGroup { get; set; } = string.Empty;
 
         [Required]
-        public Profession Profession { get; set; }
+        [StringLength(50)]
+        public string Profession { get; set; } = string.Empty;
 
         [Required]
-        public Gender Gender { get; set; }
+        [StringLength(50)]
+        public string Gender { get; set; } = string.Empty;
 
         [Required]
         [StringLength(20)]
@@ -78,24 +89,30 @@ namespace BashindaAPI.DTOs
         [StringLength(100)]
         public string Email { get; set; } = string.Empty;
 
-        // Location information
+        // Location information - using strings instead of IDs
         [Required]
-        public int DivisionId { get; set; }
+        [StringLength(100)]
+        public string Division { get; set; } = string.Empty;
 
         [Required]
-        public int DistrictId { get; set; }
+        [StringLength(100)]
+        public string District { get; set; } = string.Empty;
 
         [Required]
-        public int UpazilaId { get; set; }
+        [StringLength(100)]
+        public string Upazila { get; set; } = string.Empty;
 
         [Required]
-        public AreaType AreaType { get; set; }
+        [StringLength(50)]
+        public string AreaType { get; set; } = string.Empty;
 
         [Required]
-        public int WardId { get; set; }
+        [StringLength(100)]
+        public string Ward { get; set; } = string.Empty;
 
         [Required]
-        public int VillageId { get; set; }
+        [StringLength(100)]
+        public string Village { get; set; } = string.Empty;
 
         [Required]
         [StringLength(10)]
@@ -130,16 +147,20 @@ namespace BashindaAPI.DTOs
         public string MotherName { get; set; } = string.Empty;
 
         [Required]
-        public Nationality Nationality { get; set; }
+        [StringLength(50)]
+        public string Nationality { get; set; } = string.Empty;
 
         [Required]
-        public BloodGroup BloodGroup { get; set; }
+        [StringLength(50)]
+        public string BloodGroup { get; set; } = string.Empty;
 
         [Required]
-        public Profession Profession { get; set; }
+        [StringLength(50)]
+        public string Profession { get; set; } = string.Empty;
 
         [Required]
-        public Gender Gender { get; set; }
+        [StringLength(50)]
+        public string Gender { get; set; } = string.Empty;
 
         [Required]
         [StringLength(20)]
@@ -150,24 +171,30 @@ namespace BashindaAPI.DTOs
         [StringLength(100)]
         public string Email { get; set; } = string.Empty;
 
-        // Location information
+        // Location information - using strings instead of IDs
         [Required]
-        public int DivisionId { get; set; }
+        [StringLength(100)]
+        public string Division { get; set; } = string.Empty;
 
         [Required]
-        public int DistrictId { get; set; }
+        [StringLength(100)]
+        public string District { get; set; } = string.Empty;
 
         [Required]
-        public int UpazilaId { get; set; }
+        [StringLength(100)]
+        public string Upazila { get; set; } = string.Empty;
 
         [Required]
-        public AreaType AreaType { get; set; }
+        [StringLength(50)]
+        public string AreaType { get; set; } = string.Empty;
 
         [Required]
-        public int WardId { get; set; }
+        [StringLength(100)]
+        public string Ward { get; set; } = string.Empty;
 
         [Required]
-        public int VillageId { get; set; }
+        [StringLength(100)]
+        public string Village { get; set; } = string.Empty;
 
         [Required]
         [StringLength(10)]
@@ -191,6 +218,9 @@ namespace BashindaAPI.DTOs
         public bool IsApproved { get; set; }
         
         // Basic location information
+        public string Division { get; set; } = string.Empty;
+        public string District { get; set; } = string.Empty;
+        public string Upazila { get; set; } = string.Empty;
         public string DivisionName { get; set; } = string.Empty;
         public string DistrictName { get; set; } = string.Empty;
         public string UpazilaName { get; set; } = string.Empty;

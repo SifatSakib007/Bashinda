@@ -1,5 +1,6 @@
 using Bashinda.ViewModels;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Bashinda.Services
 {
@@ -20,8 +21,9 @@ namespace Bashinda.Services
         private readonly IApiService _apiService;
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly ILogger<RenterProfileApiService> _logger;
 
-        public RenterProfileApiService(IApiService apiService, IHttpClientFactory httpClientFactory)
+        public RenterProfileApiService(IApiService apiService, IHttpClientFactory httpClientFactory, ILogger<RenterProfileApiService> logger)
         {
             _apiService = apiService;
             _httpClient = httpClientFactory.CreateClient("BashindaAPI");
@@ -29,6 +31,7 @@ namespace Bashinda.Services
             {
                 PropertyNameCaseInsensitive = true
             };
+            _logger = logger;
         }
 
         public async Task<(bool Success, RenterProfileDto? Data, string[] Errors)> GetByIdAsync(int id, string token)
@@ -67,14 +70,39 @@ namespace Bashinda.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<ApiResponse<RenterProfileDto>>(content, _jsonOptions);
+                    _logger.LogInformation("API response content: {Content}", content);
                     
-                    if (result != null && result.Success)
+                    try 
                     {
-                        return (true, result.Data, Array.Empty<string>());
+                        // Try to deserialize the content directly as RenterProfileDto first
+                        var directResult = JsonSerializer.Deserialize<RenterProfileDto>(content, _jsonOptions);
+                        if (directResult != null)
+                        {
+                            return (true, directResult, Array.Empty<string>());
+                        }
+                    }
+                    catch
+                    {
+                        // If direct deserialization fails, try with ApiResponse wrapper
+                        try
+                        {
+                            var result = JsonSerializer.Deserialize<ApiResponse<RenterProfileDto>>(content, _jsonOptions);
+                            if (result != null && result.Success)
+                            {
+                                return (true, result.Data, Array.Empty<string>());
+                            }
+                            else if (result != null)
+                            {
+                                return (false, null, result.Errors ?? new[] { "API returned failure response" });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to deserialize response as ApiResponse<RenterProfileDto>");
+                        }
                     }
                     
-                    return (false, null, result?.Errors ?? new[] { "Unknown error occurred" });
+                    return (false, null, new[] { "Unable to parse API response" });
                 }
                 
                 return (false, null, new[] { $"API request failed with status code {response.StatusCode}" });
@@ -143,7 +171,32 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.PostAsync("api/renterprofiles", model, token);
+                var apiModel = new
+                {
+                    IsAdult = model.IsAdult,
+                    NationalId = model.IsAdult ? model.NationalId : null,
+                    BirthRegistrationNo = !model.IsAdult ? model.BirthRegistrationNo : null,
+                    DateOfBirth = model.DateOfBirth,
+                    FullName = model.FullName,
+                    FatherName = model.FatherName,
+                    MotherName = model.MotherName,
+                    Nationality = model.Nationality.ToString(),
+                    BloodGroup = model.BloodGroup.ToString(),
+                    Profession = model.Profession.ToString(),
+                    Gender = model.Gender.ToString(),
+                    MobileNo = model.MobileNo,
+                    Email = model.Email,
+                    Division = model.Division,
+                    District = model.District,
+                    Upazila = model.Upazila,
+                    AreaType = model.AreaType,
+                    Ward = model.Ward,
+                    Village = model.Village,
+                    PostCode = model.PostCode,
+                    HoldingNo = model.HoldingNo
+                };
+
+                var response = await _apiService.PostAsync("api/renterprofiles", apiModel, token);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -170,7 +223,32 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.PutAsync($"api/renterprofiles/{id}", model, token);
+                var apiModel = new
+                {
+                    IsAdult = model.IsAdult,
+                    NationalId = model.IsAdult ? model.NationalId : null,
+                    BirthRegistrationNo = !model.IsAdult ? model.BirthRegistrationNo : null,
+                    DateOfBirth = model.DateOfBirth,
+                    FullName = model.FullName,
+                    FatherName = model.FatherName,
+                    MotherName = model.MotherName,
+                    Nationality = model.Nationality.ToString(),
+                    BloodGroup = model.BloodGroup.ToString(),
+                    Profession = model.Profession.ToString(),
+                    Gender = model.Gender.ToString(),
+                    MobileNo = model.MobileNo,
+                    Email = model.Email,
+                    Division = model.Division,
+                    District = model.District,
+                    Upazila = model.Upazila,
+                    AreaType = model.AreaType,
+                    Ward = model.Ward,
+                    Village = model.Village,
+                    PostCode = model.PostCode,
+                    HoldingNo = model.HoldingNo
+                };
+
+                var response = await _apiService.PutAsync($"api/renterprofiles/{id}", apiModel, token);
                 
                 if (response.IsSuccessStatusCode)
                 {

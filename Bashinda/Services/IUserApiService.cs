@@ -36,15 +36,34 @@ namespace Bashinda.Services
         {
             try
             {
-                // Ensure we're sending what the API expects
-                var apiModel = new
+                // Create an appropriate payload based on whether email or phone number is provided
+                object apiModel;
+                
+                if (!string.IsNullOrEmpty(model.PhoneNumber))
                 {
-                    Email = model.Email,
-                    Password = model.Password
-                };
+                    apiModel = new
+                    {
+                        PhoneNumber = model.PhoneNumber,
+                        Password = model.Password
+                    };
+                    System.Diagnostics.Debug.WriteLine($"Sending login request for phone number: {model.PhoneNumber}");
+                }
+                else if (!string.IsNullOrEmpty(model.Email))
+                {
+                    apiModel = new
+                    {
+                        Email = model.Email,
+                        Password = model.Password
+                    };
+                    System.Diagnostics.Debug.WriteLine($"Sending login request for email: {model.Email}");
+                }
+                else
+                {
+                    // Neither email nor phone provided
+                    return (false, null, new[] { "Either email or phone number must be provided" });
+                }
 
-                System.Diagnostics.Debug.WriteLine($"Sending login request for email: {model.Email}");
-                var response = await _apiService.PostAsync("api/auth/login", apiModel);
+                var response = await _apiService.PostAsync("api/auth/login", apiModel, null);
                 var content = await response.Content.ReadAsStringAsync();
                 
                 // Log the raw response
@@ -154,7 +173,7 @@ namespace Bashinda.Services
                     Role = model.Role
                 };
 
-                var response = await _apiService.PostAsync("api/auth/register", apiModel);
+                var response = await _apiService.PostAsync("api/auth/register", apiModel, null);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -202,7 +221,7 @@ namespace Bashinda.Services
                     OtpCode = otp
                 };
 
-                var response = await _apiService.PostAsync("api/auth/verify-otp", apiModel);
+                var response = await _apiService.PostAsync("api/auth/verify-otp", apiModel, null);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -249,7 +268,7 @@ namespace Bashinda.Services
                     Email = email  // Changed to match API's expected format
                 };
 
-                var response = await _apiService.PostAsync("api/auth/resend-otp", apiModel);
+                var response = await _apiService.PostAsync("api/auth/resend-otp", apiModel, null);
                 
                 if (response.IsSuccessStatusCode)
                 {

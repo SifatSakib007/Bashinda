@@ -42,16 +42,16 @@ namespace Bashinda.ViewModels
         public string? MotherName { get; set; }
 
         [Required]
-        public Nationality Nationality { get; set; }
+        public string Nationality { get; set; } = string.Empty;
 
         [Required]
-        public BloodGroup BloodGroup { get; set; }
+        public string BloodGroup { get; set; } = string.Empty;
 
         [Required]
-        public Profession Profession { get; set; }
+        public string Profession { get; set; } = string.Empty;
 
         [Required]
-        public Gender Gender { get; set; }
+        public string Gender { get; set; } = string.Empty;
 
         [Required]
         [Phone]
@@ -75,13 +75,13 @@ namespace Bashinda.ViewModels
         
         // New fields for permanent residence
         [Required]
-        public string? LocalityType { get; set; }
+        public string AreaType { get; set; } = string.Empty;
         
         [Required]
         public string? Ward { get; set; }
         
         [Required]
-        public string? VillageArea { get; set; }
+        public string? Village { get; set; }
         
         [Required]
         [RegularExpression(@"^\d{4}$", ErrorMessage = "Post code must be a 4-digit number.")]

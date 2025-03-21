@@ -4,6 +4,7 @@ namespace Bashinda.Models
 {
     public enum UserRole
     {
+        SuperAdmin,
         Admin,
         ApartmentOwner,
         ApartmentRenter
@@ -13,16 +14,16 @@ namespace Bashinda.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserName { get; set; }
+        public required string UserName { get; set; }
 
         [Required, EmailAddress]
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
         [Required, Phone]
-        public string PhoneNumber { get; set; }
+        public required string PhoneNumber { get; set; }
 
         [Required]
-        public string PasswordHash { get; set; } // We'll store a hashed password
+        public required string PasswordHash { get; set; } // We'll store a hashed password
 
         public bool IsVerified { get; set; }
 

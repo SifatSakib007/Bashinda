@@ -76,7 +76,9 @@ namespace Bashinda.Services
 
                 var loginRequest = new ViewModels.LoginRequestDto
                 {
-                    Email = email,
+                    // API uses either PhoneNumber or Email
+                    PhoneNumber = email.Contains("@") ? null : email,
+                    Email = email.Contains("@") ? email : null,
                     Password = password
                 };
 

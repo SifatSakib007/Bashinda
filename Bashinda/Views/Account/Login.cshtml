@@ -22,11 +22,39 @@
                         <div asp-validation-summary="All" class="alert alert-danger"></div>
                     }
 
-                    <div class="input-icon mb-4">
-                        <i class="bi bi-person"></i>
-                        <input asp-for="Email" class="form-control" placeholder="Email" required />
+                    <!-- Tab navigation -->
+                    <ul class="nav nav-tabs mb-4" id="loginTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="phone-tab" data-bs-toggle="tab" data-bs-target="#phone-content" 
+                                   type="button" role="tab" aria-controls="phone-content" aria-selected="true">
+                                Phone
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email-content" 
+                                   type="button" role="tab" aria-controls="email-content" aria-selected="false">
+                                Email
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab content -->
+                    <div class="tab-content" id="loginTabsContent">
+                        <div class="tab-pane fade show active" id="phone-content" role="tabpanel" aria-labelledby="phone-tab">
+                            <div class="input-icon mb-4">
+                                <i class="bi bi-phone"></i>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="tab-pane fade" id="email-content" role="tabpanel" aria-labelledby="email-tab">
+                            <div class="input-icon mb-4">
+                                <i class="bi bi-envelope"></i>
+                                <input asp-for="Email" class="form-control" placeholder="Email Address" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
                     </div>
-                    <span asp-validation-for="Email" class="text-danger small"></span>
 
                     <div class="input-icon mb-4">
                         <i class="bi bi-lock"></i>
@@ -48,20 +76,36 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Form validation
-        (function () {
-            'use strict'
-            var forms = document.querySelectorAll('.needs-validation')
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
+        // Handle tab switching and form validation
+        document.addEventListener('DOMContentLoaded', () => {
+            const phoneTab = document.getElementById('phone-tab');
+            const emailTab = document.getElementById('email-tab');
+            const phoneInput = document.querySelector('input[name="PhoneNumber"]');
+            const emailInput = document.querySelector('input[name="Email"]');
+            
+            // When switching to phone tab
+            phoneTab.addEventListener('shown.bs.tab', () => {
+                emailInput.value = '';
+                emailInput.removeAttribute('required');
+                phoneInput.setAttribute('required', 'required');
+            });
+            
+            // When switching to email tab
+            emailTab.addEventListener('shown.bs.tab', () => {
+                phoneInput.value = '';
+                phoneInput.removeAttribute('required');
+                emailInput.setAttribute('required', 'required');
+            });
+            
+            // Set initial state
+            if (phoneTab.classList.contains('active')) {
+                phoneInput.setAttribute('required', 'required');
+                emailInput.removeAttribute('required');
+            } else {
+                emailInput.setAttribute('required', 'required');
+                phoneInput.removeAttribute('required');
+            }
+        });
     </script>
 }
 

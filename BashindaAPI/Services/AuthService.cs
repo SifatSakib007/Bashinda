@@ -35,7 +35,24 @@ namespace BashindaAPI.Services
         {
             try
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+                User? user = null;
+                
+                // Try to find user by phone number first, then by email
+                if (!string.IsNullOrEmpty(model.PhoneNumber))
+                {
+                    user = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == model.PhoneNumber);
+                    _logger.LogInformation("Login attempt with phone number: {PhoneNumber}", model.PhoneNumber);
+                }
+                else if (!string.IsNullOrEmpty(model.Email))
+                {
+                    user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
+                    _logger.LogInformation("Login attempt with email: {Email}", model.Email);
+                }
+                else
+                {
+                    return (false, string.Empty, null, new[] { "Either phone number or email must be provided" });
+                }
+                
                 if (user == null)
                 {
                     return (false, string.Empty, null, new[] { "User not found" });
@@ -48,7 +65,7 @@ namespace BashindaAPI.Services
 
                 if (!user.IsVerified)
                 {
-                    return (false, string.Empty, null, new[] { "Email not verified. Please verify your email first." });
+                    return (false, string.Empty, null, new[] { "Account not verified. Please verify your account first." });
                 }
 
                 var token = GenerateJwtToken(user);

@@ -28,5 +28,17 @@ namespace BashindaAPI.Controllers
         {
             return StatusCode(500, ApiResponse<T>.ErrorResponse(message, errors));
         }
+
+        protected ActionResult<ApiResponse<T>> ForbidWithResponse<T>(string message)
+        {
+            return new ObjectResult(new ApiResponse<T>
+            {
+                Success = false,
+                Errors = new[] { message }
+            })
+            {
+                StatusCode = StatusCodes.Status403Forbidden
+            };
+        }
     }
 }

@@ -1,19 +1,23 @@
 using BashindaAPI.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BashindaAPI.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        public DbSet<User> Users { get; set; }
+        // 2. Remove the "new" keyword since we're properly overriding
+        public override DbSet<User> Users { get; set; }
         public DbSet<UserOTP> UserOTPs { get; set; }
         public DbSet<RenterProfile> RenterProfiles { get; set; }
         public DbSet<ApartmentOwnerProfile> ApartmentOwnerProfiles { get; set; }
         public DbSet<Apartment> Apartments { get; set; }
+        public DbSet<AdminPermission> AdminPermissions { get; set; }
 
         // Location tables
         public DbSet<Division> Divisions { get; set; }
@@ -33,6 +37,14 @@ namespace BashindaAPI.Data
                 .HasForeignKey(u => u.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // 3.Configure AdminPermission relationship with correct types
+            modelBuilder.Entity<AdminPermission>(entity =>
+            {
+                entity.HasOne(a => a.User)
+                    .WithOne(u => u.AdminPermission)
+                    .HasForeignKey<AdminPermission>(a => a.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
             // Configure RenterProfile relationships
             modelBuilder.Entity<RenterProfile>(entity =>
             {
@@ -41,30 +53,7 @@ namespace BashindaAPI.Data
                     .HasForeignKey(r => r.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(r => r.Division)
-                    .WithMany()
-                    .HasForeignKey(r => r.DivisionId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(r => r.District)
-                    .WithMany()
-                    .HasForeignKey(r => r.DistrictId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(r => r.Upazila)
-                    .WithMany()
-                    .HasForeignKey(r => r.UpazilaId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(r => r.Ward)
-                    .WithMany()
-                    .HasForeignKey(r => r.WardId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(r => r.Village)
-                    .WithMany()
-                    .HasForeignKey(r => r.VillageId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                // Remove location navigation properties since we're using string-based location fields now
             });
 
             // Configure ApartmentOwnerProfile relationships
@@ -75,30 +64,7 @@ namespace BashindaAPI.Data
                     .HasForeignKey(a => a.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(a => a.Division)
-                    .WithMany()
-                    .HasForeignKey(a => a.DivisionId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(a => a.District)
-                    .WithMany()
-                    .HasForeignKey(a => a.DistrictId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(a => a.Upazila)
-                    .WithMany()
-                    .HasForeignKey(a => a.UpazilaId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(a => a.Ward)
-                    .WithMany()
-                    .HasForeignKey(a => a.WardId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(a => a.Village)
-                    .WithMany()
-                    .HasForeignKey(a => a.VillageId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                // Remove location navigation properties since we're using string-based location fields now
             });
 
             // Configure Apartment relationships

@@ -45,15 +45,18 @@ namespace BashindaAPI.Models
         // Permanent Resident Information
         [Required]
         [Display(Name = "Division")]
-        public int DivisionId { get; set; }
+        [StringLength(100)]
+        public string Division { get; set; } = string.Empty;
         
         [Required]
         [Display(Name = "District")]
-        public int DistrictId { get; set; }
+        [StringLength(100)]
+        public string District { get; set; } = string.Empty;
         
         [Required]
         [Display(Name = "Upazila")]
-        public int UpazilaId { get; set; }
+        [StringLength(100)]
+        public string Upazila { get; set; } = string.Empty;
         
         [Required]
         [Display(Name = "Area Type")]
@@ -61,11 +64,13 @@ namespace BashindaAPI.Models
         
         [Required]
         [Display(Name = "Ward")]
-        public int WardId { get; set; }
+        [StringLength(100)]
+        public string Ward { get; set; } = string.Empty;
         
         [Required]
         [Display(Name = "Village/Area")]
-        public int VillageId { get; set; }
+        [StringLength(100)]
+        public string Village { get; set; } = string.Empty;
         
         [Required]
         [StringLength(10)]
@@ -89,20 +94,5 @@ namespace BashindaAPI.Models
         // Navigation properties
         [ForeignKey("UserId")]
         public User? User { get; set; }
-        
-        [ForeignKey("DivisionId")]
-        public Division? Division { get; set; }
-        
-        [ForeignKey("DistrictId")]
-        public District? District { get; set; }
-        
-        [ForeignKey("UpazilaId")]
-        public Upazila? Upazila { get; set; }
-        
-        [ForeignKey("WardId")]
-        public Ward? Ward { get; set; }
-        
-        [ForeignKey("VillageId")]
-        public Village? Village { get; set; }
     }
 } 

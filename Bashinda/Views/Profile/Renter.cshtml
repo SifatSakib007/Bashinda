@@ -105,11 +105,11 @@
                             <label class="form-label">Nationality</label>
                             <div class="d-flex gap-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="Nationality" value="Bangladeshi" id="nationalityBangladeshi" @(Model.Nationality == Bashinda.Models.Nationality.Bangladeshi ? "checked" : "") required />
+                                    <input class="form-check-input" type="radio" name="Nationality" value="Bangladeshi" id="nationalityBangladeshi" @(Model.Nationality == "Bangladeshi" ? "checked" : "") required />
                                     <label class="form-check-label" for="nationalityBangladeshi">Bangladeshi</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="Nationality" value="Foreigner" id="nationalityForeigner" @(Model.Nationality == Bashinda.Models.Nationality.Foreigner ? "checked" : "") />
+                                    <input class="form-check-input" type="radio" name="Nationality" value="Foreigner" id="nationalityForeigner" @(Model.Nationality == "Foreigner" ? "checked" : "") />
                                     <label class="form-check-label" for="nationalityForeigner">Foreigner</label>
                                 </div>
                             </div>
@@ -144,15 +144,15 @@
                             <label class="form-label">Gender</label>
                             <div class="d-flex gap-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="Gender" value="Male" id="genderMale" @(Model.Gender == Bashinda.Models.Gender.Male ? "checked" : "") required />
+                                    <input class="form-check-input" type="radio" name="Gender" value="Male" id="genderMale" @(Model.Gender == "Male" ? "checked" : "") required />
                                     <label class="form-check-label" for="genderMale">Male</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="Gender" value="Female" id="genderFemale" @(Model.Gender == Bashinda.Models.Gender.Female ? "checked" : "") />
+                                    <input class="form-check-input" type="radio" name="Gender" value="Female" id="genderFemale" @(Model.Gender == "Female" ? "checked" : "") />
                                     <label class="form-check-label" for="genderFemale">Female</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="Gender" value="Other" id="genderOther" @(Model.Gender == Bashinda.Models.Gender.Other ? "checked" : "") />
+                                    <input class="form-check-input" type="radio" name="Gender" value="Other" id="genderOther" @(Model.Gender == "Other" ? "checked" : "") />
                                     <label class="form-check-label" for="genderOther">Other</label>
                                 </div>
                             </div>

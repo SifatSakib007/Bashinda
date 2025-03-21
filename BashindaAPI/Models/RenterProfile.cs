@@ -39,18 +39,22 @@ namespace BashindaAPI.Models
         [StringLength(100)]
         public string MotherName { get; set; } = string.Empty;
 
-        // Nationality, Blood Group, Profession, Gender as enums:
+        // Nationality, Blood Group, Profession, Gender as strings:
         [Required]
-        public Nationality Nationality { get; set; }
+        [StringLength(50)]
+        public string Nationality { get; set; } = string.Empty;
         
         [Required]
-        public BloodGroup BloodGroup { get; set; }
+        [StringLength(50)]
+        public string BloodGroup { get; set; } = string.Empty;
         
         [Required]
-        public Profession Profession { get; set; }
+        [StringLength(50)]
+        public string Profession { get; set; } = string.Empty;
         
         [Required]
-        public Gender Gender { get; set; }
+        [StringLength(50)]
+        public string Gender { get; set; } = string.Empty;
 
         [Required]
         [StringLength(20)]
@@ -63,25 +67,31 @@ namespace BashindaAPI.Models
         
         public string? SelfImagePath { get; set; }
 
-        // Permanent Resident Information - Basic (already in the model)
+        // Permanent Resident Information - using strings instead of IDs
         [Required]
-        public int DivisionId { get; set; }
+        [StringLength(100)]
+        public string Division { get; set; } = string.Empty;
         
         [Required]
-        public int DistrictId { get; set; }
+        [StringLength(100)]
+        public string District { get; set; } = string.Empty;
         
         [Required]
-        public int UpazilaId { get; set; }
+        [StringLength(100)]
+        public string Upazila { get; set; } = string.Empty;
         
-        // New Permanent Resident Information
+        // Use string-based AreaType as well for consistency
         [Required]
-        public AreaType AreaType { get; set; }
+        [StringLength(50)]
+        public string AreaType { get; set; } = string.Empty;
         
         [Required]
-        public int WardId { get; set; }
+        [StringLength(100)]
+        public string Ward { get; set; } = string.Empty;
         
         [Required]
-        public int VillageId { get; set; }
+        [StringLength(100)]
+        public string Village { get; set; } = string.Empty;
         
         [Required]
         [StringLength(10)]
@@ -97,24 +107,9 @@ namespace BashindaAPI.Models
         // Reason for rejection if not approved
         public string? RejectionReason { get; set; }
 
-        // Navigation properties
+        // Navigation property for User only
         [ForeignKey("UserId")]
         public User? User { get; set; }
-        
-        [ForeignKey("DivisionId")]
-        public Division? Division { get; set; }
-        
-        [ForeignKey("DistrictId")]
-        public District? District { get; set; }
-        
-        [ForeignKey("UpazilaId")]
-        public Upazila? Upazila { get; set; }
-        
-        [ForeignKey("WardId")]
-        public Ward? Ward { get; set; }
-        
-        [ForeignKey("VillageId")]
-        public Village? Village { get; set; }
     }
 
     // Enums for the dropdowns and bullet selections:
