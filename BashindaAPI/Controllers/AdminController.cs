@@ -262,14 +262,14 @@ namespace BashindaAPI.Controllers
         //        return ServerErrorWithResponse<bool>("An error occurred while processing the request");
         //    }
         //}
-        [HttpPut("renter-profiles/{id}/approve")]
-        public async Task<ActionResult<ApiResponse<bool>>> ApproveRenterProfile(int id, [FromBody] ApproveProfileDto dto)
+        [HttpPut("renter-profiles/{profileId}/approve")]
+        public async Task<ActionResult<ApiResponse<bool>>> ApproveRenterProfile(int profileId, [FromBody] ApproveProfileDto dto)
         {
             try
             {
                 var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-                if (!await _adminService.CanAdminAccessUserAsync(adminId, id))
+                if (!await _adminService.CanAdminAccessUserAsync(adminId, profileId))
                 {
                     return StatusCode(StatusCodes.Status403Forbidden,
                         new ApiResponse<bool>
@@ -281,13 +281,17 @@ namespace BashindaAPI.Controllers
 
                 var profile = await _context.RenterProfiles
                     .Include(p => p.User)
-                    .FirstOrDefaultAsync(p => p.Id == id);
+                    .FirstOrDefaultAsync(p => p.Id == profileId);
 
                 if (profile == null)
                 {
                     return NotFoundWithResponse<bool>("Renter profile not found");
                 }
-
+                // Use the UserId from the profile, not the profileId
+                if (!await _adminService.CanAdminAccessUserAsync(adminId, profile.UserId))
+                {
+                    return Forbid();
+                }
                 profile.IsApproved = dto.IsApproved;
                 profile.RejectionReason = dto.IsApproved ? null : dto.Reason;
 
@@ -297,7 +301,7 @@ namespace BashindaAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error approving renter profile ID: {ProfileId}", id);
+                _logger.LogError(ex, "Error approving renter profile ID: {ProfileId}", profileId);
                 return ServerErrorWithResponse<bool>("Failed to process approval");
             }
         }
@@ -538,6 +542,15 @@ namespace BashindaAPI.Controllers
                 _logger.LogError(ex, "Error retrieving permissions for admin {AdminId}", adminId);
                 return ServerErrorWithResponse<AdminPermissionDto>("Error retrieving permissions");
             }
+        }
+
+        // In AdminController.cs (API)
+        [HttpGet("verify-access/{userId}")]
+        public async Task<IActionResult> VerifyAccess(int userId)
+        {
+            var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            bool canAccess = await _adminService.CanAdminAccessUserAsync(adminId, userId);
+            return canAccess ? Ok() : Unauthorized();
         }
         // Helper method to get authentication token
         private string GetAuthToken()

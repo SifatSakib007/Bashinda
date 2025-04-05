@@ -398,13 +398,17 @@ namespace Bashinda.Controllers
         {
             // Parse the string claim value to integer
             var adminIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Debug: Log the raw claim value
+            _logger.LogInformation("Admin ID Claim Value: {ClaimValue}", adminIdClaim);
+
 
             if (!int.TryParse(adminIdClaim, out int adminId))
             {
                 _logger.LogError("Invalid admin ID format in claims: {AdminIdClaim}", adminIdClaim);
-                return new AdminLocationFilters(); // Return empty filters or throw exception
+                throw new InvalidOperationException("Admin ID is invalid"); // Return empty filters or throw exception
             }
-
+            // Debug: Log the parsed admin ID
+            _logger.LogInformation("Parsed Admin ID: {AdminId}", adminId);
             return await _adminLocationService.GetAdminFiltersAsync(adminId);
         }
 

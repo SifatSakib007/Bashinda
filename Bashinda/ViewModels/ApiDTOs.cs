@@ -15,7 +15,71 @@ namespace Bashinda.ViewModels
         [Required]
         public string Password { get; set; } = string.Empty;
     }
-    
+
+    public class AdminPermissionDto
+    {
+        // Location-based access restrictions
+        [JsonPropertyName("division")]
+        public string? Division { get; set; }
+
+        [JsonPropertyName("district")]
+        public string? District { get; set; }
+
+        [JsonPropertyName("upazila")]
+        public string? Upazila { get; set; }
+
+        [JsonPropertyName("ward")]
+        public string? Ward { get; set; }
+
+        [JsonPropertyName("village")]
+        public string? Village { get; set; }
+
+        // Field-level access permissions
+        [JsonPropertyName("canViewUserName")]
+        public bool CanViewUserName { get; set; } 
+
+        [JsonPropertyName("canViewEmail")]
+        public bool CanViewEmail { get; set; } 
+
+        [JsonPropertyName("canViewPhone")]
+        public bool CanViewPhone { get; set; } 
+
+        [JsonPropertyName("canViewAddress")]
+        public bool CanViewAddress { get; set; } 
+
+        [JsonPropertyName("canViewProfileImage")]
+        public bool CanViewProfileImage { get; set; } 
+
+        [JsonPropertyName("canViewNationalId")]
+        public bool CanViewNationalId { get; set; }
+
+        [JsonPropertyName("canViewBirthRegistration")]
+        public bool CanViewBirthRegistration { get; set; }
+
+        [JsonPropertyName("canViewDateOfBirth")]
+        public bool CanViewDateOfBirth { get; set; }
+
+        [JsonPropertyName("canViewFamilyInfo")]
+        public bool CanViewFamilyInfo { get; set; }
+
+        [JsonPropertyName("canViewProfession")]
+        public bool CanViewProfession { get; set; }
+
+        // Action permissions
+        [JsonPropertyName("canApproveRenters")]
+        public bool CanApproveRenters { get; set; }
+
+        [JsonPropertyName("canApproveOwners")]
+        public bool CanApproveOwners { get; set; }
+
+        [JsonPropertyName("canManageApartments")]
+        public bool CanManageApartments { get; set; }
+
+
+
+        // Add remaining properties with same pattern...
+    }
+
     // User DTOs
     public class UserDto
     {
@@ -54,7 +118,9 @@ namespace Bashinda.ViewModels
         public string Role { get; set; } = string.Empty;
     }
 
-    // RenterProfile DTOs
+    /// <summary>
+    /// RenterProfile DTOs
+    /// </summary>
     public class RenterProfileDto
     {
         public int Id { get; set; }

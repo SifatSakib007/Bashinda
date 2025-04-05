@@ -1,5 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using BashindaAPI.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BashindaAPI.DTOs
 {
@@ -49,34 +50,67 @@ namespace BashindaAPI.DTOs
         [Required]
         public AdminPermissionDto Permissions { get; set; } = new AdminPermissionDto();
     }
-    
+
     public class AdminPermissionDto
     {
         // Location-based access restrictions
+        [JsonPropertyName("division")]
         public string? Division { get; set; }
+
+        [JsonPropertyName("district")]
         public string? District { get; set; }
+
+        [JsonPropertyName("upazila")]
         public string? Upazila { get; set; }
+
+        [JsonPropertyName("ward")]
         public string? Ward { get; set; }
+
+        [JsonPropertyName("village")]
         public string? Village { get; set; }
-        
+
         // Field-level access permissions
+        [JsonPropertyName("canViewUserName")]
         public bool CanViewUserName { get; set; } = true;
+
+        [JsonPropertyName("canViewEmail")]
         public bool CanViewEmail { get; set; } = true;
+
+        [JsonPropertyName("canViewPhone")]
         public bool CanViewPhone { get; set; } = true;
+
+        [JsonPropertyName("canViewAddress")]
         public bool CanViewAddress { get; set; } = true;
+
+        [JsonPropertyName("canViewProfileImage")]
         public bool CanViewProfileImage { get; set; } = true;
-        public bool CanViewNationalId { get; set; } = false;
-        public bool CanViewBirthRegistration { get; set; } = false;
-        public bool CanViewDateOfBirth { get; set; } = true;
-        public bool CanViewFamilyInfo { get; set; } = false;
-        public bool CanViewProfession { get; set; } = true;
-        
+
+        [JsonPropertyName("canViewNationalId")]
+        public bool CanViewNationalId { get; set; } 
+
+        [JsonPropertyName("canViewBirthRegistration")]
+        public bool CanViewBirthRegistration { get; set; } 
+
+        [JsonPropertyName("canViewDateOfBirth")]
+        public bool CanViewDateOfBirth { get; set; } 
+
+        [JsonPropertyName("canViewFamilyInfo")]
+        public bool CanViewFamilyInfo { get; set; } 
+
+        [JsonPropertyName("canViewProfession")]
+        public bool CanViewProfession { get; set; } 
+
         // Action permissions
-        public bool CanApproveRenters { get; set; } = false;
-        public bool CanApproveOwners { get; set; } = false;
-        public bool CanManageApartments { get; set; } = false;
+        [JsonPropertyName("canApproveRenters")]
+        public bool CanApproveRenters { get; set; } 
+
+        [JsonPropertyName("canApproveOwners")]
+        public bool CanApproveOwners { get; set; } 
+
+        [JsonPropertyName("canManageApartments")]
+        public bool CanManageApartments { get; set; } 
     }
-    
+
     public class AdminDto
     {
         public int Id { get; set; }

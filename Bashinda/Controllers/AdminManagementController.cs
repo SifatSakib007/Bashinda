@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using AdminPermissionDto = BashindaAPI.DTOs.AdminPermissionDto;
 
 namespace Bashinda.Controllers
 {
@@ -139,7 +140,7 @@ namespace Bashinda.Controllers
                     Password = model.Password,
                         ConfirmPassword = model.ConfirmPassword,
                         Permissions = new AdminPermissionDto
-                    {
+                        {
                         Division = model.Permissions.Division,
                         District = model.Permissions.District,
                         Upazila = model.Permissions.Upazila,
@@ -505,7 +506,7 @@ namespace Bashinda.Controllers
         #endregion
 
         // Helper method to map AdminPermission DTO to ViewModel
-        private AdminPermissionViewModel MapToPermissionViewModel(AdminPermissionDto dto)
+        private AdminPermissionViewModel MapToPermissionViewModel(ViewModels.AdminPermissionDto dto)
         {
             return new AdminPermissionViewModel
             {
@@ -556,9 +557,9 @@ namespace Bashinda.Controllers
             return names.Contains(code) ? code : "Unknown Location";
         }
 
-        private AdminPermissionDto MapToAdminPermissionDto(AdminPermissionViewModel viewModel)
+        private ViewModels.AdminPermissionDto MapToAdminPermissionDto(AdminPermissionViewModel viewModel)
         {
-            return new AdminPermissionDto
+            return new ViewModels.AdminPermissionDto
             {
                 Division = viewModel.Division,
                 District = viewModel.District,

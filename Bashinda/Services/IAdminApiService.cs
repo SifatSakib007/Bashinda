@@ -32,7 +32,7 @@ namespace Bashinda.Services
             int profileId, bool isApproved, string reason, string token, AdminLocationFilters filters);
 
         Task<bool> VerifyProfileAccess(int profileId, string token, AdminLocationFilters filters);
-        Task<(bool Success, AdminPermissionDto Permissions, string[] Errors)> GetAdminPermissionsAsync(int adminId);
+        Task<(bool Success, ViewModels.AdminPermissionDto Permissions, string[] Errors)> GetAdminPermissionsAsync(int adminId);
 
         Task<(bool Success, List<ViewModels.RenterProfileListDto> Profiles, string[] Errors)>
         GetPendingProfilesAsync(string token, AdminLocationFilters filters);

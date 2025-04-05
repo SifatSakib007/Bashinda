@@ -65,29 +65,29 @@ namespace Bashinda.Controllers
             }
         }
         
-        // GET: /Account/ConfirmOTP
+        // Get: Account/ConfirmOTP
         public IActionResult ConfirmOTP(string email)
         {
             if (string.IsNullOrEmpty(email))
             {
                 // Try to get email from TempData if not provided in URL
-                email = TempData["RegisterEmail"] as string;
-                
+                email = TempData["RegisterEmail"] as string ?? string.Empty;
+
                 if (string.IsNullOrEmpty(email))
                 {
                     return RedirectToAction(nameof(Register));
                 }
-                
+
                 // Preserve email for post action
                 TempData.Keep("RegisterEmail");
             }
-            
+
             var model = new OTPViewModel
             {
                 Email = email,
                 PhoneNumber = TempData["RegisterPhoneNumber"] as string
             };
-            
+
             return View(model);
         }
 
@@ -100,12 +100,18 @@ namespace Bashinda.Controllers
             {
                 return View(model);
             }
-            
+
             try
             {
+                if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.OTP))
+                {
+                    ModelState.AddModelError("", "Email and OTP are required.");
+                    return View(model);
+                }
+
                 // Call API to verify OTP
                 var response = await _userService.VerifyOTPAsync(model.Email, model.OTP);
-                
+
                 if (response.Success)
                 {
                     // After successful OTP verification, automatically log in the user
@@ -117,6 +123,7 @@ namespace Bashinda.Controllers
                     }
 
                     // Get phone number either from model or TempData
+                    
                     var phoneNumber = model.PhoneNumber;
                     if (string.IsNullOrEmpty(phoneNumber))
                     {
@@ -132,27 +139,27 @@ namespace Bashinda.Controllers
 
                     var loginModel = new LoginRequestDto
                     {
-                        PhoneNumber = phoneNumber,
+                        Email = model.Email,
                         Password = storedPassword
                     };
 
                     var (loginSuccess, loginResult, loginErrors) = await _userService.LoginAsync(loginModel);
-                    
+
                     if (loginSuccess && loginResult != null)
                     {
-                        _logger.LogInformation("Auto-login successful for user: {UserName} with roles: {Roles}", 
+                        _logger.LogInformation("Auto-login successful for user: {UserName} with roles: {Roles}",
                             loginResult.User.UserName, loginResult.User.Roles != null ? string.Join(", ", loginResult.User.Roles) : "No roles");
-                        
+
                         // Store the token in session
                         HttpContext.Session.SetString("AuthToken", loginResult.Token);
                         // Also store the user ID in session for easy access
                         HttpContext.Session.SetInt32("UserId", loginResult.User.Id);
                         // Store user ID as string as well
                         HttpContext.Session.SetString("UserId", loginResult.User.Id.ToString());
-                        
+
                         // Add a claim for the JWT token and store it in a cookie
                         _logger.LogInformation("Storing JWT token in cookie");
-                        
+
                         // Store the JWT token in a cookie for API requests
                         Response.Cookies.Append("JwtToken", loginResult.Token, new CookieOptions
                         {
@@ -175,7 +182,7 @@ namespace Bashinda.Controllers
                             new Claim("UserId", userId),
                             new Claim("Token", loginResult.Token)
                         };
-                        
+
                         // Add roles
                         if (loginResult.User.Roles != null && loginResult.User.Roles.Any())
                         {
@@ -199,48 +206,48 @@ namespace Bashinda.Controllers
                             AllowRefresh = true
                         };
 
-                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, 
-                            new ClaimsPrincipal(claimsIdentity), 
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                            new ClaimsPrincipal(claimsIdentity),
                             authProperties);
 
                         // Clear sensitive data from TempData
                         TempData.Remove("RegisterPassword");
                         TempData.Remove("RegisterEmail");
-                        
+
                         // Force a session commit
                         await HttpContext.Session.CommitAsync();
-                        
-                        // If the user is a renter, try to fetch their profile image
-                        bool isRenter = (loginResult.User.Roles != null && loginResult.User.Roles.Contains("ApartmentRenter")) ||
-                                       loginResult.User.Role.ToString() == "ApartmentRenter";
-                        
-                        if (isRenter)
-                        {
-                            try
-                            {
-                                // Get renter profile using the API
-                                var renterApiService = HttpContext.RequestServices.GetService<IRenterProfileApiService>();
-                                if (renterApiService != null)
-                                {
-                                    var (profileSuccess, profile, _) = await renterApiService.GetCurrentAsync(loginResult.Token);
-                                    if (profileSuccess && profile != null && !string.IsNullOrEmpty(profile.SelfImagePath))
-                                    {
-                                        HttpContext.Session.SetString("UserProfileImage", profile.SelfImagePath);
-                                        _logger.LogInformation("Stored user profile image in session: {ImagePath}", profile.SelfImagePath);
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                // Don't fail login if we can't get the profile image
-                                _logger.LogWarning(ex, "Could not retrieve renter profile image");
-                            }
-                        }
+
+                        //// If the user is a renter, try to fetch their profile image
+                        //bool isRenter = (loginResult.User.Roles != null && loginResult.User.Roles.Contains("ApartmentRenter")) ||
+                        //               loginResult.User.Role.ToString() == "ApartmentRenter";
+
+                        //if (isRenter)
+                        //{
+                        //    try
+                        //    {
+                        //        // Get renter profile using the API
+                        //        var renterApiService = HttpContext.RequestServices.GetService<IRenterProfileApiService>();
+                        //        if (renterApiService != null)
+                        //        {
+                        //            var (profileSuccess, profile, _) = await renterApiService.GetCurrentAsync(loginResult.Token);
+                        //            if (profileSuccess && profile != null && !string.IsNullOrEmpty(profile.SelfImagePath))
+                        //            {
+                        //                HttpContext.Session.SetString("UserProfileImage", profile.SelfImagePath);
+                        //                _logger.LogInformation("Stored user profile image in session: {ImagePath}", profile.SelfImagePath);
+                        //            }
+                        //        }
+                        //    }
+                        //    catch (Exception ex)
+                        //    {
+                        //        // Don't fail login if we can't get the profile image
+                        //        _logger.LogWarning(ex, "Could not retrieve renter profile image");
+                        //    }
+                        //}
 
                         _logger.LogInformation("User authenticated successfully after registration, redirecting to dashboard");
                         return RedirectToDashboard();
                     }
-                    
+
                     _logger.LogWarning("Auto-login failed after OTP verification. Errors: {Errors}", string.Join(", ", loginErrors));
                     foreach (var error in loginErrors)
                     {
@@ -248,7 +255,7 @@ namespace Bashinda.Controllers
                     }
                     return View(model);
                 }
-                
+
                 ModelState.AddModelError("", "Invalid OTP. Please try again.");
                 return View(model);
             }
@@ -470,6 +477,12 @@ namespace Bashinda.Controllers
         {
             _logger.LogInformation("Redirecting to dashboard. User roles: {Roles}", 
                 string.Join(", ", User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value)));
+            // Check if user is admin
+            if (User.IsInRole("SuperAdmin"))
+            {
+                _logger.LogInformation("Redirecting to Admin dashboard");
+                return RedirectToAction("Index", "AdminManagemet");
+            }
 
             // Check if user is admin
             if (User.IsInRole("Admin"))

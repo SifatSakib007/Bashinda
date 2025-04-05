@@ -2,6 +2,8 @@ using Bashinda.ViewModels;
 using BashindaAPI.DTOs;
 using Newtonsoft.Json.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+//using RenterProfileDto = Bashinda.ViewModels.RenterProfileDto;
 
 namespace Bashinda.Services
 {
@@ -21,7 +23,9 @@ namespace Bashinda.Services
             _httpContextAccessor = httpContextAccessor;
             _jsonOptions = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
+                // Add if using System.Text.Json attributes:
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
         }
 
@@ -216,13 +220,90 @@ namespace Bashinda.Services
                 return (false, new[] { ex.Message });
             }
         }
+
+
         public async Task<bool> VerifyProfileAccess(int profileId, string token, AdminLocationFilters filters)
         {
-            var endpoint = BuildEndpoint($"admin/verify-access/{profileId}", filters);
-            var response = await _apiService.GetAsync(endpoint, token);
-            return response.IsSuccessStatusCode;
-        }
+            try
+            {
+                // First get profile to find associated user
+                var (success, profile, errors) = await GetRenterProfileAsync(profileId, token);
 
+                if (!success || profile?.UserId == null)
+                {
+                    _logger.LogError("Can't verify access for profile {ProfileId}: {Errors}",
+                        profileId, string.Join(", ", errors));
+                    return false;
+                }
+
+                // Now verify access using the USER ID
+                var endpoint = BuildEndpoint($"api/Admin/verify-access/{profile.UserId}", filters);
+                _logger.LogInformation("Verifying access for user {UserId} (profile {ProfileId})",
+                    profile.UserId, profileId);
+
+                var response = await _apiService.GetAsync(endpoint, token);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Access denied for user {UserId}: {StatusCode}",
+                        profile.UserId, response.StatusCode);
+                }
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Verification error for profile {ProfileId}", profileId);
+                return false;
+            }
+        }
+        private async Task<(bool Success, ViewModels.RenterProfileDto Profile, string[] Errors)> GetRenterProfileAsync(int profileId, string token)
+        {
+            try
+            {
+                var response = await _apiService.GetAsync($"api/RenterProfiles/{profileId}", token);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to get renter profile {ProfileId}: {StatusCode} - {Error}",
+                        profileId, response.StatusCode, errorContent);
+                    return (false, null, new[] { $"Failed to retrieve profile: {errorContent}" });
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                _logger.LogDebug("Raw profile response: {Content}", content);
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new JsonStringEnumConverter() }
+                };
+
+                var apiResponse = JsonSerializer.Deserialize<ViewModels.ApiResponse<ViewModels.RenterProfileDto>>(content, options);
+
+                if (apiResponse?.Success != true || apiResponse.Data == null)
+                {
+                    _logger.LogError("Invalid profile response format for {ProfileId}", profileId);
+                    return (false, null, apiResponse?.Errors ?? new[] { "Invalid profile response format" });
+                }
+
+                // Ensure UserId is present
+                if (apiResponse.Data.UserId <= 0)
+                {
+                    _logger.LogError("Profile {ProfileId} has invalid UserId: {UserId}",
+                        profileId, apiResponse.Data.UserId);
+                    return (false, null, new[] { "Profile has invalid user association" });
+                }
+
+                return (true, apiResponse.Data, Array.Empty<string>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving profile {ProfileId}", profileId);
+                return (false, null, new[] { $"Exception: {ex.Message}" });
+            }
+        }
         private string BuildEndpoint(string basePath, AdminLocationFilters filters)
         {
             var queryParams = new List<string>();
@@ -424,31 +505,42 @@ namespace Bashinda.Services
             }
         }
 
-        public async Task<(bool Success, AdminPermissionDto Permissions, string[] Errors)> GetAdminPermissionsAsync(int adminId)
+        public async Task<(bool Success, ViewModels.AdminPermissionDto Permissions, string[] Errors)> GetAdminPermissionsAsync(int adminId)
         {
             try
             {
                 var token = GetAuthToken();
                 if (string.IsNullOrEmpty(token))
                 {
-                    return (false, new AdminPermissionDto(), new[] { "Authentication token not found" });
+                    return (false, new ViewModels.AdminPermissionDto(), new[] { "Authentication token not found" });
                 }
                 var response = await _apiService.GetAsync($"api/Admin/permissions/{adminId}", token);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var permissions = JsonSerializer.Deserialize<AdminPermissionDto>(content, _jsonOptions);
-                    return (permissions != null, permissions ?? new AdminPermissionDto(), Array.Empty<string>());
+                    _logger.LogInformation("Raw API Response: {Content}", content); // Debug raw JSON
+                                                                                    // Deserialize into the full API response structure
+                    var apiResponse = JsonSerializer.Deserialize<ViewModels.ApiResponse<ViewModels.AdminPermissionDto>>(
+                        content,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                    );
+
+                    if (apiResponse?.Success == true && apiResponse.Data != null)
+                    {
+                        return (true, apiResponse.Data, Array.Empty<string>());
+                    }
+
+                    return (false, new ViewModels.AdminPermissionDto(), apiResponse?.Errors ?? new[] { "Invalid response" });
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync();
-                return (false, new AdminPermissionDto(), new[] { errorContent });
+                return (false, new ViewModels.AdminPermissionDto(), new[] { errorContent });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving permissions for admin {AdminId}", adminId);
-                return (false, new AdminPermissionDto(), new[] { ex.Message });
+                return (false, new ViewModels.AdminPermissionDto(), new[] { ex.Message });
             }
         }
 
