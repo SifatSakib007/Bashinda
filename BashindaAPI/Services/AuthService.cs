@@ -104,6 +104,9 @@ namespace BashindaAPI.Services
                     IsVerified = false
                 };
 
+                // Generate and assign UniqueID based on the user's role.
+                user.UniqueID = await GenerateUniqueIDAsync(user.Role);
+
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
@@ -132,6 +135,56 @@ namespace BashindaAPI.Services
                 return (false, new[] { "An error occurred during registration" });
             }
         }
+        private async Task<string> GenerateUniqueIDAsync(UserRole role)
+        {
+            string prefix;
+            int width;
+
+            switch (role)
+            {
+                case UserRole.SuperAdmin:
+                    prefix = "SA";
+                    width = 8;
+                    break;
+                case UserRole.Admin:
+                    prefix = "A";
+                    width = 9;
+                    break;
+                case UserRole.ApartmentOwner:
+                    prefix = "AW";
+                    width = 8;
+                    break;
+                case UserRole.ApartmentRenter:
+                    prefix = "B";
+                    width = 9;
+                    break;
+                default:
+                    prefix = "XX";
+                    width = 8;
+                    break;
+            }
+
+            // Query users with this role that already have a UniqueID starting with the prefix.
+            var lastUser = await _context.Users
+                .Where(u => u.Role == role && u.UniqueID != null && u.UniqueID.StartsWith(prefix))
+                .OrderByDescending(u => u.UniqueID)
+                .FirstOrDefaultAsync();
+
+            int lastNumber = 0;
+            if (lastUser != null && !string.IsNullOrEmpty(lastUser.UniqueID))
+            {
+                // Extract the numeric portion from the UniqueID (everything after the prefix)
+                var numberPart = lastUser.UniqueID.Substring(prefix.Length);
+                int.TryParse(numberPart, out lastNumber);
+            }
+
+            int newNumber = lastNumber + 1;
+            // Format the new number with the specified width (leading zeros)
+            string newNumberString = newNumber.ToString("D" + width);
+
+            return prefix + newNumberString;
+        }
+
 
         public async Task<(bool Success, string[] Errors)> VerifyOtpAsync(VerifyOtpDto model)
         {

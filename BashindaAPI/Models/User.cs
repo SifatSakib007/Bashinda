@@ -16,5 +16,6 @@ namespace BashindaAPI.Models
         public bool IsVerified { get; set; }
         public UserRole Role { get; set; }
         public AdminPermission? AdminPermission { get; set; }
+        public string? UniqueID  { get; set; }
     }
 }
