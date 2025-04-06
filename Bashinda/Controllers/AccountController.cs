@@ -52,7 +52,14 @@ namespace Bashinda.Controllers
                 
                 foreach (var error in errors)
                 {
-                    ModelState.AddModelError("", error);
+                    if (error.Contains("Please enter only numbers"))
+                    {
+                        ModelState.AddModelError(nameof(model.Password), error);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", error);
+                    }
                 }
                 
                 return View(model);

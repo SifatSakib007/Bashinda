@@ -373,4 +373,11 @@ namespace Bashinda.ViewModels
         public T? Data { get; set; }
         public string[] Errors { get; set; } = Array.Empty<string>();
     }
-} 
+    public class ValidationProblemDetailsDto
+    {
+        public string Title { get; set; } = string.Empty;
+        public int Status { get; set; }
+        public IDictionary<string, string[]> Errors { get; set; } = new Dictionary<string, string[]>();
+    }
+
+}

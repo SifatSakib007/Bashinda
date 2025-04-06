@@ -194,10 +194,25 @@ namespace Bashinda.Services
                     var content = await response.Content.ReadAsStringAsync();
                     try
                     {
-                        var errorResponse = JsonSerializer.Deserialize<ApiResponse<object>>(content, _jsonOptions);
+                        
+
+                        var errorResponse = JsonSerializer.Deserialize<AuthResponseDto>(content, _jsonOptions);
+
                         if (errorResponse != null && errorResponse.Errors.Length > 0)
                         {
                             return (false, null, errorResponse.Errors);
+                        }
+                    }
+                    catch { /* ignore and try next */  }
+                    try
+                    {
+                        // Fallback: try deserializing as ValidationProblemDetailsDto
+                        var validationError = JsonSerializer.Deserialize<ValidationProblemDetailsDto>(content, _jsonOptions);
+                        if (validationError != null && validationError.Errors.Count > 0)
+                        {
+                            // Flatten errors into a single string array
+                            var errors = validationError.Errors.SelectMany(kvp => kvp.Value).ToArray();
+                            return (false, null, errors);
                         }
                     }
                     catch { /* If deserialization fails, use the generic message below */ }

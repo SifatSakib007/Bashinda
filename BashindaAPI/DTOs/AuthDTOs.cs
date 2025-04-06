@@ -1,5 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using BashindaAPI.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace BashindaAPI.DTOs
 {
@@ -15,7 +16,7 @@ namespace BashindaAPI.DTOs
         public string Password { get; set; } = string.Empty;
     }
 
-    public class RegisterDto
+    public class RegisterDto : IValidatableObject
     {
         [Required]
         [StringLength(50, MinimumLength = 3)]
@@ -34,12 +35,25 @@ namespace BashindaAPI.DTOs
         public string Password { get; set; } = string.Empty;
 
         [Required]
-        [Compare("Password")]
+        [Compare("Password", ErrorMessage = "Passwords do not match.")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
         [Required]
         public UserRole Role { get; set; }
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (Role == UserRole.ApartmentOwner || Role == UserRole.ApartmentRenter)
+            {
+                if (!Regex.IsMatch(Password, @"^\d+$"))
+                {
+                    yield return new ValidationResult(
+                        "Please enter only numbers.",
+                        new[] { nameof(Password) });
+                }
+            }
+        }
     }
+    
 
     public class VerifyOtpDto
     {
