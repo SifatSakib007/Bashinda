@@ -274,6 +274,13 @@ namespace BashindaAPI.Controllers
             {
                 return Unauthorized();
             }
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            string uniqueId = user.UniqueID ?? string.Empty;
 
             var renterProfile = await _context.RenterProfiles
                 .Include(r => r.User)
@@ -315,6 +322,7 @@ namespace BashindaAPI.Controllers
                 HoldingNo = renterProfile.HoldingNo,
                 IsApproved = renterProfile.IsApproved,
                 RejectionReason = renterProfile.RejectionReason,
+                UniqueId = uniqueId,
                 User = renterProfile.User != null ? new UserDto
                 {
                     Id = renterProfile.User.Id,
