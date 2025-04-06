@@ -141,6 +141,21 @@
                 });
             }
         });
+            // --- Real-time password number-only validation ---
+        const passwordInput = document.querySelector('input[name="Password"]');
+        const passwordErrorSpan = document.querySelector('span[data-valmsg-for="Password"]');
+
+        passwordInput.addEventListener('input', function () {
+            const value = passwordInput.value;
+
+            if (/^\d*$/.test(value)) {
+                passwordErrorSpan.textContent = "";
+                passwordInput.classList.remove("is-invalid");
+            } else {
+                passwordErrorSpan.textContent = "Please enter only numbers.";
+                passwordInput.classList.add("is-invalid");
+            }
+        });
     </script>
 }
 
