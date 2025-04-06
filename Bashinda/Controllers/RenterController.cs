@@ -638,6 +638,7 @@ namespace Bashinda.Controllers
                 var viewModel = new RenterProfileViewModel
                 {
                     Id = profile.Id,
+                    UniqueId = profile.UniqueId,
                     UserId = profile.UserId,
                     IsAdult = profile.IsAdult,
                     NationalId = profile.NationalId,

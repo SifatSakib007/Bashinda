@@ -53,11 +53,15 @@
                             </div>
                             <div class="col-md-8">
                                 <h3 class="mb-2">@Model.FullName</h3>
-                                <p class="text-muted mb-3">@Model.Email</p>
+                                <p class="text-muted mb-3">@Model.Email</p> || <p class="text-muted mb-3">@Model.UniqueId</p>
                                 
                                 <div class="row mb-2">
                                     <div class="col-md-4 fw-bold">Mobile Number:</div>
                                     <div class="col-md-8">@Model.MobileNo</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-4 fw-bold">Mobile Number:</div>
+                                    <div class="col-md-8">@Model.UniqueId</div>
                                 </div>
                                 
                                 <div class="row mb-2">

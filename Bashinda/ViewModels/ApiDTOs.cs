@@ -124,6 +124,7 @@ namespace Bashinda.ViewModels
     public class RenterProfileDto
     {
         public int Id { get; set; }
+        public string? UniqueId { get; set; }
         public int UserId { get; set; }
         public bool IsAdult { get; set; }
         public string? NationalId { get; set; }

@@ -7,6 +7,7 @@ namespace Bashinda.ViewModels
     {
         // Added missing properties
         public int Id { get; set; }
+        public string? UniqueId { get; set; }
         public int UserId { get; set; }
         public bool IsApproved { get; set; }
 
