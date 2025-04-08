@@ -47,23 +47,23 @@ namespace BashindaAPI.Controllers
                     Errors = new[] { "Invalid token" }
                 });
             }
-            
+
             // Get user's role
             var roleClaim = User.FindFirst(ClaimTypes.Role);
             var role = roleClaim?.Value;
             bool isSuperAdmin = role == UserRole.SuperAdmin.ToString();
             bool isAdmin = role == UserRole.Admin.ToString();
-            
+
             // If regular admin, get their permissions
             User? adminUser = null;
             AdminPermission? adminPermission = null;
-            
+
             if (isAdmin)
             {
                 adminUser = await _context.Users
                     .Include(u => u.AdminPermission)
                     .FirstOrDefaultAsync(u => u.Id == userId);
-                
+
                 adminPermission = adminUser?.AdminPermission;
                 if (adminPermission == null)
                 {
@@ -75,10 +75,10 @@ namespace BashindaAPI.Controllers
                     });
                 }
             }
-            
+
             // Get profiles based on permissions
             IQueryable<RenterProfile> profilesQuery = _context.RenterProfiles;
-            
+
             // Filter by location for admin users (if not SuperAdmin)
             if (isAdmin && !isSuperAdmin && adminPermission != null)
             {
@@ -86,28 +86,28 @@ namespace BashindaAPI.Controllers
                 {
                     profilesQuery = profilesQuery.Where(p => p.Division == adminPermission.Division);
                 }
-                
+
                 if (!string.IsNullOrEmpty(adminPermission.District))
                 {
                     profilesQuery = profilesQuery.Where(p => p.District == adminPermission.District);
                 }
-                
+
                 if (!string.IsNullOrEmpty(adminPermission.Upazila))
                 {
                     profilesQuery = profilesQuery.Where(p => p.Upazila == adminPermission.Upazila);
                 }
-                
+
                 if (!string.IsNullOrEmpty(adminPermission.Ward))
                 {
                     profilesQuery = profilesQuery.Where(p => p.Ward == adminPermission.Ward);
                 }
-                
+
                 if (!string.IsNullOrEmpty(adminPermission.Village))
                 {
                     profilesQuery = profilesQuery.Where(p => p.Village == adminPermission.Village);
                 }
             }
-            
+
             // Project to DTOs with field visibility based on permissions
             var profiles = await profilesQuery.Select(p => new RenterProfileListDto
             {
@@ -143,7 +143,7 @@ namespace BashindaAPI.Controllers
                     Errors = new[] { "Invalid token" }
                 });
             }
-            
+
             // Get user's role
             var roleClaim = User.FindFirst(ClaimTypes.Role);
             var role = roleClaim?.Value;
@@ -151,7 +151,7 @@ namespace BashindaAPI.Controllers
             bool isAdmin = role == UserRole.Admin.ToString();
             bool isCurrentUser = await _context.RenterProfiles
                 .AnyAsync(p => p.Id == id && p.UserId == userId);
-            
+
             // Find the profile
             var renterProfile = await _context.RenterProfiles
                 .FirstOrDefaultAsync(p => p.Id == id);
@@ -164,14 +164,14 @@ namespace BashindaAPI.Controllers
                     Errors = new[] { "Renter profile not found" }
                 });
             }
-            
+
             // Check permissions for admin users
             if (isAdmin && !isSuperAdmin)
             {
                 var adminUser = await _context.Users
                     .Include(u => u.AdminPermission)
                     .FirstOrDefaultAsync(u => u.Id == userId);
-                
+
                 var adminPermission = adminUser?.AdminPermission;
                 if (adminPermission == null)
                 {
@@ -181,7 +181,7 @@ namespace BashindaAPI.Controllers
                         Errors = new[] { "Admin permissions not configured" }
                     });
                 }
-                
+
                 // Check location-based access
                 bool hasLocationAccess = await _adminService.CanAdminAccessLocationAsync(
                     userId,
@@ -190,12 +190,12 @@ namespace BashindaAPI.Controllers
                     renterProfile.Upazila,
                     renterProfile.Ward,
                     renterProfile.Village);
-                    
+
                 if (!hasLocationAccess)
                 {
                     return Forbid();
                 }
-                
+
                 // Create DTO with field filtering based on permissions
                 var profileDto = new RenterProfileDto
                 {
@@ -226,10 +226,10 @@ namespace BashindaAPI.Controllers
                     HoldingNo = adminPermission.CanViewAddress ? renterProfile.HoldingNo : "***Hidden***",
                     IsApproved = renterProfile.IsApproved
                 };
-                
+
                 return Ok(ApiResponse<RenterProfileDto>.SuccessResponse(profileDto));
             }
-            
+
             // For SuperAdmin, own profile, or apartment owner - show full details
             var dto = new RenterProfileDto
             {
@@ -352,23 +352,23 @@ namespace BashindaAPI.Controllers
                     Errors = new[] { "Invalid token" }
                 });
             }
-            
+
             // Get user's role
             var roleClaim = User.FindFirst(ClaimTypes.Role);
             var role = roleClaim?.Value;
             bool isSuperAdmin = role == UserRole.SuperAdmin.ToString();
             bool isAdmin = role == UserRole.Admin.ToString();
-            
+
             // If regular admin, get their permissions
             User? adminUser = null;
             AdminPermission? adminPermission = null;
-            
+
             if (isAdmin && !isSuperAdmin)
             {
                 adminUser = await _context.Users
                     .Include(u => u.AdminPermission)
                     .FirstOrDefaultAsync(u => u.Id == userId);
-                
+
                 adminPermission = adminUser?.AdminPermission;
                 if (adminPermission == null)
                 {
@@ -379,18 +379,18 @@ namespace BashindaAPI.Controllers
                         Errors = new[] { "Admin permissions not configured" }
                     });
                 }
-                
+
                 // Check if admin has permission to approve renters
                 if (!adminPermission.CanApproveRenters)
                 {
                     return Forbid();
                 }
             }
-            
+
             // Get profiles based on permissions
             IQueryable<RenterProfile> profilesQuery = _context.RenterProfiles
                 .Where(p => !p.IsApproved);
-            
+
             // Filter by location for admin users (if not SuperAdmin)
             if (isAdmin && !isSuperAdmin && adminPermission != null)
             {
@@ -398,28 +398,28 @@ namespace BashindaAPI.Controllers
                 {
                     profilesQuery = profilesQuery.Where(p => p.Division == adminPermission.Division);
                 }
-                
+
                 if (!string.IsNullOrEmpty(adminPermission.District))
                 {
                     profilesQuery = profilesQuery.Where(p => p.District == adminPermission.District);
                 }
-                
+
                 if (!string.IsNullOrEmpty(adminPermission.Upazila))
                 {
                     profilesQuery = profilesQuery.Where(p => p.Upazila == adminPermission.Upazila);
                 }
-                
+
                 if (!string.IsNullOrEmpty(adminPermission.Ward))
                 {
                     profilesQuery = profilesQuery.Where(p => p.Ward == adminPermission.Ward);
                 }
-                
+
                 if (!string.IsNullOrEmpty(adminPermission.Village))
                 {
                     profilesQuery = profilesQuery.Where(p => p.Village == adminPermission.Village);
                 }
             }
-            
+
             var profiles = await profilesQuery
                 .Select(p => new RenterProfileListDto
                 {
@@ -437,7 +437,7 @@ namespace BashindaAPI.Controllers
                     Upazila = p.Upazila
                 })
                 .ToListAsync();
-            
+
             return Ok(ApiResponse<IEnumerable<RenterProfileListDto>>.SuccessResponse(profiles));
         }
 
@@ -571,7 +571,7 @@ namespace BashindaAPI.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                
+
                 return Ok(ApiResponse<object>.SuccessResponse(null, "Profile updated successfully."));
             }
             catch (DbUpdateConcurrencyException)
@@ -607,13 +607,13 @@ namespace BashindaAPI.Controllers
                     Errors = new[] { "Invalid token" }
                 });
             }
-            
+
             // Get user's role
             var roleClaim = User.FindFirst(ClaimTypes.Role);
             var role = roleClaim?.Value;
             bool isSuperAdmin = role == UserRole.SuperAdmin.ToString();
             bool isAdmin = role == UserRole.Admin.ToString();
-            
+
             var renterProfile = await _context.RenterProfiles.FindAsync(id);
             if (renterProfile == null)
             {
@@ -623,14 +623,14 @@ namespace BashindaAPI.Controllers
                     Errors = new[] { "Renter profile not found" }
                 });
             }
-            
+
             // Check admin's permission to approve renter profiles
             if (isAdmin && !isSuperAdmin)
             {
                 var adminUser = await _context.Users
                     .Include(u => u.AdminPermission)
                     .FirstOrDefaultAsync(u => u.Id == userId);
-                
+
                 var adminPermission = adminUser?.AdminPermission;
                 if (adminPermission == null)
                 {
@@ -640,13 +640,13 @@ namespace BashindaAPI.Controllers
                         Errors = new[] { "Admin permissions not configured" }
                     });
                 }
-                
+
                 // Check if admin has permission to approve renters
                 if (!adminPermission.CanApproveRenters)
                 {
                     return Forbid();
                 }
-                
+
                 // Check location-based access
                 bool hasLocationAccess = await _adminService.CanAdminAccessLocationAsync(
                     userId,
@@ -655,16 +655,16 @@ namespace BashindaAPI.Controllers
                     renterProfile.Upazila,
                     renterProfile.Ward,
                     renterProfile.Village);
-                    
+
                 if (!hasLocationAccess)
                 {
                     return Forbid();
                 }
             }
-            
+
             renterProfile.IsApproved = dto.IsApproved;
             renterProfile.RejectionReason = !dto.IsApproved ? dto.Reason : null;
-            
+
             try
             {
                 await _context.SaveChangesAsync();

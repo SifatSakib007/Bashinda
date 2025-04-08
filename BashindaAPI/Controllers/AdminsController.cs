@@ -52,6 +52,32 @@ namespace BashindaAPI.Controllers
             return BadRequest(new { Errors = errors });
         }
 
+        [HttpGet]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<ActionResult<IEnumerable<RenterProfileDto>>> GetAllRenters()
+        {
+            var (success, users, errors) = await _adminService.GetAllRentersAsync();
+            if (success)
+            {
+                return Ok(users);
+            }
+            return BadRequest(new { Errors = errors });
+
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<ActionResult<IEnumerable<ApartmentOwnerProfileDto>>> GetAllOwners()
+        {
+            var (success, users, errors) = await _adminService.GetAllOwnersAsync();
+            if (success)
+            {
+                return Ok(users);
+            }
+            return BadRequest(new { Errors = errors });
+
+        }
+
         [HttpGet("{id}")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<ActionResult<AdminDto>> GetAdmin(int id)

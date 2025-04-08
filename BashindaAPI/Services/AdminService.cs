@@ -17,7 +17,94 @@ namespace BashindaAPI.Services
             _context = context;
             _logger = logger;
         }
+        public async Task<(bool Success, List<RenterProfileDto> Renters, string[] Errors)> GetAllRentersAsync()
+        {
+            try
+            {
+                var renters = await _context.RenterProfiles.ToListAsync();
 
+                var renterDtos = renters.Select(u => new RenterProfileDto
+                {
+                    Id = u.Id,
+                    UserId = u.UserId,
+                    IsAdult = u.IsAdult,
+                    NationalId = u.NationalId,
+                    BirthRegistrationNo = u.BirthRegistrationNo,
+                    DateOfBirth = u.DateOfBirth,
+                    FullName = u.FullName,
+                    FatherName = u.FatherName,
+                    MotherName = u.MotherName,
+                    Nationality = u.Nationality,
+                    BloodGroup = u.BloodGroup,
+                    Profession = u.Profession,
+                    Gender = u.Gender,
+                    MobileNo = u.MobileNo,
+                    Email = u.Email,
+                    SelfImagePath = u.SelfImagePath,
+                    Division = u.Division,
+                    District = u.District,
+                    Upazila = u.Upazila,
+                    AreaType = u.AreaType.ToString(), // Convert AreaType enum to string
+                    Ward = u.Ward,
+                    Village = u.Village,
+                    PostCode = u.PostCode,
+                    HoldingNo = u.HoldingNo,
+                    IsApproved = u.IsApproved,
+                    RejectionReason = u.RejectionReason
+                }).ToList();
+
+                return (true, renterDtos, Array.Empty<string>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all renters: {Message}", ex.Message);
+                return (false, new List<RenterProfileDto>(), new[] { "An error occurred while retrieving renters" });
+            }
+        }
+        public async Task<(bool Success, List<ApartmentOwnerProfileDto> Owners, string[] Errors)> GetAllOwnersAsync()
+        {
+            try
+            {
+                var owners = await _context.ApartmentOwnerProfiles.ToListAsync();
+
+                var ownterDtos = owners.Select(u => new ApartmentOwnerProfileDto
+                {
+                    Id = u.Id,
+                    UserId = u.UserId,
+                    IsAdult = u.IsAdult,
+                    NationalId = u.NationalId,
+                    BirthRegistrationNo = u.BirthRegistrationNo,
+                    DateOfBirth = u.DateOfBirth,
+                    FullName = u.FullName,
+                    FatherName = u.FatherName,
+                    MotherName = u.MotherName,
+                    Nationality = u.Nationality,
+                    BloodGroup = u.BloodGroup,
+                    Profession = u.Profession ?? string.Empty, 
+                    Gender = u.Gender,
+                    MobileNo = u.MobileNo ?? string.Empty,
+                    Email = u.Email ?? string.Empty,
+                    SelfImagePath = u.SelfImagePath,
+                    Division = u.Division,
+                    District = u.District,
+                    Upazila = u.Upazila,
+                    AreaType = u.AreaType.ToString(), // Convert AreaType enum to string
+                    Ward = u.Ward,
+                    Village = u.Village,
+                    PostCode = u.PostCode,
+                    HoldingNo = u.HoldingNo,
+                    IsApproved = u.IsApproved,
+                    RejectionReason = u.RejectionReason
+                }).ToList();
+
+                return (true, ownterDtos, Array.Empty<string>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all renters: {Message}", ex.Message);
+                return (false, new List<ApartmentOwnerProfileDto>(), new[] { "An error occurred while retrieving renters" });
+            }
+        }
         public async Task<(bool Success, AdminDto? Admin, string[] Errors)> CreateAdminAsync(CreateAdminDto model)
         {
             try
@@ -657,5 +744,6 @@ namespace BashindaAPI.Services
             return true;
         }
 
+        
     }
 } 

@@ -10,12 +10,25 @@ namespace BashindaAPI.Models
         
         [Required]
         public int UserId { get; set; }
-        
+        public bool IsAdult { get; set; }
+        // Nationality, Blood Group, Profession, Gender as strings:
+        [Required]
+        [StringLength(50)]
+        public string Nationality { get; set; } = string.Empty;
         [Required]
         [StringLength(100)]
         [Display(Name = "Full Name")]
         public string FullName { get; set; } = string.Empty;
-        
+        // If Not Adult: Birth Registration information
+        public string? BirthRegistrationNo { get; set; }
+        public string? BirthRegistrationImagePath { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string FatherName { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(100)]
+        public string MotherName { get; set; } = string.Empty;
         [Required]
         [DataType(DataType.Date)]
         [Display(Name = "Date of Birth")]
@@ -31,7 +44,11 @@ namespace BashindaAPI.Models
         
         [Display(Name = "Profile Picture")]
         public string? SelfImagePath { get; set; }
-        
+
+        [Required]
+        [StringLength(50)]
+        public string BloodGroup { get; set; } = string.Empty;
+
         [Display(Name = "Contact Number")]
         [Phone]
         [StringLength(15)]
@@ -61,7 +78,9 @@ namespace BashindaAPI.Models
         [Required]
         [Display(Name = "Area Type")]
         public AreaType AreaType { get; set; }
-        
+        [Required]
+        [StringLength(50)]
+        public string Gender { get; set; } = string.Empty;
         [Required]
         [Display(Name = "Ward")]
         [StringLength(100)]

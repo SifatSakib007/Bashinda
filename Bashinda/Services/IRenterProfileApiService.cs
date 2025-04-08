@@ -39,20 +39,20 @@ namespace Bashinda.Services
             try
             {
                 var response = await _apiService.GetAsync($"api/renterprofiles/{id}", token);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<ApiResponse<RenterProfileDto>>(content, _jsonOptions);
-                    
+
                     if (result != null && result.Success)
                     {
                         return (true, result.Data, Array.Empty<string>());
                     }
-                    
+
                     return (false, null, result?.Errors ?? new[] { "Unknown error occurred" });
                 }
-                
+
                 return (false, null, new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
@@ -66,13 +66,13 @@ namespace Bashinda.Services
             try
             {
                 var response = await _apiService.GetAsync("api/renterprofiles/current", token);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("API response content: {Content}", content);
-                    
-                    try 
+
+                    try
                     {
                         // Try to deserialize the content directly as RenterProfileDto first
                         var directResult = JsonSerializer.Deserialize<RenterProfileDto>(content, _jsonOptions);
@@ -101,10 +101,10 @@ namespace Bashinda.Services
                             _logger.LogError(ex, "Failed to deserialize response as ApiResponse<RenterProfileDto>");
                         }
                     }
-                    
+
                     return (false, null, new[] { "Unable to parse API response" });
                 }
-                
+
                 return (false, null, new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
@@ -118,20 +118,20 @@ namespace Bashinda.Services
             try
             {
                 var response = await _apiService.GetAsync("api/renterprofiles", token);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<ApiResponse<List<RenterProfileListDto>>>(content, _jsonOptions);
-                    
+
                     if (result != null && result.Success)
                     {
                         return (true, result.Data ?? new List<RenterProfileListDto>(), Array.Empty<string>());
                     }
-                    
+
                     return (false, new List<RenterProfileListDto>(), result?.Errors ?? new[] { "Unknown error occurred" });
                 }
-                
+
                 return (false, new List<RenterProfileListDto>(), new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
@@ -145,20 +145,20 @@ namespace Bashinda.Services
             try
             {
                 var response = await _apiService.GetAsync("api/renterprofiles/pending", token);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<ApiResponse<List<RenterProfileListDto>>>(content, _jsonOptions);
-                    
+
                     if (result != null && result.Success)
                     {
                         return (true, result.Data ?? new List<RenterProfileListDto>(), Array.Empty<string>());
                     }
-                    
+
                     return (false, new List<RenterProfileListDto>(), result?.Errors ?? new[] { "Unknown error occurred" });
                 }
-                
+
                 return (false, new List<RenterProfileListDto>(), new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
@@ -197,20 +197,20 @@ namespace Bashinda.Services
                 };
 
                 var response = await _apiService.PostAsync("api/renterprofiles", apiModel, token);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<ApiResponse<RenterProfileDto>>(content, _jsonOptions);
-                    
+
                     if (result != null && result.Success)
                     {
                         return (true, result.Data, Array.Empty<string>());
                     }
-                    
+
                     return (false, null, result?.Errors ?? new[] { "Unknown error occurred" });
                 }
-                
+
                 return (false, null, new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
@@ -249,20 +249,20 @@ namespace Bashinda.Services
                 };
 
                 var response = await _apiService.PutAsync($"api/renterprofiles/{id}", apiModel, token);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<ApiResponse<object>>(content, _jsonOptions);
-                    
+
                     if (result != null && result.Success)
                     {
                         return (true, Array.Empty<string>());
                     }
-                    
+
                     return (false, result?.Errors ?? new[] { "Unknown error occurred" });
                 }
-                
+
                 return (false, new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
@@ -276,20 +276,20 @@ namespace Bashinda.Services
             try
             {
                 var response = await _apiService.PatchAsync($"api/renterprofiles/{id}/approve", model, token);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<ApiResponse<object>>(content, _jsonOptions);
-                    
+
                     if (result != null && result.Success)
                     {
                         return (true, Array.Empty<string>());
                     }
-                    
+
                     return (false, result?.Errors ?? new[] { "Unknown error occurred" });
                 }
-                
+
                 return (false, new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
@@ -309,22 +309,22 @@ namespace Bashinda.Services
 
                 // Set authorization header
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                
+
                 var response = await _httpClient.PostAsync($"api/renterprofiles/{id}/upload-image", formContent);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<ApiResponse<string>>(content, _jsonOptions);
-                    
+
                     if (result != null && result.Success)
                     {
                         return (true, result.Data, Array.Empty<string>());
                     }
-                    
+
                     return (false, null, result?.Errors ?? new[] { "Unknown error occurred" });
                 }
-                
+
                 return (false, null, new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
@@ -333,4 +333,4 @@ namespace Bashinda.Services
             }
         }
     }
-} 
+}

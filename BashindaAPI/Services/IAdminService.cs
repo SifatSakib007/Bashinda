@@ -8,6 +8,8 @@ namespace BashindaAPI.Services
         Task<(bool Success, AdminDto? Admin, string[] Errors)> CreateAdminAsync(CreateAdminDto model);
         Task<(bool Success, AdminDto? Admin, string[] Errors)> GetAdminByIdAsync(int id);
         Task<(bool Success, List<AdminListDto> Admins, string[] Errors)> GetAllAdminsAsync();
+        Task<(bool Success, List<RenterProfileDto> Renters, string[] Errors)> GetAllRentersAsync();
+        Task<(bool Success, List<ApartmentOwnerProfileDto> Owners, string[] Errors)> GetAllOwnersAsync();
         Task<(bool Success, string[] Errors)> UpdateAdminPermissionsAsync(UpdateAdminPermissionsDto model);
         Task<(bool Success, string[] Errors)> DeleteAdminAsync(int id);
         

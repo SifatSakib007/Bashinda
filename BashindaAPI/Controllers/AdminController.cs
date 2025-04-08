@@ -27,13 +27,13 @@ namespace BashindaAPI.Controllers
             _logger = logger;
             _adminService = adminService;
         }
-        
+
 
 
         // GET: api/Admin/dashboard
         [HttpGet("dashboard")]
         public async Task<ActionResult<ApiResponse<AdminDashboardDto>>> GetDashboard(
-                [FromQuery] string? division,  
+                [FromQuery] string? division,
                 [FromQuery] string? district,
                 [FromQuery] string? upazila,
                 [FromQuery] string? ward,
@@ -82,7 +82,6 @@ namespace BashindaAPI.Controllers
             }
         }
 
-
         // GET: api/Admin/users
         [HttpGet("users")]
         public async Task<ActionResult<ApiResponse<List<UserDto>>>> GetUsers()
@@ -113,18 +112,18 @@ namespace BashindaAPI.Controllers
         // GET: api/Admin/renter-profiles/pending
         [HttpGet("renter-profiles/pending")]
         public async Task<ActionResult<ApiResponse<List<RenterProfileListDto>>>> GetPendingRenterProfiles(
-    [FromQuery] string? division,
-    [FromQuery] string? district,
-    [FromQuery] string? upazila,
-    [FromQuery] string? ward,
-    [FromQuery] string? village)
+        [FromQuery] string? division,
+        [FromQuery] string? district,
+        [FromQuery] string? upazila,
+        [FromQuery] string? ward,
+        [FromQuery] string? village)
         {
             try
             {
                 var baseQuery = _context.RenterProfiles
                     .Where(p => !p.IsApproved)
                     .Include(p => p.User);
-
+                      
                 var filteredQuery = ApplyRenterLocationFilters(baseQuery,
                     division ?? string.Empty,
                     district ?? string.Empty,
@@ -384,24 +383,24 @@ namespace BashindaAPI.Controllers
             try
             {
                 var user = await _context.Users.FindAsync(id);
-                
+
                 if (user == null)
                 {
                     return NotFoundWithResponse<bool>($"User with ID {id} not found");
                 }
-                
+
                 // Check if this user has any related data
                 var hasRenterProfile = await _context.RenterProfiles.AnyAsync(p => p.UserId == id);
                 var hasOwnerProfile = await _context.ApartmentOwnerProfiles.AnyAsync(p => p.UserId == id);
-                
+
                 if (hasRenterProfile || hasOwnerProfile)
                 {
                     return BadRequestWithResponse<bool>("Cannot delete user with existing profiles. Delete the profiles first.");
                 }
-                
+
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
-                
+
                 return OkWithResponse(true);
             }
             catch (Exception ex)
@@ -560,4 +559,4 @@ namespace BashindaAPI.Controllers
                 ?? User.FindFirst("Token")?.Value;
         }
     }
-} 
+}

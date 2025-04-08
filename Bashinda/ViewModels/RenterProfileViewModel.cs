@@ -18,14 +18,14 @@ namespace Bashinda.ViewModels
         // If adult, these fields are required
         [RequiredIf("IsAdult", true, ErrorMessage = "National ID is required for adults.")]
         public string? NationalId { get; set; }
-        
+
         // File upload fields shouldn't be required as they need special handling
         public IFormFile? NationalIdImage { get; set; }
 
         // If not adult, these fields are required
         [RequiredIf("IsAdult", false, ErrorMessage = "Birth Registration Number is required for non-adults.")]
         public string? BirthRegistrationNo { get; set; }
-        
+
         // File upload fields shouldn't be required as they need special handling
         public IFormFile? BirthRegistrationImage { get; set; }
 
@@ -73,21 +73,21 @@ namespace Bashinda.ViewModels
 
         [Required]
         public string? Upazila { get; set; }
-        
+
         // New fields for permanent residence
         [Required]
         public string AreaType { get; set; } = string.Empty;
-        
+
         [Required]
         public string? Ward { get; set; }
-        
+
         [Required]
         public string? Village { get; set; }
-        
+
         [Required]
         [RegularExpression(@"^\d{4}$", ErrorMessage = "Post code must be a 4-digit number.")]
         public string? PostCode { get; set; }
-        
+
         [Required]
         public string? HoldingNo { get; set; }
     }
