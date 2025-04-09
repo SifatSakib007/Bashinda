@@ -1,5 +1,4 @@
 using BashindaAPI.DTOs;
-using BashindaAPI.Models;
 using BashindaAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -52,9 +51,9 @@ namespace BashindaAPI.Controllers
             return BadRequest(new { Errors = errors });
         }
 
-        [HttpGet]
+        [HttpGet("renters")]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<ActionResult<IEnumerable<RenterProfileDto>>> GetAllRenters()
+        public async Task<ActionResult<IEnumerable<RenterProfileDTO>>> GetAllRenters()
         {
             var (success, users, errors) = await _adminService.GetAllRentersAsync();
             if (success)
@@ -65,7 +64,7 @@ namespace BashindaAPI.Controllers
 
         }
 
-        [HttpGet]
+        [HttpGet("owners")]
         [Authorize(Roles = "SuperAdmin")]
         public async Task<ActionResult<IEnumerable<ApartmentOwnerProfileDto>>> GetAllOwners()
         {
@@ -75,7 +74,6 @@ namespace BashindaAPI.Controllers
                 return Ok(users);
             }
             return BadRequest(new { Errors = errors });
-
         }
 
         [HttpGet("{id}")]

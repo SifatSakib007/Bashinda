@@ -487,8 +487,8 @@ namespace Bashinda.Controllers
             // Check if user is admin
             if (User.IsInRole("SuperAdmin"))
             {
-                _logger.LogInformation("Redirecting to Admin dashboard");
-                return RedirectToAction("Index", "AdminManagemet");
+                _logger.LogInformation("Redirecting to Super Admin dashboard");
+                return RedirectToAction("Index", "AdminManagement");
             }
 
             // Check if user is admin

@@ -131,7 +131,7 @@ namespace BashindaAPI.Controllers
         // GET: api/RenterProfiles/5
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin,ApartmentOwner,ApartmentRenter,SuperAdmin")]
-        public async Task<ActionResult<ApiResponse<RenterProfileDto>>> GetRenterProfile(int id)
+        public async Task<ActionResult<ApiResponse<RenterProfileDTO>>> GetRenterProfile(int id)
         {
             // Get current user's ID from the token
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -197,7 +197,7 @@ namespace BashindaAPI.Controllers
                 }
 
                 // Create DTO with field filtering based on permissions
-                var profileDto = new RenterProfileDto
+                var profileDto = new RenterProfileDTO
                 {
                     Id = renterProfile.Id,
                     UserId = renterProfile.UserId,
@@ -227,11 +227,11 @@ namespace BashindaAPI.Controllers
                     IsApproved = renterProfile.IsApproved
                 };
 
-                return Ok(ApiResponse<RenterProfileDto>.SuccessResponse(profileDto));
+                return Ok(ApiResponse<RenterProfileDTO>.SuccessResponse(profileDto));
             }
 
             // For SuperAdmin, own profile, or apartment owner - show full details
-            var dto = new RenterProfileDto
+            var dto = new RenterProfileDTO
             {
                 Id = renterProfile.Id,
                 UserId = renterProfile.UserId,
@@ -261,13 +261,13 @@ namespace BashindaAPI.Controllers
                 IsApproved = renterProfile.IsApproved
             };
 
-            return Ok(ApiResponse<RenterProfileDto>.SuccessResponse(dto));
+            return Ok(ApiResponse<RenterProfileDTO>.SuccessResponse(dto));
         }
 
         // GET: api/RenterProfiles/current
         [HttpGet("current")]
         [Authorize(Roles = "ApartmentRenter")]
-        public async Task<ActionResult<RenterProfileDto>> GetCurrentRenterProfile()
+        public async Task<ActionResult<RenterProfileDTO>> GetCurrentRenterProfile()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -291,7 +291,7 @@ namespace BashindaAPI.Controllers
                 return NotFound();
             }
 
-            var dto = new RenterProfileDto
+            var dto = new RenterProfileDTO
             {
                 Id = renterProfile.Id,
                 UserId = renterProfile.UserId,
@@ -444,7 +444,7 @@ namespace BashindaAPI.Controllers
         // POST: api/RenterProfiles
         [HttpPost]
         [Authorize(Roles = "ApartmentRenter")]
-        public async Task<ActionResult<RenterProfileDto>> CreateRenterProfile(CreateRenterProfileDto dto)
+        public async Task<ActionResult<RenterProfileDTO>> CreateRenterProfile(CreateRenterProfileDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -489,7 +489,7 @@ namespace BashindaAPI.Controllers
             _context.RenterProfiles.Add(renterProfile);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetRenterProfile), new { id = renterProfile.Id }, new RenterProfileDto
+            return CreatedAtAction(nameof(GetRenterProfile), new { id = renterProfile.Id }, new RenterProfileDTO
             {
                 Id = renterProfile.Id,
                 UserId = renterProfile.UserId,

@@ -142,6 +142,12 @@
                 <i class="fas fa-users-cog"></i>
                 Create Admins
                 </a>
+
+                <a class="nav-link @(currentController == "AdminManagement" && currentAction == "AllRenters" ? "active" : "")"
+                   asp-controller="AdminManagement" asp-action="AllRenters">
+                <i class="fas fa-users-cog"></i>
+                    Renters List
+                </a>
             }
             
             <!-- Show renters link only to apartment owners and admins -->

@@ -17,13 +17,13 @@ namespace BashindaAPI.Services
             _context = context;
             _logger = logger;
         }
-        public async Task<(bool Success, List<RenterProfileDto> Renters, string[] Errors)> GetAllRentersAsync()
+        public async Task<(bool Success, List<RenterProfileDTO> Renters, string[] Errors)> GetAllRentersAsync()
         {
             try
             {
                 var renters = await _context.RenterProfiles.ToListAsync();
 
-                var renterDtos = renters.Select(u => new RenterProfileDto
+                var renterDtos = renters.Select(u => new RenterProfileDTO
                 {
                     Id = u.Id,
                     UserId = u.UserId,
@@ -58,7 +58,7 @@ namespace BashindaAPI.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all renters: {Message}", ex.Message);
-                return (false, new List<RenterProfileDto>(), new[] { "An error occurred while retrieving renters" });
+                return (false, new List<RenterProfileDTO>(), new[] { "An error occurred while retrieving renters" });
             }
         }
         public async Task<(bool Success, List<ApartmentOwnerProfileDto> Owners, string[] Errors)> GetAllOwnersAsync()

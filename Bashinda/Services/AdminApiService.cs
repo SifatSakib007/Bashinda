@@ -56,6 +56,61 @@ namespace Bashinda.Services
                 return (false, new List<AdminViewModel>(), new[] { $"Exception occurred: {ex.Message}" });
             }
         }
+        public async Task<(bool Success, List<RenterProfileViewModel> Data, string[] Errors)> GetAllRentersAsync(string token)
+        {
+            try
+            {
+                var response = await _apiService.GetAsync("api/Admins/renters", token);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var apiResult = JsonSerializer.Deserialize<List<RenterProfileViewModel>>(content, _jsonOptions);
+
+                    if (apiResult != null)
+                    {
+                        return (true, apiResult, Array.Empty<string>());
+                    }
+
+                    return (false, new List<RenterProfileViewModel>(), new[] { "Failed to deserialize response" });
+                }
+
+                return (false, new List<RenterProfileViewModel>(), new[] { $"API request failed with status code {response.StatusCode}" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all renters");
+                return (false, new List<RenterProfileViewModel>(), new[] { $"Exception occurred: {ex.Message}" });
+            }
+        }
+        public async Task<(bool Success, List<OwnerProfileListDto> Data, string[] Errors)> GetAllOwnersAsync(string token)
+        {
+            try
+            {
+                var response = await _apiService.GetAsync("api/Admins/owners", token);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var apiResult = JsonSerializer.Deserialize<List<OwnerProfileListDto>>(content, _jsonOptions);
+
+                    if (apiResult != null)
+                    {
+                        return (true, apiResult, Array.Empty<string>());
+                    }
+
+                    return (false, new List<OwnerProfileListDto>(), new[] { "Failed to deserialize response" });
+                }
+
+                return (false, new List<OwnerProfileListDto>(), new[] { $"API request failed with status code {response.StatusCode}" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all renters");
+                return (false, new List<OwnerProfileListDto>(), new[] { $"Exception occurred: {ex.Message}" });
+            }
+        }
+
 
         public async Task<(bool Success, AdminViewModel? Data, string[] Errors)> GetAdminByIdAsync(string id, string token)
         {
@@ -193,14 +248,14 @@ namespace Bashinda.Services
 
 
         public async Task<(bool Success, List<ViewModels.RenterProfileListDto> Profiles, string[] Errors)>
-    GetPendingProfilesAsync(string token, AdminLocationFilters filters)
+        GetPendingProfilesAsync(string token, AdminLocationFilters filters)
         {
             var endpoint = BuildEndpoint("api/Admin/renter-profiles/pending", filters);
             return await HandleApiCall<List<ViewModels.RenterProfileListDto>>(endpoint, token);
         }
 
         public async Task<(bool Success, string[] Errors)> ProcessApproval(
-    int profileId, bool isApproved, string reason, string token, AdminLocationFilters filters)
+        int profileId, bool isApproved, string reason, string token, AdminLocationFilters filters)
         {
             try
             {

@@ -1,4 +1,3 @@
-using Bashinda.Data;
 using Bashinda.Models;
 using Bashinda.Services;
 using Bashinda.ViewModels;
@@ -6,10 +5,8 @@ using BashindaAPI.DTOs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using AdminPermissionDto = BashindaAPI.DTOs.AdminPermissionDto;
 
 namespace Bashinda.Controllers
@@ -53,12 +50,112 @@ namespace Bashinda.Controllers
         // GET: AdminManagement
         public async Task<IActionResult> Index()
         {
-            // Get token from cookies/session
-            var token = await GetAccessToken();
+            try
+            {
+                // Get token from cookies/session
+                var token = await GetAccessToken();
 
-            var (success, admins, errors) = await _adminApiService.GetAllAdminsAsync(token);
-            return View(admins);
+                var (success, admins, errors) = await _adminApiService.GetAllAdminsAsync(token);
+                if (!success)
+                {
+                    TempData["ErrorMessage"] = errors.FirstOrDefault() ?? "Failed to load.";
+                    return NotFound();
+                }
+                return View(admins);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in AllRenters action");
+                TempData["ErrorMessage"] = "An error occurred while loading renters.";
+                return NotFound();
+            }
         }
+        public async Task<IActionResult> AllRenters()
+        {
+            try
+            {
+                var token = await GetAccessToken(); 
+                var (success, renters, errors) = await _adminApiService.GetAllRentersAsync(token);
+                if (!success)
+                {
+                    TempData["ErrorMessage"] = errors.FirstOrDefault() ?? "Failed to load renters.";
+                    return View(new List<RenterProfileViewModel>());
+                }
+
+                // Map the DTOs to your view models
+                var viewModels = renters.Select(dto => new RenterProfileViewModel
+                {
+                    Id = dto.Id,
+                    UserId = dto.UserId,
+                    IsAdult = dto.IsAdult,
+                    FullName = dto.FullName,
+                    Email = dto.Email,
+                    MobileNo = dto.MobileNo,
+                    Nationality = dto.Nationality,
+                    BloodGroup = dto.BloodGroup,
+                    Profession = dto.Profession,
+                    Gender = dto.Gender,
+                    DateOfBirth = dto.DateOfBirth,
+                    IsApproved = dto.IsApproved,
+                    Division = dto.Division,
+                    District = dto.District,
+                    Upazila = dto.Upazila,
+                }).ToList();
+
+                return View(viewModels);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in AllRenters action");
+                TempData["ErrorMessage"] = "An error occurred while loading renters.";
+                return View(new List<RenterProfileViewModel>());
+            }
+        }
+        public async Task<IActionResult> AllOwners()
+        {
+            try
+            {
+                var token = await GetAccessToken(); 
+                var (success, owners, errors) = await _adminApiService.GetAllOwnersAsync(token);
+                if (!success)
+                {
+                    TempData["ErrorMessage"] = errors.FirstOrDefault() ?? "Failed to load renters.";
+                    return View(new List<OwnerProfileListDto>());
+                }
+
+                // Map the DTOs to your view models
+                var viewModels = owners.Select(dto => new OwnerProfileListDto
+                {
+                    Id = dto.Id,
+                    UserId = dto.UserId,
+                    IsAdult = dto.IsAdult,
+                    FullName = dto.FullName,
+                    Email = dto.Email,
+                    MobileNo = dto.MobileNo,
+                    Nationality = dto.Nationality,
+                    BloodGroup = dto.BloodGroup,
+                    Profession = dto.Profession,
+                    Gender = dto.Gender,
+                    DateOfBirth = dto.DateOfBirth,
+                    SelfImagePath = dto.SelfImagePath,
+                    IsApproved = dto.IsApproved,
+                    Division = dto.Division,
+                    District = dto.District,
+                    Upazila = dto.Upazila,
+                    RejectionReason = dto.RejectionReason
+                }).ToList();
+
+                return View(viewModels);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in AllRenters action");
+                TempData["ErrorMessage"] = "An error occurred while loading renters.";
+                return View(new List<OwnerProfileListDto>());
+            }
+        }
+
 
         // GET: AdminManagement/Details/5
         //[HttpGet]

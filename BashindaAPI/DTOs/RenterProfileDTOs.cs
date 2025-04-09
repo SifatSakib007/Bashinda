@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace BashindaAPI.DTOs
 {
-    public class RenterProfileDto
+    public class RenterProfileDTO
     {
         public int Id { get; set; }
         public int UserId { get; set; }

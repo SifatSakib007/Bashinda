@@ -9,6 +9,8 @@ namespace Bashinda.Services
     public interface IAdminApiService
     {
         Task<(bool Success, List<AdminViewModel> Data, string[] Errors)> GetAllAdminsAsync(string token);
+        Task<(bool Success, List<RenterProfileViewModel> Data, string[] Errors)> GetAllRentersAsync(string token);
+        Task<(bool Success, List<OwnerProfileListDto> Data, string[] Errors)> GetAllOwnersAsync(string token);
         Task<(bool Success, AdminViewModel? Data, string[] Errors)> GetAdminByIdAsync(string id, string token);
         Task<(bool Success, AdminViewModel? Data, string[] Errors)> CreateAdminAsync(CreateAdminDto model, string token);
         Task<(bool Success, string[] Errors)> UpdateAdminPermissionsAsync(string id, AdminPermissionViewModel permissions, string token);
@@ -21,7 +23,7 @@ namespace Bashinda.Services
         Task<(bool Success, List<Bashinda.ViewModels.RenterProfileListDto> PendingProfiles, string[] Errors)>
         GetPendingRenterProfilesAsync(string token);
 
-        Task<(bool Success, List<Bashinda.ViewModels.OwnerProfileListDto> PendingProfiles, string[] Errors)>
+        Task<(bool Success, List<OwnerProfileListDto> PendingProfiles, string[] Errors)>
             GetPendingOwnerProfilesAsync(string token);
         Task<(bool Success, string[] Errors)> ApproveRenterProfileAsync(int id, bool isApproved, string? rejectionReason, string token);
         Task<(bool Success, string[] Errors)> ApproveOwnerProfileAsync(int id, bool isApproved, string? rejectionReason, string token);
