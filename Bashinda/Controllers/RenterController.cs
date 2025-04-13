@@ -596,13 +596,13 @@ namespace Bashinda.Controllers
                             Path = "/"
                         });
                     }
-                    else
-                    {
-                        // No token found, redirect to login
-                        _logger.LogWarning("No JWT token found in cookie or claims for ViewProfile");
-                        TempData["ErrorMessage"] = "Your session has expired. Please login again.";
-                        return View("~/Views/Shared/SessionExpired.cshtml");
-                    }
+                        else
+                        {
+                            // No token found, redirect to login
+                            _logger.LogWarning("No JWT token found in cookie or claims for ViewProfile");
+                            TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                            return View("~/Views/Shared/SessionExpired.cshtml");
+                        }
                 }
                 
                 // Use the API service to get the current renter profile

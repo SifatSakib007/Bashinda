@@ -6,6 +6,7 @@ namespace Bashinda.ViewModels
     {
         public int Id { get; set; }
         public int UserId { get; set; }
+        public string? UniqueId { get; set; }
         public bool IsAdult { get; set; }
 
         public string FullName { get; set; } = string.Empty;

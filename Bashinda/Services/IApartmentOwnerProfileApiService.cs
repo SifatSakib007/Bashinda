@@ -35,7 +35,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync($"api/apartmentownerprofiles/{id}", token);
+                var response = await _apiService.GetAsync($"api/ApartmentOwnerProfiles/{id}", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -62,7 +62,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync("api/apartmentownerprofiles/current", token);
+                var response = await _apiService.GetAsync("api/ApartmentOwnerProfiles/current", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -89,7 +89,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync("api/apartmentownerprofiles", token);
+                var response = await _apiService.GetAsync("api/ApartmentOwnerProfiles", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -116,7 +116,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync("api/apartmentownerprofiles/pending", token);
+                var response = await _apiService.GetAsync("api/ApartmentOwnerProfiles/pending", token);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -143,7 +143,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.PostAsync("api/apartmentownerprofiles", model, token);
+                var response = await _apiService.PostAsync("api/ApartmentOwnerProfiles", model, token);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -170,7 +170,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.PutAsync($"api/apartmentownerprofiles/{id}", model, token);
+                var response = await _apiService.PutAsync($"api/ApartmentOwnerProfiles/{id}", model, token);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -197,7 +197,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.PatchAsync($"api/apartmentownerprofiles/{id}/approve", model, token);
+                var response = await _apiService.PatchAsync($"api/ApartmentOwnerProfiles/{id}/approve", model, token);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -232,7 +232,7 @@ namespace Bashinda.Services
                 // Set authorization header
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                 
-                var response = await _httpClient.PostAsync($"api/apartmentownerprofiles/{id}/upload-image", formContent);
+                var response = await _httpClient.PostAsync($"api/ApartmentOwnerProfiles/{id}/upload-image", formContent);
                 
                 if (response.IsSuccessStatusCode)
                 {
