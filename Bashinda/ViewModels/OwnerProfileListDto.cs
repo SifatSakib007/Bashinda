@@ -36,7 +36,6 @@ namespace Bashinda.ViewModels
         public string Village { get; set; } = string.Empty;
         public string PostCode { get; set; } = string.Empty;
         public string HoldingNo { get; set; } = string.Empty;
-        public string? UniqueId { get; set; }
         public string? RejectionReason { get; set; }
         public UserDto? User { get; set; }
     }

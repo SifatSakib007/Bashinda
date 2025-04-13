@@ -1,11 +1,14 @@
 ﻿using Bashinda.Services;
 using Bashinda.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Security.Cryptography.Xml;
 
 namespace Bashinda.Controllers
 {
+    [Authorize(Roles = "ApartmentOwner")]
     public class OwnerController : Controller
     {
         private readonly IApartmentOwnerProfileApiService _apartmentOwnerProfileApiService;
@@ -22,7 +25,60 @@ namespace Bashinda.Controllers
             return View();
         }
 
-        
+        [HttpGet]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(OwnerProfileViewModel ownerProfileViewModel)
+        {
+            try
+            {
+                // Get the token from the cookie
+                var token = HttpContext.Request.Cookies["JwtToken"];
+
+                // If token not in cookie, try from claims
+                if (string.IsNullOrEmpty(token))
+                {
+                    var tokenClaim = User.FindFirst("Token");
+                    if (tokenClaim != null && !string.IsNullOrEmpty(tokenClaim.Value))
+                    {
+                        token = tokenClaim.Value;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("JWT token not found");
+                        TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                        return View("~/Views/Shared/SessionExpired.cshtml");
+                    }
+                }
+
+                // Create a new view model
+                var model = new OwnerProfileViewModel();
+
+                // Pre-fill with user's email if available
+                var emailClaim = User.FindFirst(ClaimTypes.Email);
+                if (emailClaim != null)
+                {
+                    model.Email = emailClaim.Value;
+                }
+
+                // Pre-fill with user's name if available
+                var nameClaim = User.FindFirst(ClaimTypes.Name);
+                if (nameClaim != null)
+                {
+                    model.FullName = nameClaim.Value;
+                }
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading Create form");
+                TempData["ErrorMessage"] = "An error occurred while loading the form.";
+                return RedirectToAction("Index", "Home");
+            }
+
+        }
+
+
         public async Task<IActionResult> ViewProfile()
         {
             try
@@ -57,6 +113,9 @@ namespace Bashinda.Controllers
                     else
                     {
                         // No token found, redirect to login
+                        // No token found, redirect to login
+                        _logger.LogWarning("No JWT token found in cookie or claims for ViewProfile");
+                        TempData["ErrorMessage"] = "Your session has expired. Please login again.";
                         return RedirectToAction("Login", "Account");
                     }
                 }
@@ -66,10 +125,14 @@ namespace Bashinda.Controllers
 
                 if(!success)
                 {
+                    _logger.LogWarning("Failed to get owner profile: {Errors}", string.Join(", ", errors));
+
                     // Check if unauthorized (likely invalid/expired token)
                     if (errors.Any(e => e.Contains("unauthorized", StringComparison.OrdinalIgnoreCase) ||
                                     e.Contains("token", StringComparison.OrdinalIgnoreCase)))
                     {
+                        _logger.LogInformation("User unauthorized, redirecting to login");
+
                         TempData["ErrorMessage"] = "Your session has expired. Please login again.";
                         return RedirectToAction("Login", "Account");
                     }
@@ -79,8 +142,10 @@ namespace Bashinda.Controllers
                     if (errors.Any(e => e.Contains("NotFound", StringComparison.OrdinalIgnoreCase) ||
                                      e.Contains("404", StringComparison.OrdinalIgnoreCase)))
                     {
+                        _logger.LogInformation("User doesn't have a profile yet, redirecting to Create action");
+
                         TempData["InfoMessage"] = "Please create your profile to continue.";
-                        return RedirectToAction("Create", "ApartmentOwnerProfile");
+                        return RedirectToAction("Create");
                     }
                     TempData["ErrorMessage"] = errors.FirstOrDefault() ?? "Failed to load profile";
                     return View(new OwnerProfileViewModel());

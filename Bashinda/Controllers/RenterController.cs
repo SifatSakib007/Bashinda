@@ -447,9 +447,23 @@ namespace Bashinda.Controllers
             {
                 // Get the JWT token from cookie
                 var token = User.FindFirstValue("Token");
+
+                // Ensure token is not null or empty
+                if (string.IsNullOrEmpty(token))
+                {
+                    _logger.LogWarning("JWT token not found");
+                    TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                    return View("~/Views/Shared/SessionExpired.cshtml");
+                }
+
                 _logger.LogInformation($"Using token for profile creation: {token?.Substring(0, 20)}...");
 
                 // Check if the user already has a profile
+                if(token == null) {
+                    _logger.LogWarning("Token is null, cannot check existing profile");
+                    TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                    return View("~/Views/Shared/SessionExpired.cshtml");
+                }
                 var existingProfile = await _renterProfileApiService.GetCurrentAsync(token);
                 if (existingProfile.Success && existingProfile.Data != null)
                 {
@@ -493,7 +507,7 @@ namespace Bashinda.Controllers
                     Gender = model.Gender,
                     MobileNo = model.MobileNo ?? string.Empty,
                     Email = model.Email ?? string.Empty,
-                    
+
                     // Use string-based location data directly from form
                     Division = model.Division ?? string.Empty,
                     District = model.District ?? string.Empty,

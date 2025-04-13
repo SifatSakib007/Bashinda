@@ -56,12 +56,25 @@
                                 <span class="text-muted small">@userRole</span>
                             </div>
                         </li>
+                        
                         <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" asp-controller="Profile" asp-action="Renter">
-                                <i class="fas fa-user me-2"></i>View Profile
-                            </a>
-                        </li>
+                        @if (userRole == "ApartmentRenter")
+                        {
+                            <li>
+                                <a class="dropdown-item" asp-controller="Profile" asp-action="Renter">
+                                    <i class="fas fa-user me-2"></i>View Profile
+                                </a>
+                            </li>
+                        }
+                        @if (userRole == "ApartmentOwner")
+                        {
+                            <li>
+                                <a class="dropdown-item" asp-controller="Owner" asp-action="ViewProfile">
+                                    <i class="fas fa-user me-2"></i>View Profile
+                                </a>
+                            </li>
+                        }
+                        
                         <li>
                             <a class="dropdown-item" href="#">
                                 <i class="fas fa-cog me-2"></i>Settings

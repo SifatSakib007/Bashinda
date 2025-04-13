@@ -20,8 +20,9 @@ namespace Bashinda.Services
         private readonly IApiService _apiService;
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly ILogger<ApartmentOwnerProfileApiService> _logger;
 
-        public ApartmentOwnerProfileApiService(IApiService apiService, IHttpClientFactory httpClientFactory)
+        public ApartmentOwnerProfileApiService(IApiService apiService, IHttpClientFactory httpClientFactory, ILogger<ApartmentOwnerProfileApiService> logger)
         {
             _apiService = apiService;
             _httpClient = httpClientFactory.CreateClient("BashindaAPI");
@@ -29,6 +30,7 @@ namespace Bashinda.Services
             {
                 PropertyNameCaseInsensitive = true
             };
+            _logger = logger;
         }
 
         public async Task<(bool Success, ApartmentOwnerProfileDto? Data, string[] Errors)> GetByIdAsync(int id, string token)
@@ -67,16 +69,41 @@ namespace Bashinda.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<ApiResponse<ApartmentOwnerProfileDto>>(content, _jsonOptions);
-                    
-                    if (result != null && result.Success)
+                    _logger.LogInformation("API response content: {Content}", content);
+
+                    try
                     {
-                        return (true, result.Data, Array.Empty<string>());
+                        // Try to deserialize the content directly as RenterProfileDto first
+                        var directResult = JsonSerializer.Deserialize<ApartmentOwnerProfileDto>(content, _jsonOptions);
+                        if (directResult != null)
+                        {
+                            return (true, directResult, Array.Empty<string>());
+                        }
                     }
-                    
-                    return (false, null, result?.Errors ?? new[] { "Unknown error occurred" });
+                    catch
+                    {
+                        // If direct deserialization fails, try with ApiResponse wrapper
+                        try
+                        {
+                            var result = JsonSerializer.Deserialize<ApiResponse<ApartmentOwnerProfileDto>>(content, _jsonOptions);
+                            if (result != null && result.Success)
+                            {
+                                return (true, result.Data, Array.Empty<string>());
+                            }
+                            else if (result != null)
+                            {
+                                return (false, null, result.Errors ?? new[] { "API returned failure response" });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to deserialize response as ApiResponse<ApartmentOwnerProfileDto>");
+                        }
+                    }
+
+                    return (false, null, new[] { "Unable to parse API response" });
                 }
-                
+
                 return (false, null, new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
