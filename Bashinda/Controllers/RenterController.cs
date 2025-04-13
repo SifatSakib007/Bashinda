@@ -633,7 +633,11 @@ namespace Bashinda.Controllers
                     TempData["ErrorMessage"] = errors.FirstOrDefault() ?? "Failed to load profile";
                     return View(new RenterProfileViewModel());
                 }
-                
+                if (profile == null)
+                {
+                    TempData["ErrorMessage"] = "Profile not found.";
+                    return View(new RenterProfileViewModel());
+                }
                 // Map the API DTO to view model
                 var viewModel = new RenterProfileViewModel
                 {

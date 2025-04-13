@@ -9,10 +9,20 @@ namespace Bashinda.Controllers
     public class OwnerController : Controller
     {
         private readonly IApartmentOwnerProfileApiService _apartmentOwnerProfileApiService;
+        private readonly ILogger<OwnerController> _logger;
+
+        public OwnerController(IApartmentOwnerProfileApiService apartmentOwnerProfileApiService, ILogger<OwnerController> logger)
+        {
+            _apartmentOwnerProfileApiService = apartmentOwnerProfileApiService;
+            _logger = logger;
+        }
+
         public IActionResult Index()
         {
             return View();
         }
+
+        
         public async Task<IActionResult> ViewProfile()
         {
             try
@@ -119,6 +129,7 @@ namespace Bashinda.Controllers
             catch (Exception ex)
             {
                 // Handle exceptions
+                _logger.LogError(ex, "Error in ViewProfile action");
                 TempData["ErrorMessage"] = "An error occurred while loading your profile.";
                 return View(new OwnerProfileViewModel());
             }
