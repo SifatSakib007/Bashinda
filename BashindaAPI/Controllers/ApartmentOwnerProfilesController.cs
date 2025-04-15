@@ -130,14 +130,14 @@ namespace BashindaAPI.Controllers
         public async Task<ActionResult<ApartmentOwnerProfileDto>> GetCurrentApartmentOwnerProfile()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            if (!int.TryParse(userId, out int parsedUserId))
             {
                 return Unauthorized();
             }
 
             var ownerProfile = await _context.ApartmentOwnerProfiles
                 .Include(r => r.User)
-                .FirstOrDefaultAsync(r => r.UserId.ToString() == userId);
+                .FirstOrDefaultAsync(r => r.UserId == parsedUserId);
 
             if (ownerProfile == null)
             {

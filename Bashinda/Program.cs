@@ -19,7 +19,7 @@ builder.Services.AddControllersWithViews()
 // Configure API HttpClient
 builder.Services.AddHttpClient("BashindaAPI", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5003/");
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:7242/");
     client.DefaultRequestHeaders.Accept.Clear();
     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     client.Timeout = TimeSpan.FromSeconds(30);

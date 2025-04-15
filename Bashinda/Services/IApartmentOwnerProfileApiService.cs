@@ -308,7 +308,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.GetAsync($"api/owners/{userId}", token);
+                var response = await _apiService.GetAsync($"api/ApartmentOwnerProfiles/owners/{userId}", token);
 
                 if (response.IsSuccessStatusCode)
                 {
