@@ -36,10 +36,8 @@ namespace Bashinda.Models
 
     public enum AreaType
     {
-        City,
-        Municipality,
-        Union,
         CityCorporation,
-        Pourashava
+        Union,
+        Pourasava
     }
 } 

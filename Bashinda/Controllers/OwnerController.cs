@@ -245,24 +245,24 @@ namespace Bashinda.Controllers
                     _logger.LogWarning("User already has a profile, redirecting to Dashboard");
                     return RedirectToAction("Dashboard");
                 }
-                // Upload files first if provided
-                if (model.NationalIdImage != null && model.IsAdult)
-                {
-                    // Handle NID image upload
-                    // This would be implemented in a real application
-                }
+                //// Upload files first if provided
+                //if (model.NationalIdImage != null && model.IsAdult)
+                //{
+                //    // Handle NID image upload
+                //    // This would be implemented in a real application
+                //}
 
-                if (model.BirthRegistrationImage != null && !model.IsAdult)
-                {
-                    // Handle birth registration image upload
-                    // This would be implemented in a real application
-                }
+                //if (model.BirthRegistrationImage != null && !model.IsAdult)
+                //{
+                //    // Handle birth registration image upload
+                //    // This would be implemented in a real application
+                //}
 
-                if (model.SelfImage != null)
-                {
-                    // Handle self image upload
-                    // This would be implemented in a real application
-                }
+                //if (model.SelfImage != null)
+                //{
+                //    // Handle self image upload
+                //    // This would be implemented in a real application
+                //}
 
                 // Create a new DTO to send to the API
                 var dto = new CreateApartmentOwnerProfileDto

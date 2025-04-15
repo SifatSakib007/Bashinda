@@ -42,7 +42,7 @@ namespace Bashinda.Services
         {
             { ("Dhaka North", AreaType.CityCorporation), new List<string> { "Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5" } },
             { ("Dhaka South", AreaType.CityCorporation), new List<string> { "Ward 6", "Ward 7", "Ward 8", "Ward 9", "Ward 10" } },
-            { ("Savar", AreaType.Pourashava), new List<string> { "Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5" } },
+            { ("Savar", AreaType.Pourasava), new List<string> { "Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5" } },
             { ("Savar", AreaType.Union), new List<string> { "Union 1", "Union 2", "Union 3", "Union 4", "Union 5" } }
             // Add more upazilas and area types as needed
         };
@@ -108,7 +108,7 @@ namespace Bashinda.Services
             return Task.FromResult(localityTypeName.ToLower() switch
             {
                 "citycorporation" => AreaType.CityCorporation,
-                "pourashava" => AreaType.Pourashava,
+                "pourashava" => AreaType.Pourasava,
                 "union" => AreaType.Union,
                 _ => AreaType.CityCorporation // Default
             });

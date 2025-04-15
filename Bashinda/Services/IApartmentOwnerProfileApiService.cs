@@ -193,12 +193,15 @@ namespace Bashinda.Services
             try
             {
                 var response = await _apiService.PostAsync("api/ApartmentOwnerProfiles", model, token);
-                
+                _logger.LogInformation($"response: {response}");
                 if (response.IsSuccessStatusCode)
                 {
+                    _logger.LogInformation($"{response.StatusCode}");
                     var content = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<ApiResponse<ApartmentOwnerProfileDto>>(content, _jsonOptions);
                     
+                    _logger.LogInformation(content.ToString());
+                    var result = JsonSerializer.Deserialize<ApiResponse<ApartmentOwnerProfileDto>>(content, _jsonOptions);
+                    _logger.LogInformation($"result: {result}");
                     if (result != null && result.Success)
                     {
                         return (true, result.Data, Array.Empty<string>());

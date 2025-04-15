@@ -195,23 +195,30 @@ namespace BashindaAPI.Controllers
             return Ok(profiles);
         }
 
-        // POST: api/ApartmentOwnerProfiles
+        // Fix for the Enum.TryParse issue in the CreateApartmentOwnerProfile method
         [HttpPost]
         [Authorize(Roles = "ApartmentOwner")]
         public async Task<ActionResult<ApartmentOwnerProfileDto>> CreateApartmentOwnerProfile(CreateApartmentOwnerProfileDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            // In API's CreateApartmentOwnerProfile action
+            if (!int.TryParse(userId, out int parsedUserId))
             {
-                return Unauthorized();
+                return BadRequest("Invalid user ID");
             }
 
-            if (await _context.ApartmentOwnerProfiles.AnyAsync(r => r.UserId.ToString() == userId))
+            if (await _context.ApartmentOwnerProfiles.AnyAsync(r => r.UserId == parsedUserId))
             {
-                return Conflict("You already have a profile");
+                return Conflict("Profile exists");
             }
-            
-            // No need to validate location data with string-based fields
+
+            // Parse AreaType enum - with error handling
+            if (!Enum.TryParse(typeof(AreaType), dto.AreaType.ToString(), true, out var parsedAreaType))
+            {
+                return BadRequest($"Invalid AreaType value: {dto.AreaType}");
+            }
+
+            var areaType = (AreaType)parsedAreaType;
 
             var ownerProfile = new ApartmentOwnerProfile
             {
@@ -224,7 +231,7 @@ namespace BashindaAPI.Controllers
                 Division = dto.Division,
                 District = dto.District,
                 Upazila = dto.Upazila,
-                AreaType = dto.AreaType,
+                AreaType = areaType,
                 Ward = dto.Ward,
                 Village = dto.Village,
                 PostCode = dto.PostCode,
