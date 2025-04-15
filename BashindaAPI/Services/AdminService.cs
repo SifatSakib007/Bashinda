@@ -744,6 +744,49 @@ namespace BashindaAPI.Services
             return true;
         }
 
-        
+        public async Task<(bool Success, ApartmentOwnerProfileDto? Profile, string[] Errors)> GetOwnerByUserIdAsync(string userId)
+        {
+            try
+            {
+                // Convert userId to int since ApartmentOwnerProfile.Id is of type int
+                if (!int.TryParse(userId, out var userIdInt))
+                {
+                    return (false, null, new[] { "Invalid user ID format." });
+                }
+
+                var profile = await _context.ApartmentOwnerProfiles
+                    .FirstOrDefaultAsync(r => r.Id == userIdInt);
+
+                if (profile == null)
+                {
+                    return (false, null, new[] { "Owner profile not found." });
+                }
+
+                var dto = new ApartmentOwnerProfileDto
+                {
+                    Id = profile.Id,
+                    UserId = profile.UserId,
+                    // Map other properties as needed
+                    IsAdult = profile.IsAdult,
+                    NationalId = profile.NationalId,
+                    BirthRegistrationNo = profile.BirthRegistrationNo,
+                    DateOfBirth = profile.DateOfBirth,
+                    FullName = profile.FullName,
+                    FatherName = profile.FatherName,
+                    MotherName = profile.MotherName,
+                    MobileNo = profile.MobileNo,
+                    BirthRegistrationImagePath = profile.BirthRegistrationImagePath
+                    
+                };
+
+                return (true, dto, Array.Empty<string>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving owner profile for user ID: {UserId}", userId);
+                return (false, null, new[] { "An error occurred while retrieving the owner profile." });
+            }
+        }
+
     }
 } 

@@ -502,7 +502,7 @@ namespace Bashinda.Controllers
             if (User.IsInRole("ApartmentOwner"))
             {
                 _logger.LogInformation("Redirecting to ApartmentOwner dashboard");
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Dashboard", "Owner");
             }
             
             // Check if user is apartment renter

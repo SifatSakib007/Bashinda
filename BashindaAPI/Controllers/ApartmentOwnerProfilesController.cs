@@ -1,11 +1,12 @@
-using System.Security.Claims;
 using BashindaAPI.Data;
 using BashindaAPI.DTOs;
 using BashindaAPI.Models;
+using BashindaAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BashindaAPI.Controllers
 {
@@ -14,18 +15,32 @@ namespace BashindaAPI.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ApartmentOwnerProfilesController : BaseApiController
     {
+        private readonly IAdminService _adminService;
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<ApartmentOwnerProfilesController> _logger;
 
         public ApartmentOwnerProfilesController(
+            IAdminService adminService,
             ApplicationDbContext context,
             IWebHostEnvironment env,
             ILogger<ApartmentOwnerProfilesController> logger)
         {
+            _adminService = adminService;
             _context = context;
             _env = env;
             _logger = logger;
+        }
+
+        [HttpGet("owners/{userId}")]
+        public async Task<IActionResult> GetOwnerByUserId(string userId)
+        {
+            var (success, profile, errors) = await _adminService.GetOwnerByUserIdAsync(userId);
+            if (success)
+            {
+                return Ok(profile);
+            }
+            return NotFound(new { Errors = errors });
         }
 
         // GET: api/ApartmentOwnerProfiles

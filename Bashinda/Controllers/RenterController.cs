@@ -1,15 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Bashinda.Data;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 using Bashinda.Services;
 using Bashinda.ViewModels;
-using System.Linq;
-using Bashinda.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace Bashinda.Controllers
@@ -19,18 +14,15 @@ namespace Bashinda.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<RenterController> _logger;
-        private readonly IRenterProfileService _renterProfileService;
         private readonly IRenterProfileApiService _renterProfileApiService;
 
         public RenterController(
             ApplicationDbContext context, 
             ILogger<RenterController> logger, 
-            IRenterProfileService renterProfileService,
             IRenterProfileApiService renterProfileApiService)
         {
             _context = context;
             _logger = logger;
-            _renterProfileService = renterProfileService;
             _renterProfileApiService = renterProfileApiService;
         }
 

@@ -16,6 +16,8 @@ namespace BashindaAPI.Services
         // Methods for filtering users based on admin permissions
         Task<bool> CanAdminAccessUserAsync(int adminId, int userId);
         Task<bool> CanAdminAccessLocationAsync(int adminId, string division, string district, string upazila, string? ward = null, string? village = null);
-        
+        Task<(bool Success, ApartmentOwnerProfileDto? Profile, string[] Errors)> GetOwnerByUserIdAsync(string userId);
+
+
     }
 } 

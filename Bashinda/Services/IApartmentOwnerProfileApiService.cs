@@ -13,6 +13,7 @@ namespace Bashinda.Services
         Task<(bool Success, string[] Errors)> UpdateAsync(int id, CreateApartmentOwnerProfileDto model, string token);
         Task<(bool Success, string[] Errors)> ApproveAsync(int id, ApproveApartmentOwnerProfileDto model, string token);
         Task<(bool Success, string? ImagePath, string[] Errors)> UploadImageAsync(int id, string imageType, IFormFile file, string token);
+        Task<(bool Success, ApartmentOwnerProfileDto? Profile, string[] Errors)> OwnerProfilesInfo(string userId, string token);
     }
 
     public class ApartmentOwnerProfileApiService : IApartmentOwnerProfileApiService
@@ -65,9 +66,24 @@ namespace Bashinda.Services
             try
             {
                 var response = await _apiService.GetAsync("api/ApartmentOwnerProfiles/current", token);
-                
+                _logger.LogInformation("API response status code: {StatusCode}", response.StatusCode);
+
+                // Handle 404 specifically
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    _logger.LogWarning("Profile not found for the current user.");
+                    return (false, null, new[] { "Profile not found" });
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("API request failed with status code: {StatusCode}", response.StatusCode);
+                    return (false, null, new[] { $"API request failed: {response.StatusCode}" });
+                }
+
                 if (response.IsSuccessStatusCode)
                 {
+                    _logger.LogInformation("API request succeeded.");
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("API response content: {Content}", content);
 
@@ -75,8 +91,10 @@ namespace Bashinda.Services
                     {
                         // Try to deserialize the content directly as RenterProfileDto first
                         var directResult = JsonSerializer.Deserialize<ApartmentOwnerProfileDto>(content, _jsonOptions);
+                        _logger.LogInformation("Direct deserialization result: {Result}", directResult);
                         if (directResult != null)
                         {
+                            _logger.LogInformation("Direct deserialization succeeded.");
                             return (true, directResult, Array.Empty<string>());
                         }
                     }
@@ -86,12 +104,15 @@ namespace Bashinda.Services
                         try
                         {
                             var result = JsonSerializer.Deserialize<ApiResponse<ApartmentOwnerProfileDto>>(content, _jsonOptions);
+                            _logger.LogInformation("ApiResponse deserialization result: {Result}", result);
                             if (result != null && result.Success)
                             {
+                                _logger.LogInformation("ApiResponse deserialization succeeded.");
                                 return (true, result.Data, Array.Empty<string>());
                             }
                             else if (result != null)
                             {
+                                _logger.LogWarning("ApiResponse deserialization failed with errors: {Errors}", result.Errors);
                                 return (false, null, result.Errors ?? new[] { "API returned failure response" });
                             }
                         }
@@ -100,14 +121,15 @@ namespace Bashinda.Services
                             _logger.LogError(ex, "Failed to deserialize response as ApiResponse<ApartmentOwnerProfileDto>");
                         }
                     }
-
+                    _logger.LogWarning("Failed to deserialize API response.");
                     return (false, null, new[] { "Unable to parse API response" });
                 }
-
+                _logger.LogError("API request failed with status code: {StatusCode}", response.StatusCode);
                 return (false, null, new[] { $"API request failed with status code {response.StatusCode}" });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Exception occurred while retrieving current profile");
                 return (false, null, new[] { $"Exception occurred: {ex.Message}" });
             }
         }
@@ -280,6 +302,35 @@ namespace Bashinda.Services
             {
                 return (false, null, new[] { $"Exception occurred: {ex.Message}" });
             }
+        }
+
+        public async Task<(bool Success, ApartmentOwnerProfileDto? Profile, string[] Errors)> OwnerProfilesInfo(string userId, string token)
+        {
+            try
+            {
+                var response = await _apiService.GetAsync($"api/owners/{userId}", token);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var profile = JsonSerializer.Deserialize<ApartmentOwnerProfileDto>(content, _jsonOptions);
+
+                    if (profile != null)
+                    {
+                        return (true, profile, Array.Empty<string>());
+                    }
+
+                    return (false, null, new[] { "Failed to deserialize response." });
+                }
+
+                return (false, null, new[] { $"API request failed with status code {response.StatusCode}" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving renter profile for user ID: {UserId}", userId);
+                return (false, null, new[] { $"Exception occurred: {ex.Message}" });
+            }
+
         }
     }
 } 
