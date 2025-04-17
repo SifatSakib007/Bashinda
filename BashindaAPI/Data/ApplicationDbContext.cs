@@ -25,6 +25,7 @@ namespace BashindaAPI.Data
         public DbSet<Upazila> Upazilas { get; set; }
         public DbSet<Ward> Wards { get; set; }
         public DbSet<Village> Villages { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,6 +37,22 @@ namespace BashindaAPI.Data
                 .WithMany()
                 .HasForeignKey(u => u.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ApartmentOwnerProfile>()
+                .Property(p => p.Profession)
+                .HasConversion<string>(); 
+            modelBuilder.Entity<ApartmentOwnerProfile>()
+                .Property(p => p.Nationality)
+                .HasConversion<string>(); 
+            modelBuilder.Entity<ApartmentOwnerProfile>()
+                .Property(p => p.Gender)
+                .HasConversion<string>(); 
+            modelBuilder.Entity<ApartmentOwnerProfile>()
+                .Property(p => p.BloodGroup)
+                .HasConversion<string>(); 
+            modelBuilder.Entity<ApartmentOwnerProfile>()
+                .Property(p => p.AreaType)
+                .HasConversion<string>(); 
 
             // 3.Configure AdminPermission relationship with correct types
             modelBuilder.Entity<AdminPermission>(entity =>

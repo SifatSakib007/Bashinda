@@ -17,10 +17,10 @@ namespace BashindaAPI.DTOs
         public string FullName { get; set; } = string.Empty;
         public string FatherName { get; set; } = string.Empty;
         public string MotherName { get; set; } = string.Empty;
-        public string Nationality { get; set; } = string.Empty;
-        public string BloodGroup { get; set; } = string.Empty;
-        public string Profession { get; set; } = string.Empty;
-        public string Gender { get; set; } = string.Empty;
+        public Nationality Nationality { get; set; } 
+        public BloodGroup BloodGroup { get; set; } 
+        public Profession Profession { get; set; } 
+        public Gender Gender { get; set; } 
         public string MobileNo { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? SelfImagePath { get; set; }
@@ -29,7 +29,7 @@ namespace BashindaAPI.DTOs
         public string Division { get; set; } = string.Empty;
         public string District { get; set; } = string.Empty;
         public string Upazila { get; set; } = string.Empty;
-        public string AreaType { get; set; } = string.Empty;
+        public AreaType AreaType { get; set; } 
         public string Ward { get; set; } = string.Empty;
         public string Village { get; set; } = string.Empty;
         public string PostCode { get; set; } = string.Empty;
@@ -44,15 +44,38 @@ namespace BashindaAPI.DTOs
     public class CreateApartmentOwnerProfileDto
     {
         [Required]
-        [StringLength(100)]
-        public string FullName { get; set; } = string.Empty;
+        public bool IsAdult { get; set; }
+
+        // If IsAdult = true, NationalId is required; otherwise BirthRegistrationNo is required
+        public string? NationalId { get; set; }
+        public string? BirthRegistrationNo { get; set; }
 
         [Required]
         public DateTime DateOfBirth { get; set; }
 
         [Required]
-        [StringLength(20)]
-        public string NationalId { get; set; } = string.Empty;
+        [StringLength(100)]
+        public string FullName { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(100)]
+        public string FatherName { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(100)]
+        public string MotherName { get; set; } = string.Empty;
+
+        [Required]
+        public Nationality Nationality { get; set; } 
+
+        [Required]
+        public BloodGroup BloodGroup { get; set; } 
+
+        [Required]
+        public Profession Profession { get; set; } 
+
+        [Required]
+        public Gender Gender { get; set; } 
 
         [Required]
         [StringLength(20)]
@@ -77,7 +100,7 @@ namespace BashindaAPI.DTOs
         public string Upazila { get; set; } = string.Empty;
 
         [Required]
-        public AreaType AreaType { get; set; }
+        public AreaType AreaType { get; set; } 
 
         [Required]
         [StringLength(100)]
@@ -94,10 +117,6 @@ namespace BashindaAPI.DTOs
         [Required]
         [StringLength(50)]
         public string HoldingNo { get; set; } = string.Empty;
-
-        [Required]
-        [StringLength(100)]
-        public string Profession { get; set; } = string.Empty;
     }
 
     public class UpdateApartmentOwnerProfileDto

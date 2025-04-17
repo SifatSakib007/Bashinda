@@ -48,8 +48,7 @@ namespace Bashinda.Models
         public string? Address { get; set; }
         
         [Display(Name = "Profession")]
-        [StringLength(100)]
-        public string? Profession { get; set; }
+        public Profession? Profession { get; set; }
         
         public bool IsApproved { get; set; } = false;
         

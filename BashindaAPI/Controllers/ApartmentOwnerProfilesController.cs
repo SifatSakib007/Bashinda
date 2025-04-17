@@ -103,7 +103,7 @@ namespace BashindaAPI.Controllers
                 Division = ownerProfile.Division,
                 District = ownerProfile.District,
                 Upazila = ownerProfile.Upazila,
-                AreaType = ownerProfile.AreaType.ToString(),
+                AreaType = ownerProfile.AreaType,
                 Ward = ownerProfile.Ward,
                 Village = ownerProfile.Village,
                 PostCode = ownerProfile.PostCode,
@@ -153,12 +153,12 @@ namespace BashindaAPI.Controllers
                 NationalId = ownerProfile.NationalId,
                 NationalIdImagePath = ownerProfile.NationalIdImagePath,
                 SelfImagePath = ownerProfile.SelfImagePath,
-                MobileNo = ownerProfile.MobileNo,
-                Email = ownerProfile.Email,
+                MobileNo = ownerProfile.MobileNo ?? string.Empty,
+                Email = ownerProfile.Email ?? string.Empty,
                 Division = ownerProfile.Division,
                 District = ownerProfile.District,
                 Upazila = ownerProfile.Upazila,
-                AreaType = ownerProfile.AreaType.ToString(),
+                AreaType = ownerProfile.AreaType,
                 Ward = ownerProfile.Ward,
                 Village = ownerProfile.Village,
                 PostCode = ownerProfile.PostCode,
@@ -195,13 +195,11 @@ namespace BashindaAPI.Controllers
             return Ok(profiles);
         }
 
-        // Fix for the Enum.TryParse issue in the CreateApartmentOwnerProfile method
-        [HttpPost]
+        [HttpPost("create")]
         [Authorize(Roles = "ApartmentOwner")]
         public async Task<ActionResult<ApartmentOwnerProfileDto>> CreateApartmentOwnerProfile(CreateApartmentOwnerProfileDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // In API's CreateApartmentOwnerProfile action
             if (!int.TryParse(userId, out int parsedUserId))
             {
                 return BadRequest("Invalid user ID");
@@ -210,34 +208,33 @@ namespace BashindaAPI.Controllers
             if (await _context.ApartmentOwnerProfiles.AnyAsync(r => r.UserId == parsedUserId))
             {
                 return Conflict("Profile exists");
-            }
-
-            // Parse AreaType enum - with error handling
-            if (!Enum.TryParse(typeof(AreaType), dto.AreaType.ToString(), true, out var parsedAreaType))
-            {
-                return BadRequest($"Invalid AreaType value: {dto.AreaType}");
-            }
-
-            var areaType = (AreaType)parsedAreaType;
+            }           
 
             var ownerProfile = new ApartmentOwnerProfile
             {
-                UserId = int.Parse(userId),
-                FullName = dto.FullName,
+                UserId = parsedUserId,
+                IsAdult = dto.IsAdult,
+                NationalId = dto.IsAdult ? dto.NationalId ?? string.Empty : string.Empty, 
+                BirthRegistrationNo = !dto.IsAdult ? dto.BirthRegistrationNo : null,
                 DateOfBirth = dto.DateOfBirth,
-                NationalId = dto.NationalId,
+                FullName = dto.FullName,
+                FatherName = dto.FatherName,
+                MotherName = dto.MotherName,
+                Nationality = dto.Nationality,
+                BloodGroup = dto.BloodGroup,
+                Profession = dto.Profession,
+                Gender = dto.Gender,
                 MobileNo = dto.MobileNo,
                 Email = dto.Email,
                 Division = dto.Division,
                 District = dto.District,
                 Upazila = dto.Upazila,
-                AreaType = areaType,
+                AreaType = dto.AreaType,
                 Ward = dto.Ward,
                 Village = dto.Village,
                 PostCode = dto.PostCode,
                 HoldingNo = dto.HoldingNo,
-                Profession = dto.Profession,
-                IsApproved = false // Requires admin approval
+                IsApproved = false 
             };
 
             _context.ApartmentOwnerProfiles.Add(ownerProfile);
@@ -247,20 +244,26 @@ namespace BashindaAPI.Controllers
             {
                 Id = ownerProfile.Id,
                 UserId = ownerProfile.UserId,
-                FullName = ownerProfile.FullName,
-                DateOfBirth = ownerProfile.DateOfBirth,
+                IsAdult = ownerProfile.IsAdult,
                 NationalId = ownerProfile.NationalId,
+                DateOfBirth = ownerProfile.DateOfBirth,
+                FullName = ownerProfile.FullName,
+                FatherName = ownerProfile.FatherName,
+                MotherName = ownerProfile.MotherName,
+                Nationality = ownerProfile.Nationality,
+                BloodGroup = ownerProfile.BloodGroup,
+                Profession = ownerProfile.Profession,
+                Gender = ownerProfile.Gender,
                 MobileNo = ownerProfile.MobileNo,
                 Email = ownerProfile.Email,
                 Division = ownerProfile.Division,
                 District = ownerProfile.District,
                 Upazila = ownerProfile.Upazila,
-                AreaType = ownerProfile.AreaType.ToString(),
+                AreaType = ownerProfile.AreaType,
                 Ward = ownerProfile.Ward,
                 Village = ownerProfile.Village,
                 PostCode = ownerProfile.PostCode,
                 HoldingNo = ownerProfile.HoldingNo,
-                Profession = ownerProfile.Profession,
                 IsApproved = ownerProfile.IsApproved
             });
         }
@@ -300,7 +303,8 @@ namespace BashindaAPI.Controllers
                 ownerProfile.Village = dto.Village;
                 ownerProfile.PostCode = dto.PostCode;
                 ownerProfile.HoldingNo = dto.HoldingNo;
-                ownerProfile.Profession = dto.Profession;
+                // Fix for CS0029: Convert the string value from dto.Profession to the Profession enum type using Enum.Parse
+                ownerProfile.Profession = Enum.Parse<Profession>(dto.Profession, true);
 
                 _context.Entry(ownerProfile).State = EntityState.Modified;
 

@@ -34,7 +34,7 @@ namespace BashindaAPI.Services
                     FullName = u.FullName,
                     FatherName = u.FatherName,
                     MotherName = u.MotherName,
-                    Nationality = u.Nationality,
+                    Nationality = u.Nationality.ToString(), // Convert Nationality enum to string
                     BloodGroup = u.BloodGroup,
                     Profession = u.Profession,
                     Gender = u.Gender,
@@ -80,7 +80,7 @@ namespace BashindaAPI.Services
                     MotherName = u.MotherName,
                     Nationality = u.Nationality,
                     BloodGroup = u.BloodGroup,
-                    Profession = u.Profession ?? string.Empty, 
+                    Profession = u.Profession, 
                     Gender = u.Gender,
                     MobileNo = u.MobileNo ?? string.Empty,
                     Email = u.Email ?? string.Empty,
@@ -88,7 +88,7 @@ namespace BashindaAPI.Services
                     Division = u.Division,
                     District = u.District,
                     Upazila = u.Upazila,
-                    AreaType = u.AreaType.ToString(), // Convert AreaType enum to string
+                    AreaType = u.AreaType, // Convert AreaType enum to string
                     Ward = u.Ward,
                     Village = u.Village,
                     PostCode = u.PostCode,

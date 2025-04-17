@@ -11,10 +11,8 @@ namespace BashindaAPI.Models
         [Required]
         public int UserId { get; set; }
         public bool IsAdult { get; set; }
-        // Nationality, Blood Group, Profession, Gender as strings:
         [Required]
-        [StringLength(50)]
-        public string Nationality { get; set; } = string.Empty;
+        public Nationality Nationality { get; set; } 
         [Required]
         [StringLength(100)]
         [Display(Name = "Full Name")]
@@ -46,8 +44,7 @@ namespace BashindaAPI.Models
         public string? SelfImagePath { get; set; }
 
         [Required]
-        [StringLength(50)]
-        public string BloodGroup { get; set; } = string.Empty;
+        public BloodGroup BloodGroup { get; set; } 
 
         [Display(Name = "Contact Number")]
         [Phone]
@@ -62,48 +59,39 @@ namespace BashindaAPI.Models
         // Permanent Resident Information
         [Required]
         [Display(Name = "Division")]
-        [StringLength(100)]
         public string Division { get; set; } = string.Empty;
         
         [Required]
         [Display(Name = "District")]
-        [StringLength(100)]
         public string District { get; set; } = string.Empty;
         
         [Required]
         [Display(Name = "Upazila")]
-        [StringLength(100)]
         public string Upazila { get; set; } = string.Empty;
         
         [Required]
         [Display(Name = "Area Type")]
         public AreaType AreaType { get; set; }
         [Required]
-        [StringLength(50)]
-        public string Gender { get; set; } = string.Empty;
+        public Gender Gender { get; set; } 
         [Required]
         [Display(Name = "Ward")]
-        [StringLength(100)]
         public string Ward { get; set; } = string.Empty;
         
         [Required]
         [Display(Name = "Village/Area")]
-        [StringLength(100)]
         public string Village { get; set; } = string.Empty;
         
         [Required]
-        [StringLength(10)]
         [Display(Name = "Post Code")]
         public string PostCode { get; set; } = string.Empty;
         
         [Required]
-        [StringLength(50)]
         [Display(Name = "Holding No")]
         public string HoldingNo { get; set; } = string.Empty;
         
         [Display(Name = "Profession")]
-        [StringLength(100)]
-        public string? Profession { get; set; }
+        public Profession Profession { get; set; }
         
         public bool IsApproved { get; set; } = false;
         

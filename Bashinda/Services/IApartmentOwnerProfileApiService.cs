@@ -192,7 +192,7 @@ namespace Bashinda.Services
         {
             try
             {
-                var response = await _apiService.PostAsync("api/ApartmentOwnerProfiles", model, token);
+                var response = await _apiService.PostAsync("api/ApartmentOwnerProfiles/create", model, token);
                 _logger.LogInformation($"response: {response}");
                 if (response.IsSuccessStatusCode)
                 {
