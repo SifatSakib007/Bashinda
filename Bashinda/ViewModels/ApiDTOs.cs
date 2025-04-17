@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Bashinda.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Bashinda.ViewModels
@@ -237,17 +238,17 @@ namespace Bashinda.ViewModels
         public string FullName { get; set; } = string.Empty;
         public string FatherName { get; set; } = string.Empty;
         public string MotherName { get; set; } = string.Empty;
-        public string Nationality { get; set; } = string.Empty;
-        public string BloodGroup { get; set; } = string.Empty;
-        public string Profession { get; set; } = string.Empty;
-        public string Gender { get; set; } = string.Empty;
+        public Nationality Nationality { get; set; } 
+        public BloodGroup BloodGroup { get; set; }
+        public Profession Profession { get; set; } 
+        public Gender Gender { get; set; } 
         public string MobileNo { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? SelfImagePath { get; set; }
         public string Division { get; set; } = string.Empty;
         public string District { get; set; } = string.Empty;
         public string Upazila { get; set; } = string.Empty;
-        public string AreaType { get; set; } = string.Empty;
+        public AreaType AreaType { get; set; } 
         public string Ward { get; set; } = string.Empty;
         public string Village { get; set; } = string.Empty;
         public string PostCode { get; set; } = string.Empty;
@@ -290,16 +291,16 @@ namespace Bashinda.ViewModels
         public string MotherName { get; set; } = string.Empty;
 
         [Required]
-        public string Nationality { get; set; } = string.Empty;
+        public Nationality Nationality { get; set; }
 
         [Required]
-        public string BloodGroup { get; set; } = string.Empty;
+        public BloodGroup BloodGroup { get; set; } 
 
         [Required]
-        public string Profession { get; set; } = string.Empty;
+        public Profession Profession { get; set; } 
 
         [Required]
-        public string Gender { get; set; } = string.Empty;
+        public Gender Gender { get; set; } 
 
         [Required]
         public string MobileNo { get; set; } = string.Empty;
@@ -311,11 +312,13 @@ namespace Bashinda.ViewModels
         public string Division { get; set; } = string.Empty;
         public string District { get; set; } = string.Empty;
         public string Upazila { get; set; } = string.Empty;
-        public string AreaType { get; set; } = string.Empty;
+        [Required]
+        public AreaType AreaType { get; set; } 
         public string Ward { get; set; } = string.Empty;
         public string Village { get; set; } = string.Empty;
         public string PostCode { get; set; } = string.Empty;
         public string HoldingNo { get; set; } = string.Empty;
+
     }
 
     public class ApproveApartmentOwnerProfileDto

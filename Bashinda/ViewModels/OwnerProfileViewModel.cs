@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Bashinda.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Bashinda.ViewModels
 {
@@ -41,16 +42,16 @@ namespace Bashinda.ViewModels
         public string? MotherName { get; set; }
 
         [Required]
-        public string Nationality { get; set; } = string.Empty;
+        public Nationality Nationality { get; set; } 
 
         [Required]
-        public string BloodGroup { get; set; } = string.Empty;
+        public BloodGroup BloodGroup { get; set; } 
 
         [Required]
-        public string Profession { get; set; } = string.Empty;
+        public Profession Profession { get; set; } 
 
         [Required]
-        public string Gender { get; set; } = string.Empty;
+        public Gender Gender { get; set; } 
 
         [Required]
         [Phone]
@@ -74,7 +75,7 @@ namespace Bashinda.ViewModels
 
         // New fields for permanent residence
         [Required]
-        public string AreaType { get; set; } = string.Empty;
+        public AreaType AreaType { get; set; } 
 
         [Required]
         public string? Ward { get; set; }
