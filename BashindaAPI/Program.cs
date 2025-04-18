@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using BashindaAPI.Data;
 using BashindaAPI.Helpers;
 using BashindaAPI.Models;
@@ -76,6 +76,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IHouseService, HouseService>();
 
 // Add Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -108,7 +109,8 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
+// ✅ Add AutoMapper registration if missing
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline

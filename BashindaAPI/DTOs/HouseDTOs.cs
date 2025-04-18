@@ -10,7 +10,6 @@ namespace BashindaAPI.DTOs
         public string? ImagePath { get; set; } = string.Empty;
         public int? NumberOfFloors { get; set; }
         public int? ApartmentsPerFloor { get; set; }
-        public DateTime? CreatedAt { get; set; }
 
         // Address information
         public string Division { get; set; } = string.Empty;
@@ -21,7 +20,7 @@ namespace BashindaAPI.DTOs
         public AreaType AreaType { get; set; }
 
         // Creator information
-        public string OwnerName { get; set; } = string.Empty;
+        public int? Owner { get; set; } 
     }
     public class CreateHouseDto
     {
