@@ -1,5 +1,4 @@
 using BashindaAPI.DTOs;
-using BashindaAPI.Models;
 
 namespace BashindaAPI.Services
 {

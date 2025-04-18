@@ -25,6 +25,7 @@ namespace BashindaAPI.Data
         public DbSet<Upazila> Upazilas { get; set; }
         public DbSet<Ward> Wards { get; set; }
         public DbSet<Village> Villages { get; set; }
+        public DbSet<House> Houses { get; set; }
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
